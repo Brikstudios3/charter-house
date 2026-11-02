@@ -54,6 +54,14 @@ const SCHED = [
   [24, 4, 's', 1, 399, 188000, 'Sold'], [25, 4, 'n', 1, 404, 192000, 'Sold'],
 ];
 const EXT_NAMES = ['G', '1', '2', '3', '4'];
+// Plot 1's real outline (Charlie, 2 Nov): living, kitchen and bedroom between the curved St Petersgate wall and the party wall, then the
+// hall, shower room and utility behind them; the bike store in the St Petersgate corner behind the kitchen is not part of the flat
+const PLOT1_POLY = (() => {
+  const c = [-2.14, 13.3], R = 19.33 - 0.42, out = [[-10.57, 0.25]];
+  for (let k = 0; k <= 8; k++) { const v = 0.25 + (4.53 - 0.25) * k / 8, dv = v - c[1]; out.push([+(c[0] - Math.sqrt(R * R - dv * dv)).toFixed(3), +v.toFixed(3)]); }
+  out.push([-16.0, 4.53], [-16.0, 7.86], [-10.57, 7.86]);
+  return out;
+})();
 const units = SCHED.map(([plot, floor, slot, beds, sqft, price, status]) => {
   const ext = plot >= 16;
   const type = plot === 1 ? 'LG1' : plot === 13 ? 'R1' : ext ? 'E1' : beds === 2 ? 'C2' : 'C1';
@@ -66,6 +74,7 @@ const units = SCHED.map(([plot, floor, slot, beds, sqft, price, status]) => {
   u.view = plot === 1 ? 'Looks north-east into the planted light well, below the residents’ garden'
     : plot === 13 ? 'Dual aspect: rooflights over St Petersgate and over the garden towards High Street'
     : ext ? 'High Street and the residents’ garden' : 'St Petersgate and the garden';
+  if (plot === 1) u.poly = PLOT1_POLY;
   if (plot === 13) { u.sqftTotal = 660; u.bedsNote = '1 bed + eaves room (drawn as two bedrooms, two bathrooms)'; }
   return u;
 });

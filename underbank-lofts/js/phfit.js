@@ -4,9 +4,9 @@
 // Built in the Print House model's plan frame (x = u, z = -v), so the group sits inside the model's transform.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { CUT } from './materials.js?v=1793636557';
-import { plankTexture, weaveTexture, tileTexture, finishUV } from './finishes.js?v=1793636557';
-import { Kit, sofa, armchair, bed, bedside, wardrobe, kitchen, chair, diningTable, coffeeTable, rug } from './furniture.js?v=1793636557';
+import { CUT } from './materials.js?v=1793641455';
+import { plankTexture, weaveTexture, tileTexture, finishUV } from './finishes.js?v=1793641455';
+import { Kit, sofa, armchair, bed, bedside, wardrobe, kitchen, chair, diningTable, coffeeTable, rug } from './furniture.js?v=1793641455';
 
 // which side of each main-block slot its kitchen runs along (kitchens pair back to back across the party walls)
 const KSIDE = { 2: 0, 3: 1, 4: 0, 5: 1, 6: 0, 7: 1 };
