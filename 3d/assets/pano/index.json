@@ -1,0 +1,952 @@
+[
+ {
+  "site": "ch",
+  "file": "ch1_0",
+  "plot": 1,
+  "type": "1E",
+  "name": "Apt 1 \u00b7 kitchen and living",
+  "pos": [
+   21.225,
+   1.586,
+   4.625
+  ],
+  "look": [
+   18.783,
+   1.236,
+   6.367
+  ],
+  "room": "Kitchen and living",
+  "note": "Apt 1, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch1_1",
+  "plot": 1,
+  "type": "1E",
+  "name": "Apt 1 \u00b7 bedroom",
+  "pos": [
+   18.525,
+   1.586,
+   6.925
+  ],
+  "look": [
+   17.836,
+   1.236,
+   9.845
+  ],
+  "room": "Bedroom",
+  "note": "Apt 1, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch1_2",
+  "plot": 1,
+  "type": "1E",
+  "name": "Apt 1 \u00b7 shower room",
+  "pos": [
+   17.725,
+   1.586,
+   4.925
+  ],
+  "look": [
+   15.31,
+   1.236,
+   6.704
+  ],
+  "room": "Shower room",
+  "note": "Apt 1, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch21_0",
+  "plot": 21,
+  "type": "1A",
+  "name": "Apt 21 \u00b7 kitchen and living",
+  "pos": [
+   19.975,
+   10.136,
+   2.385
+  ],
+  "look": [
+   22.971,
+   9.786,
+   2.221
+  ],
+  "room": "Kitchen and living",
+  "note": "Apt 21, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch21_1",
+  "plot": 21,
+  "type": "1A",
+  "name": "Apt 21 \u00b7 bedroom",
+  "pos": [
+   20.425,
+   10.136,
+   8.385
+  ],
+  "look": [
+   21.22,
+   9.786,
+   11.278
+  ],
+  "room": "Bedroom",
+  "note": "Apt 21, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch21_2",
+  "plot": 21,
+  "type": "1A",
+  "name": "Apt 21 \u00b7 shower room",
+  "pos": [
+   20.2,
+   10.136,
+   6.2
+  ],
+  "look": [
+   23.161,
+   9.786,
+   5.715
+  ],
+  "room": "Shower room",
+  "note": "Apt 21, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch24_0",
+  "plot": 24,
+  "type": "2A",
+  "name": "Apt 24 \u00b7 living and dining",
+  "pos": [
+   3.725,
+   10.136,
+   2.725
+  ],
+  "look": [
+   5.592,
+   9.786,
+   0.377
+  ],
+  "room": "Living and dining",
+  "note": "Apt 24, a 2-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch24_1",
+  "plot": 24,
+  "type": "2A",
+  "name": "Apt 24 \u00b7 main bedroom",
+  "pos": [
+   8.625,
+   10.136,
+   3.025
+  ],
+  "look": [
+   9.317,
+   9.786,
+   0.106
+  ],
+  "room": "Main bedroom",
+  "note": "Apt 24, a 2-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch24_2",
+  "plot": 24,
+  "type": "2A",
+  "name": "Apt 24 \u00b7 second bedroom",
+  "pos": [
+   3.425,
+   10.136,
+   4.425
+  ],
+  "look": [
+   0.459,
+   9.786,
+   4.876
+  ],
+  "room": "Second bedroom",
+  "note": "Apt 24, a 2-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch24_3",
+  "plot": 24,
+  "type": "2A",
+  "name": "Apt 24 \u00b7 shower room",
+  "pos": [
+   5.125,
+   10.136,
+   5.525
+  ],
+  "look": [
+   4.288,
+   9.786,
+   2.644
+  ],
+  "room": "Shower room",
+  "note": "Apt 24, a 2-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch25_0",
+  "plot": 25,
+  "type": "1C",
+  "name": "Apt 25 \u00b7 kitchen and living",
+  "pos": [
+   3.025,
+   10.136,
+   10.125
+  ],
+  "look": [
+   0.027,
+   9.786,
+   10.029
+  ],
+  "room": "Kitchen and living",
+  "note": "Apt 25, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch25_1",
+  "plot": 25,
+  "type": "1C",
+  "name": "Apt 25 \u00b7 bedroom",
+  "pos": [
+   1.125,
+   10.136,
+   8.025
+  ],
+  "look": [
+   4.119,
+   9.786,
+   7.831
+  ],
+  "room": "Bedroom",
+  "note": "Apt 25, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch25_2",
+  "plot": 25,
+  "type": "1C",
+  "name": "Apt 25 \u00b7 shower room",
+  "pos": [
+   5.2,
+   10.136,
+   7.5
+  ],
+  "look": [
+   6.277,
+   9.786,
+   4.7
+  ],
+  "room": "Shower room",
+  "note": "Apt 25, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch26_0",
+  "plot": 26,
+  "type": "1B",
+  "name": "Apt 26 \u00b7 kitchen and living",
+  "pos": [
+   3.065,
+   10.136,
+   14.525
+  ],
+  "look": [
+   0.072,
+   9.786,
+   14.318
+  ],
+  "room": "Kitchen and living",
+  "note": "Apt 26, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch26_1",
+  "plot": 26,
+  "type": "1B",
+  "name": "Apt 26 \u00b7 bedroom",
+  "pos": [
+   9.065,
+   10.136,
+   14.325
+  ],
+  "look": [
+   11.843,
+   9.786,
+   15.458
+  ],
+  "room": "Bedroom",
+  "note": "Apt 26, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch26_2",
+  "plot": 26,
+  "type": "1B",
+  "name": "Apt 26 \u00b7 shower room",
+  "pos": [
+   6.9,
+   10.136,
+   15.5
+  ],
+  "look": [
+   6.823,
+   9.786,
+   12.501
+  ],
+  "room": "Shower room",
+  "note": "Apt 26, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch3_0",
+  "plot": 3,
+  "type": "1D",
+  "name": "Apt 3 \u00b7 kitchen and living",
+  "pos": [
+   3.325,
+   1.586,
+   2.725
+  ],
+  "look": [
+   5.277,
+   1.236,
+   0.447
+  ],
+  "room": "Kitchen and living",
+  "note": "Apt 3, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch3_1",
+  "plot": 3,
+  "type": "1D",
+  "name": "Apt 3 \u00b7 bedroom",
+  "pos": [
+   3.125,
+   1.586,
+   4.425
+  ],
+  "look": [
+   0.164,
+   1.236,
+   4.909
+  ],
+  "room": "Bedroom",
+  "note": "Apt 3, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ch",
+  "file": "ch3_2",
+  "plot": 3,
+  "type": "1D",
+  "name": "Apt 3 \u00b7 shower room",
+  "pos": [
+   4.825,
+   1.586,
+   5.525
+  ],
+  "look": [
+   3.988,
+   1.236,
+   2.644
+  ],
+  "room": "Shower room",
+  "note": "Apt 3, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph33_living",
+  "plot": 33,
+  "type": "1A",
+  "name": "Apt 33 \u00b7 living room",
+  "pos": [
+   -40.318,
+   14.014,
+   198.569
+  ],
+  "look": [
+   -39.156,
+   13.814,
+   196.243
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 33 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph33_bedroom",
+  "plot": 33,
+  "type": "1A",
+  "name": "Apt 33 \u00b7 bedroom",
+  "pos": [
+   -42.867,
+   14.014,
+   203.667
+  ],
+  "look": [
+   -43.449,
+   13.814,
+   204.83
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 33 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph35_living",
+  "plot": 35,
+  "type": "2A",
+  "name": "Apt 35 \u00b7 living room",
+  "pos": [
+   -63.529,
+   14.014,
+   209.995
+  ],
+  "look": [
+   -65.944,
+   13.814,
+   208.787
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 35 (type 2A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph35_bedroom",
+  "plot": 35,
+  "type": "2A",
+  "name": "Apt 35 \u00b7 bedroom",
+  "pos": [
+   -58.341,
+   14.014,
+   212.589
+  ],
+  "look": [
+   -56.821,
+   13.814,
+   213.349
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 35 (type 2A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph37_living",
+  "plot": 37,
+  "type": "1B",
+  "name": "Apt 37 \u00b7 living room",
+  "pos": [
+   -59.459,
+   14.014,
+   201.856
+  ],
+  "look": [
+   -61.874,
+   13.814,
+   200.648
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 37 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph37_bedroom",
+  "plot": 37,
+  "type": "1B",
+  "name": "Apt 37 \u00b7 bedroom",
+  "pos": [
+   -54.271,
+   14.014,
+   204.449
+  ],
+  "look": [
+   -52.751,
+   13.814,
+   205.21
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 37 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph40_living",
+  "plot": 40,
+  "type": "1C",
+  "name": "Apt 40 \u00b7 living room",
+  "pos": [
+   -54.137,
+   14.014,
+   190.988
+  ],
+  "look": [
+   -56.463,
+   13.814,
+   189.826
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 40 (type 1C): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph40_bedroom",
+  "plot": 40,
+  "type": "1C",
+  "name": "Apt 40 \u00b7 bedroom",
+  "pos": [
+   -49.307,
+   14.014,
+   193.85
+  ],
+  "look": [
+   -47.34,
+   13.814,
+   194.387
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 40 (type 1C): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph9_living",
+  "plot": 9,
+  "type": "1A",
+  "name": "Apt 9 \u00b7 living room",
+  "pos": [
+   -40.318,
+   4.864,
+   198.569
+  ],
+  "look": [
+   -39.156,
+   4.664,
+   196.243
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 9 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph9_bedroom",
+  "plot": 9,
+  "type": "1A",
+  "name": "Apt 9 \u00b7 bedroom",
+  "pos": [
+   -42.867,
+   4.864,
+   203.667
+  ],
+  "look": [
+   -43.449,
+   4.664,
+   204.83
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 9 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph1_living",
+  "plot": 1,
+  "type": "1A",
+  "name": "Apt 1 \u00b7 living room",
+  "pos": [
+   -40.318,
+   1.814,
+   198.569
+  ],
+  "look": [
+   -39.156,
+   1.614,
+   196.243
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 1 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph1_bedroom",
+  "plot": 1,
+  "type": "1A",
+  "name": "Apt 1 \u00b7 bedroom",
+  "pos": [
+   -42.867,
+   1.814,
+   203.667
+  ],
+  "look": [
+   -43.449,
+   1.614,
+   204.83
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 1 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph3_living",
+  "plot": 3,
+  "type": "2A",
+  "name": "Apt 3 \u00b7 living room",
+  "pos": [
+   -63.529,
+   1.814,
+   209.995
+  ],
+  "look": [
+   -65.944,
+   1.614,
+   208.787
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 3 (type 2A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph3_bedroom",
+  "plot": 3,
+  "type": "2A",
+  "name": "Apt 3 \u00b7 bedroom",
+  "pos": [
+   -58.341,
+   1.814,
+   212.589
+  ],
+  "look": [
+   -56.821,
+   1.614,
+   213.349
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 3 (type 2A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph4_living",
+  "plot": 4,
+  "type": "1B",
+  "name": "Apt 4 \u00b7 living room",
+  "pos": [
+   -61.158,
+   1.814,
+   205.254
+  ],
+  "look": [
+   -63.573,
+   1.614,
+   204.047
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 4 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph4_bedroom",
+  "plot": 4,
+  "type": "1B",
+  "name": "Apt 4 \u00b7 bedroom",
+  "pos": [
+   -55.971,
+   1.814,
+   207.848
+  ],
+  "look": [
+   -54.45,
+   1.614,
+   208.608
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 4 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph8_living",
+  "plot": 8,
+  "type": "1C",
+  "name": "Apt 8 \u00b7 living room",
+  "pos": [
+   -54.137,
+   1.814,
+   190.988
+  ],
+  "look": [
+   -56.463,
+   1.614,
+   189.826
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 8 (type 1C): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph8_bedroom",
+  "plot": 8,
+  "type": "1C",
+  "name": "Apt 8 \u00b7 bedroom",
+  "pos": [
+   -49.307,
+   1.814,
+   193.85
+  ],
+  "look": [
+   -47.34,
+   1.614,
+   194.387
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 8 (type 1C): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl21_living",
+  "plot": 21,
+  "type": "1A",
+  "name": "Apt 21 \u00b7 living room",
+  "pos": [
+   43.527,
+   6.885,
+   -25.879
+  ],
+  "look": [
+   42.438,
+   6.685,
+   -27.557
+  ],
+  "room": "Living room",
+  "note": "Oldham Street Lofts, plot 21 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl21_bedroom",
+  "plot": 21,
+  "type": "1A",
+  "name": "Apt 21 \u00b7 bedroom",
+  "pos": [
+   46.729,
+   6.885,
+   -22.95
+  ],
+  "look": [
+   47.687,
+   6.685,
+   -21.474
+  ],
+  "room": "Bedroom",
+  "note": "Oldham Street Lofts, plot 21 (type 1A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl23_living",
+  "plot": 23,
+  "type": "1B",
+  "name": "Apt 23 \u00b7 living room",
+  "pos": [
+   51.935,
+   6.885,
+   -30.743
+  ],
+  "look": [
+   51.664,
+   6.685,
+   -33.547
+  ],
+  "room": "Living room",
+  "note": "Oldham Street Lofts, plot 23 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl23_bedroom",
+  "plot": 23,
+  "type": "1B",
+  "name": "Apt 23 \u00b7 bedroom",
+  "pos": [
+   54.68,
+   6.885,
+   -28.352
+  ],
+  "look": [
+   56.273,
+   6.685,
+   -29.386
+  ],
+  "room": "Bedroom",
+  "note": "Oldham Street Lofts, plot 23 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl24_bedroom",
+  "plot": 24,
+  "type": "1C+",
+  "name": "Apt 24 \u00b7 bedroom",
+  "pos": [
+   58.978,
+   6.885,
+   -21.365
+  ],
+  "look": [
+   60.739,
+   6.685,
+   -22.509
+  ],
+  "room": "Bedroom",
+  "note": "Oldham Street Lofts, plot 24 (type 1C+): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl24_living",
+  "plot": 24,
+  "type": "1C+",
+  "name": "Apt 24 \u00b7 living room",
+  "pos": [
+   54.034,
+   6.885,
+   -18.513
+  ],
+  "look": [
+   52.004,
+   6.685,
+   -17.195
+  ],
+  "room": "Living room",
+  "note": "Oldham Street Lofts, plot 24 (type 1C+): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl5_living",
+  "plot": 5,
+  "type": "3A",
+  "name": "House 5 \u00b7 living room",
+  "pos": [
+   20.131,
+   1.635,
+   -3.056
+  ],
+  "look": [
+   21.656,
+   1.435,
+   -0.708
+  ],
+  "room": "Living room",
+  "note": "Oldham Street Lofts, plot 5 (type 3A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "osl",
+  "file": "osl5_kitchen",
+  "plot": 5,
+  "type": "3A",
+  "name": "House 5 \u00b7 kitchen and dining",
+  "pos": [
+   17.215,
+   1.635,
+   -7.363
+  ],
+  "look": [
+   15.472,
+   1.435,
+   -10.047
+  ],
+  "room": "Kitchen and dining",
+  "note": "Oldham Street Lofts, plot 5 (type 3A): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ubl",
+  "file": "ubl1_living",
+  "plot": 1,
+  "type": "LG1",
+  "name": "Plot 1 \u00b7 kitchen and living",
+  "pos": [
+   -161.505,
+   -6.89,
+   105.027
+  ],
+  "look": [
+   -163.938,
+   -7.09,
+   106.143
+  ],
+  "room": "Kitchen and living",
+  "note": "Underbank Lofts, plot 1: photoreal 360\u00b0, furnished as the 21 Living CGIs. Drag to look round."
+ },
+ {
+  "site": "ubl",
+  "file": "ubl1_bedroom",
+  "plot": 1,
+  "type": "LG1",
+  "name": "Plot 1 \u00b7 bedroom",
+  "pos": [
+   -159.059,
+   -6.89,
+   106.287
+  ],
+  "look": [
+   -157.616,
+   -7.09,
+   105.029
+  ],
+  "room": "Bedroom",
+  "note": "Underbank Lofts, plot 1: photoreal 360\u00b0, furnished as the 21 Living CGIs. Drag to look round."
+ },
+ {
+  "site": "ubl",
+  "file": "ubl13_living",
+  "plot": 13,
+  "type": "R1",
+  "name": "Plot 13 \u00b7 kitchen and living",
+  "pos": [
+   -161.428,
+   6.85,
+   105.543
+  ],
+  "look": [
+   -162.991,
+   6.65,
+   106.582
+  ],
+  "room": "Kitchen and living",
+  "note": "Underbank Lofts, plot 13: photoreal 360\u00b0, furnished as the 21 Living CGIs. Drag to look round."
+ },
+ {
+  "site": "ubl",
+  "file": "ubl13_bedroom",
+  "plot": 13,
+  "type": "R1",
+  "name": "Plot 13 \u00b7 bedroom",
+  "pos": [
+   -159.123,
+   6.85,
+   106.379
+  ],
+  "look": [
+   -157.269,
+   6.65,
+   104.725
+  ],
+  "room": "Bedroom",
+  "note": "Underbank Lofts, plot 13: photoreal 360\u00b0, furnished as the 21 Living CGIs. Drag to look round."
+ },
+ {
+  "site": "ubl",
+  "file": "ubl13_eaves",
+  "plot": 13,
+  "type": "R1",
+  "name": "Plot 13 \u00b7 eaves room",
+  "pos": [
+   -162.922,
+   6.85,
+   108.915
+  ],
+  "look": [
+   -163.982,
+   6.65,
+   107.854
+  ],
+  "room": "Eaves room",
+  "note": "Underbank Lofts, plot 13: photoreal 360\u00b0, furnished as the 21 Living CGIs. Drag to look round."
+ }
+]
