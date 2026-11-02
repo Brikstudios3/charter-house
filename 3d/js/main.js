@@ -9,27 +9,27 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793629398';
-import { buildUBL } from './ublbuild.js?v=1793629398';
-import { buildUBLFitout } from './ublfit.js?v=1793629398';
-import { UBL_LEVELS } from './ubl_data.js?v=1793629398';
-import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793629398';
-import { buildOSL } from './oslbuild.js?v=1793629398';
-import { buildOSLFitout } from './oslfit.js?v=1793629398';
-import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793629398';
-import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793629398';
-import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793629398';
-import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole } from './world.js?v=1793629398';
-import { buildFar, hazeUniforms } from './far.js?v=1793629398';
-import { Forest, windUniforms } from './trees.js?v=1793629398';
-import { Interior } from './interior.js?v=1793629398';
-import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793629398';
-import { buildPHFitout } from './phfit.js?v=1793629398';
-import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793629398';
-import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793629398';
-import { createTour } from './tour.js?v=1793629398';
-import { buildCrowd } from './crowd.js?v=1793629398';
-import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793629398';
+import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793630180';
+import { buildUBL } from './ublbuild.js?v=1793630180';
+import { buildUBLFitout } from './ublfit.js?v=1793630180';
+import { UBL_LEVELS } from './ubl_data.js?v=1793630180';
+import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793630180';
+import { buildOSL } from './oslbuild.js?v=1793630180';
+import { buildOSLFitout } from './oslfit.js?v=1793630180';
+import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793630180';
+import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793630180';
+import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793630180';
+import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole } from './world.js?v=1793630180';
+import { buildFar, hazeUniforms } from './far.js?v=1793630180';
+import { Forest, windUniforms } from './trees.js?v=1793630180';
+import { Interior } from './interior.js?v=1793630180';
+import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793630180';
+import { buildPHFitout } from './phfit.js?v=1793630180';
+import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793630180';
+import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793630180';
+import { createTour } from './tour.js?v=1793630180';
+import { buildCrowd } from './crowd.js?v=1793630180';
+import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793630180';
 const pitch = IS_UBL ? ublPitch : IS_OSL ? oslPitch : IS_PH ? phPitch : chPitch, PICKS = IS_UBL ? UBL_PICKS : IS_OSL ? OSL_PICKS : IS_PH ? PH_PICKS : CH_PICKS;
 const RK = IS_UBL ? 'ubl' : IS_OSL ? 'osl' : IS_PH;   // which site's rents
 const PROOFS = IS_UBL ? UBL_PROOF : IS_OSL ? OSL_PROOF : PROOF;
@@ -1942,11 +1942,22 @@ function loadPano(url) {
   if (!panoCache.has(url)) panoCache.set(url, new Promise((res, rej) => new THREE.TextureLoader().load(BASE + url, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.generateMipmaps = true; res(t); }, undefined, rej)));
   return panoCache.get(url);
 }
-async function showPano(url) {
+// the showcase rooms also come at double resolution (8K): shown first at 4K, then swapped for the sharp one on screens and GPUs that can take it;
+// only the room on screen keeps its 8K texture (each is ~180 MB of video memory)
+let panoHD = null;
+const HD_OK = (() => { try { return renderer.capabilities.maxTextureSize >= 8192 && Math.min(screen.width, screen.height) >= 700 && !(navigator.connection && navigator.connection.saveData); } catch (e) { return false; } })();
+async function showPano(url, hd = null) {
   const req = ++panoReq;
-  if (!url) { panoOn = false; return; }
-  try { const t = await loadPano(url); if (req !== panoReq) return; panoSphere.material.map = t; panoSphere.material.needsUpdate = true; panoOn = true; stillFrames = Math.max(stillFrames, 3); }
+  const dropHD = () => { if (panoHD && panoHD.url !== hd) { panoHD.tex.dispose(); panoHD = null; } };
+  if (!url) { panoOn = false; dropHD(); return; }
+  try { const t = await loadPano(url); if (req !== panoReq) return; panoSphere.material.map = (panoHD && panoHD.url === hd) ? panoHD.tex : t; panoSphere.material.needsUpdate = true; dropHD(); panoOn = true; stillFrames = Math.max(stillFrames, 3); }
   catch (e) { console.warn('pano', url, e); }
+  if (hd && HD_OK && !(panoHD && panoHD.url === hd)) new THREE.TextureLoader().load(BASE + hd, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.generateMipmaps = true;
+    if (req !== panoReq) { t.dispose(); return; }
+    if (panoHD) panoHD.tex.dispose(); panoHD = { url: hd, tex: t };
+    panoSphere.material.map = t; panoSphere.material.needsUpdate = true; stillFrames = Math.max(stillFrames, 3);
+  }, undefined, (e) => console.warn('pano hd', hd, e));
 }
 
 // ------------------------------------------------------------------ 360° walk-around (Nifty-style fixed spots) and the walk to the front door
@@ -1987,7 +1998,7 @@ function buildSpots() {
     ];
   }
   // photoreal path-traced 360s of the rooms (rendered offline from this model; listed in assets/pano/index.json)
-  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793629398`, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
+  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793630180`, hd: !!p.hd, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
   const LINKS = {"wellington": [], "garden": ["garden2", "walk1", "walktop"], "garden2": ["garden", "walk1"], "walk1": ["garden", "walktop"], "walktop": ["garden", "walk1"], "stjoseph": ["fletcher"], "fletcher": ["stjoseph"], "roof": [], "corner": ["park", "arch", "harvey", "smg"], "park": ["corner", "arch"], "arch": ["corner", "park"], "harvey": ["smg", "corner"], "smg": ["harvey", "corner"], "courtyard": ["walkway"], "walkway": ["courtyard"], "church": [], "market": []};   // the spots you can actually see from each spot (pins never show through walls)
   for (const sp of SPOTS) sp.links = LINKS[sp.id] || [];
   spotPins = SPOTS.map((sp, i) => { const el = document.createElement('button'); el.className = 'spin'; el.style.opacity = 0; el.style.pointerEvents = 'none'; el.innerHTML = `<span>${sp.name}</span><i></i>`; el.onclick = () => goSpot(i); $('#labels').appendChild(el); return el; });
@@ -2042,7 +2053,7 @@ function goSpot(i) {
   const sib = sp.pano ? SPOTS.map((x, j) => [x, j]).filter(([x]) => x.pano && x.plot === sp.plot) : [];
   const roomActs = sib.length > 1 ? sib.map(([x, j]) => `<button class="btn ${j === i ? 'brass' : 'ghost'}" data-tact="room" data-spot="${j}">${(x.room || x.name).replace(/^./, ch => ch.toUpperCase())}</button>`).join('') : '';
   tourCaption(sp.pano ? `Apartment ${sp.plot} · photoreal 360°` : `360° walk-around · ${i + 1} of ${SPOTS.length}`, sp.name, sp.note, roomActs);
-  if (sp.pano) { tour.walk([{ to: sp.at, cut: true, look: sp.look }], {}); setTimeout(() => { showPano(sp.pano); tour.setFov(innerWidth < innerHeight ? 100 : 92); }, 400); }
+  if (sp.pano) { tour.walk([{ to: sp.at, cut: true, look: sp.look }], {}); setTimeout(() => { showPano(sp.pano, sp.hd ? sp.pano.replace('.jpg', '_8k.jpg') : null); tour.setFov(innerWidth < innerHeight ? 100 : 92); }, 400); }
   else { showPano(null); tour.walk([near ? { to: sp.at, speed: 6, look: sp.look } : { to: sp.at, cut: true, look: sp.look }]); }
   stillFrames = Math.max(stillFrames, 4);
 }
@@ -2221,7 +2232,7 @@ function loop() {
   try {
     await build();
     placeLandmarks();
-    try { const j = await fetch(BASE + 'pano/index.json?v=1793629398').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
+    try { const j = await fetch(BASE + 'pano/index.json?v=1793630180').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
     buildSpots();
   } catch (e) { console.error(e); lmsg.textContent = 'Something went wrong loading the model. Please refresh.'; return; }
   applyTOD('day');
