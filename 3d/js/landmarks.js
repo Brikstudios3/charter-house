@@ -5,7 +5,7 @@
 // Built in each landmark's own frame (x = geographic east, z = geographic south) then rotated into site coordinates.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { boxUV } from './building.js?v=1793648657';
+import { boxUV } from './building.js?v=1793655464';
 
 const box = (x0, y0, z0, x1, y1, z1) => { const g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0); g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); return g; };
 
