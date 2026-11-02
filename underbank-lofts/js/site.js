@@ -1,9 +1,9 @@
 // Which development this page sells: Charter House (default) or The Print House (window.__SITE = 'ph' or ?site=ph).
 // Everything the selector shows (units, floors, prices, copy) comes through here, so one engine serves both.
-import * as CHD from './data.js?v=1793644873';
-import { PH_SITE, PH_FLOORS, PH_UNITS, PH_FH } from './ph_data.js?v=1793644873';
-import { OSL_SITE, OSL_FLOORS, OSL_UNITS, OSL_FH } from './osl_data.js?v=1793644873';
-import { UBL_SITE, UBL_FLOORS, UBL_UNITS, UBL_FH } from './ubl_data.js?v=1793644873';
+import * as CHD from './data.js?v=1793650008';
+import { PH_SITE, PH_FLOORS, PH_UNITS, PH_FH } from './ph_data.js?v=1793650008';
+import { OSL_SITE, OSL_FLOORS, OSL_UNITS, OSL_FH } from './osl_data.js?v=1793650008';
+import { UBL_SITE, UBL_FLOORS, UBL_UNITS, UBL_FH } from './ubl_data.js?v=1793650008';
 
 export const IS_PH = typeof window !== 'undefined' && (window.__SITE === 'ph' || /[?&]site=ph\b/.test(location.search));
 // Oldham Street Lofts, Hyde (window.__SITE = 'osl' or ?site=osl): a different town, built in the same plan-frame way as The Print House
