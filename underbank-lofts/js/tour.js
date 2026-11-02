@@ -90,7 +90,7 @@ export function createTour({ camera, fader }) {
     st, place, face, walk, stop, skip, update,
     drag(dx, dy) { st.ty -= dx * 0.0045; st.tp = THREE.MathUtils.clamp(st.tp - dy * 0.0045, -1.25, 1.25); },
     turn(a) { st.ty += a; },
-    zoom(d) { st.tfov = THREE.MathUtils.clamp(st.tfov + d, 32, 100); },
+    zoom(d) { st.tfov = THREE.MathUtils.clamp(st.tfov + d, 24, 100); },
     setFov(f) { st.fov = st.tfov = f; camera.fov = f; camera.updateProjectionMatrix(); },
     busy: () => !!st.path,
   };
