@@ -3,8 +3,8 @@
 // Positions are approximate, from Google Earth and the Ollier Smurthwaite site/context drawings.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { boxGeom, boxUV } from './building.js?v=1793643147';
-import { groundAt, letteringTexture } from './world.js?v=1793643147';
+import { boxGeom, boxUV } from './building.js?v=1793644873';
+import { groundAt, letteringTexture } from './world.js?v=1793644873';
 
 // street level comes from the terrain model (world.js): estimated levels relative to Charter House's ground floor
 export function groundY(x, z) { return groundAt(x, z); }
