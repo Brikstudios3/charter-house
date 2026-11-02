@@ -39,25 +39,6 @@
  },
  {
   "site": "ch",
-  "file": "ch1_2",
-  "plot": 1,
-  "type": "1E",
-  "name": "Apt 1 \u00b7 shower room",
-  "pos": [
-   17.725,
-   1.586,
-   4.925
-  ],
-  "look": [
-   15.31,
-   1.236,
-   6.704
-  ],
-  "room": "Shower room",
-  "note": "Apt 1, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
- },
- {
-  "site": "ch",
   "file": "ch21_0",
   "plot": 21,
   "type": "1A",
@@ -92,25 +73,6 @@
    11.278
   ],
   "room": "Bedroom",
-  "note": "Apt 21, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
- },
- {
-  "site": "ch",
-  "file": "ch21_2",
-  "plot": 21,
-  "type": "1A",
-  "name": "Apt 21 \u00b7 shower room",
-  "pos": [
-   20.2,
-   10.136,
-   6.2
-  ],
-  "look": [
-   23.161,
-   9.786,
-   5.715
-  ],
-  "room": "Shower room",
   "note": "Apt 21, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
  },
  {
@@ -172,25 +134,6 @@
  },
  {
   "site": "ch",
-  "file": "ch24_3",
-  "plot": 24,
-  "type": "2A",
-  "name": "Apt 24 \u00b7 shower room",
-  "pos": [
-   5.125,
-   10.136,
-   5.525
-  ],
-  "look": [
-   4.288,
-   9.786,
-   2.644
-  ],
-  "room": "Shower room",
-  "note": "Apt 24, a 2-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
- },
- {
-  "site": "ch",
   "file": "ch25_0",
   "plot": 25,
   "type": "1C",
@@ -225,25 +168,6 @@
    7.831
   ],
   "room": "Bedroom",
-  "note": "Apt 25, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
- },
- {
-  "site": "ch",
-  "file": "ch25_2",
-  "plot": 25,
-  "type": "1C",
-  "name": "Apt 25 \u00b7 shower room",
-  "pos": [
-   5.2,
-   10.136,
-   7.5
-  ],
-  "look": [
-   6.277,
-   9.786,
-   4.7
-  ],
-  "room": "Shower room",
   "note": "Apt 25, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
  },
  {
@@ -286,25 +210,6 @@
  },
  {
   "site": "ch",
-  "file": "ch26_2",
-  "plot": 26,
-  "type": "1B",
-  "name": "Apt 26 \u00b7 shower room",
-  "pos": [
-   6.9,
-   10.136,
-   15.5
-  ],
-  "look": [
-   6.823,
-   9.786,
-   12.501
-  ],
-  "room": "Shower room",
-  "note": "Apt 26, a 1-bed on the top floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
- },
- {
-  "site": "ch",
   "file": "ch3_0",
   "plot": 3,
   "type": "1D",
@@ -339,25 +244,6 @@
    4.909
   ],
   "room": "Bedroom",
-  "note": "Apt 3, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
- },
- {
-  "site": "ch",
-  "file": "ch3_2",
-  "plot": 3,
-  "type": "1D",
-  "name": "Apt 3 \u00b7 shower room",
-  "pos": [
-   4.825,
-   1.586,
-   5.525
-  ],
-  "look": [
-   3.988,
-   1.236,
-   2.644
-  ],
-  "room": "Shower room",
   "note": "Apt 3, a 1-bed on the ground floor: oak herringbone, panelled walls, brass and marble. Drag to look round."
  },
  {
