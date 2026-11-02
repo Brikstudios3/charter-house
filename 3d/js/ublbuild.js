@@ -9,10 +9,10 @@
 // Heights in metres above the converted building's lower ground floor (+52.00 m AOD).
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UBL_SITE, UBL_UNITS, UBL_LEVELS, UBL_EXT_LEVELS } from './ubl_data.js?v=1793640739';
-import { roomBox } from './building.js?v=1793640739';
-import { roomMaterial } from './materials.js?v=1793640739';
-import { insetPoly } from './world.js?v=1793640739';
+import { UBL_SITE, UBL_UNITS, UBL_LEVELS, UBL_EXT_LEVELS } from './ubl_data.js?v=1793641451';
+import { roomBox } from './building.js?v=1793641451';
+import { roomMaterial } from './materials.js?v=1793641451';
+import { insetPoly } from './world.js?v=1793641451';
 
 const NF = 5;
 const EAVES = 15.4, RIDGE = 18.4;                     // +67.40 / +70.40
@@ -367,12 +367,12 @@ export function buildUBL(M, opts = {}) {
       const wseg = (s0, s1, ya, yb, wd, key) => { const g = new THREE.BoxGeometry(s1 - s0, yb - ya, wd); g.rotateY(ang); g.translate(a[0] + dx * (s0 + s1) / 2, (ya + yb) / 2, a[1] + dz * (s0 + s1) / 2); add(key, g); };
       const gate = i === BOUND.length - 2;
       const sEnd = gate ? L - 1.6 : L;
-      wseg(0, sEnd, WELL - 0.4, GARDEN + 1.2, 0.34, 'band'); wseg(-0.02, sEnd + 0.02, GARDEN + 1.2, GARDEN + 1.3, 0.44, 'stone');   // ~0.6 m of brick above the pavement
+      wseg(0, sEnd, WELL - 0.4, GARDEN + 1.65, 0.34, 'band'); wseg(-0.02, sEnd + 0.02, GARDEN + 1.65, GARDEN + 1.75, 0.44, 'stone');   // ~1.1 m of brick above the pavement (Charlie, 2 Nov: the wall is higher)
       // the hedge's solid core just behind the wall (the instanced leaves are added round it below), only where there is ground for it
       for (let s = 0; s < sEnd - 0.05; s += 0.5) {
         const s1 = Math.min(sEnd, s + 0.5), m = (s + s1) / 2, pu = a[0] + dx * m, pv = a[1] + dz * m, hu = pu - dz * 0.55, hv = pv + dx * 0.55;
         if (hv > -wellIn(hu) - 0.36 - 0.2) continue;
-        const g = new THREE.BoxGeometry(s1 - s + 0.04, 2.0, 0.5); g.rotateY(ang); g.translate(hu, GARDEN + 0.1 + 1.0, hv); add('hedgeCore', g);
+        const g = new THREE.BoxGeometry(s1 - s + 0.04, 2.3, 0.5); g.rotateY(ang); g.translate(hu, GARDEN + 0.1 + 1.15, hv); add('hedgeCore', g);
         (G._hedge ||= []).push([hu, hv, pu - dz * 0.85, pv + dx * 0.85]);
       }
       if (gate) { for (let s = sEnd + 0.1; s < L; s += 0.1) { const g = new THREE.CylinderGeometry(0.013, 0.013, 1.8, 5); g.translate(a[0] + dx * s, GARDEN + 0.9, a[1] + dz * s); add('steel', g); } wseg(sEnd, L, GARDEN + 1.7, GARDEN + 1.78, 0.05, 'steel'); }
@@ -479,8 +479,8 @@ export function buildUBL(M, opts = {}) {
     // the clipped hedge behind the boundary wall: its top rises from the wall's coping (so from the street it reads as brick, then hedge),
     // its lower half leafed on the garden side
     (G._hedge || []).forEach(([u, v, gu, gv], k) => {
-      const p = W(u, GARDEN + 0.95, v); opts.forest.add?.(p.x, p.z, { kind: 'hedge', h: 1.4, r: 0.4, y: p.y, seed: 4500 + k });
-      const q = W(gu, GARDEN, gv); opts.forest.add?.(q.x, q.z, { kind: 'hedge', h: 1.2, r: 0.35, y: q.y, seed: 4700 + k });
+      const p = W(u, GARDEN + 1.42, v); opts.forest.add?.(p.x, p.z, { kind: 'hedge', h: 1.15, r: 0.4, y: p.y, seed: 4500 + k });
+      const q = W(gu, GARDEN, gv); opts.forest.add?.(q.x, q.z, { kind: 'hedge', h: 1.7, r: 0.35, y: q.y, seed: 4700 + k });
     });
   }
   // rooms behind the glass (light up with the floor)
