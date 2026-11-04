@@ -327,44 +327,6 @@
  },
  {
   "site": "ph",
-  "file": "ph37_living",
-  "plot": 37,
-  "type": "1B",
-  "name": "Apt 37 \u00b7 living room",
-  "pos": [
-   -59.459,
-   14.014,
-   201.856
-  ],
-  "look": [
-   -61.874,
-   13.814,
-   200.648
-  ],
-  "room": "Living room",
-  "note": "The Print House, plot 37 (type 1B): photoreal 360\u00b0. Drag to look round."
- },
- {
-  "site": "ph",
-  "file": "ph37_bedroom",
-  "plot": 37,
-  "type": "1B",
-  "name": "Apt 37 \u00b7 bedroom",
-  "pos": [
-   -54.271,
-   14.014,
-   204.449
-  ],
-  "look": [
-   -52.751,
-   13.814,
-   205.21
-  ],
-  "room": "Bedroom",
-  "note": "The Print House, plot 37 (type 1B): photoreal 360\u00b0. Drag to look round."
- },
- {
-  "site": "ph",
   "file": "ph40_living",
   "plot": 40,
   "type": "1C",
@@ -837,5 +799,43 @@
   ],
   "room": "Bedroom",
   "note": "Underbank Lofts, plot 1: photoreal 360\u00b0, furnished as the 21 Living CGIs. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph37_living",
+  "plot": 37,
+  "type": "1B",
+  "name": "Apt 37 \u00b7 living room",
+  "pos": [
+   -59.034,
+   14.014,
+   201.677
+  ],
+  "look": [
+   -61.874,
+   13.814,
+   200.648
+  ],
+  "room": "Living room",
+  "note": "The Print House, plot 37 (type 1B): photoreal 360\u00b0. Drag to look round."
+ },
+ {
+  "site": "ph",
+  "file": "ph37_bedroom",
+  "plot": 37,
+  "type": "1B",
+  "name": "Apt 37 \u00b7 bedroom",
+  "pos": [
+   -54.517,
+   14.014,
+   203.264
+  ],
+  "look": [
+   -52.751,
+   13.814,
+   205.21
+  ],
+  "room": "Bedroom",
+  "note": "The Print House, plot 37 (type 1B): photoreal 360\u00b0. Drag to look round."
  }
 ]
