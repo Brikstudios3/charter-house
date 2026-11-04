@@ -13,7 +13,7 @@ export const OSL_SITE = {
   completion: 'Late 2027',
   lease: '999 years',
   groundRent: 'Peppercorn',
-  serviceCharge: 3.45, // £ per sq ft per year (draft Fortum estimate, October 2026)
+  serviceCharge: 2.50, // £ per sq ft per year (Brik Studios figure, November 2026)
   estateCharge: 0.96,  // townhouses pay the estate charge only (freehold)
   reservation: 3000,
   whatsapp: '447353164480',

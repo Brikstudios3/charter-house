@@ -12,7 +12,7 @@ export const SITE = {
   completion: 'Early 2028',
   lease: '250 years',
   groundRent: 'Nil',
-  serviceCharge: 2.24, // £ per sq ft per year (Salesforce estimate)
+  serviceCharge: 2.50, // £ per sq ft per year (Salesforce estimate)
   rent1: 1300, rent2: 1550, // Salesforce rental estimates
   reservation: 3000,
   whatsapp: '447353164480',
