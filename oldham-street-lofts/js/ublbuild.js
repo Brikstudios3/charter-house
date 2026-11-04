@@ -9,10 +9,10 @@
 // Heights in metres above the converted building's lower ground floor (+52.00 m AOD).
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UBL_SITE, UBL_UNITS, UBL_LEVELS, UBL_EXT_LEVELS } from './ubl_data.js?v=1793524242';
-import { roomBox } from './building.js?v=1793524242';
-import { roomMaterial } from './materials.js?v=1793524242';
-import { insetPoly } from './world.js?v=1793524242';
+import { UBL_SITE, UBL_UNITS, UBL_LEVELS, UBL_EXT_LEVELS } from './ubl_data.js?v=1793799229';
+import { roomBox } from './building.js?v=1793799229';
+import { roomMaterial } from './materials.js?v=1793799229';
+import { insetPoly } from './world.js?v=1793799229';
 
 const NF = 5;
 const EAVES = 15.4, RIDGE = 18.4;                     // +67.40 / +70.40
@@ -360,17 +360,47 @@ export function buildUBL(M, opts = {}) {
     for (let i = 0; i < steps; i++) { const ua = U0 + (U1 - U0) * i / steps, ub = U0 + (U1 - U0) * (i + 1) / steps; const vb0 = boundAt((ua + ub) / 2) + 0.35, va0 = -wellIn((ua + ub) / 2) - 0.36; if (vb0 < va0) add('soil', box(ua, vb0, ub, va0, WELL - 0.3, GARDEN - 0.01)); }
     // gravel path from the High Street gate to the extension door
     add('gravel', box(-4.4, -8.6, -2.6, -3.2, GARDEN - 0.02, GARDEN + 0.012));
-    // boundary: the retained low brick wall with stone copings and black railings on top (1.8 m in all), gate by the extension
+    // boundary: the retained low brick wall with stone copings and a clipped hedge rising behind it (Charlie, 2 Nov: a wall and a hedge, not
+    // railings round the site); the garden gate by the extension stays
     for (let i = 0; i < BOUND.length - 1; i++) {
       const a = BOUND[i], b = BOUND[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1]), dx = (b[0] - a[0]) / L, dz = (b[1] - a[1]) / L, ang = Math.atan2(-dz, dx);
       const wseg = (s0, s1, ya, yb, wd, key) => { const g = new THREE.BoxGeometry(s1 - s0, yb - ya, wd); g.rotateY(ang); g.translate(a[0] + dx * (s0 + s1) / 2, (ya + yb) / 2, a[1] + dz * (s0 + s1) / 2); add(key, g); };
       const gate = i === BOUND.length - 2;
       const sEnd = gate ? L - 1.6 : L;
-      wseg(0, sEnd, WELL - 0.4, GARDEN + 0.75, 0.34, 'band'); wseg(-0.02, sEnd + 0.02, GARDEN + 0.75, GARDEN + 0.85, 0.44, 'stone');
-      for (let s = 0.1; s < sEnd; s += 0.13) { const g = new THREE.CylinderGeometry(0.011, 0.011, 0.95, 5); g.translate(a[0] + dx * s, GARDEN + 1.32, a[1] + dz * s); add('steel', g); }
-      wseg(0, sEnd, GARDEN + 1.72, GARDEN + 1.76, 0.04, 'steel'); wseg(0, sEnd, GARDEN + 0.95, GARDEN + 0.99, 0.04, 'steel');
+      wseg(0, sEnd, WELL - 0.4, GARDEN + 1.65, 0.34, 'band'); wseg(-0.02, sEnd + 0.02, GARDEN + 1.65, GARDEN + 1.75, 0.44, 'stone');   // ~1.1 m of brick above the pavement (Charlie, 2 Nov: the wall is higher)
+      // the hedge's solid core just behind the wall (the instanced leaves are added round it below), only where there is ground for it
+      for (let s = 0; s < sEnd - 0.05; s += 0.5) {
+        const s1 = Math.min(sEnd, s + 0.5), m = (s + s1) / 2, pu = a[0] + dx * m, pv = a[1] + dz * m, hu = pu - dz * 0.55, hv = pv + dx * 0.55;
+        if (hv > -wellIn(hu) - 0.36 - 0.2) continue;
+        const g = new THREE.BoxGeometry(s1 - s + 0.04, 2.3, 0.5); g.rotateY(ang); g.translate(hu, GARDEN + 0.1 + 1.15, hv); add('hedgeCore', g);
+        (G._hedge ||= []).push([hu, hv, pu - dz * 0.85, pv + dx * 0.85]);
+      }
       if (gate) { for (let s = sEnd + 0.1; s < L; s += 0.1) { const g = new THREE.CylinderGeometry(0.013, 0.013, 1.8, 5); g.translate(a[0] + dx * s, GARDEN + 0.9, a[1] + dz * s); add('steel', g); } wseg(sEnd, L, GARDEN + 1.7, GARDEN + 1.78, 0.05, 'steel'); }
     }
+    // solid ground under the site: earth from below the lower ground floor up to each outdoor surface, so the cut floor views never look
+    // through the world (Charlie, 2 Nov: the yard behind and the strip by the extension showed the sky under the pavement)
+    { const sp = [...BOUND, [4.86, -11.8], [5.25, -11.8], [5.25, 12.3], [-12.68, 12.66], ...FRONT.slice(1).reverse().map(([u, v]) => [u - 0.05, v])];
+      const sh = new THREE.Shape(sp.map(([u, v]) => new THREE.Vector2(u, -v))); const g = new THREE.ExtrudeGeometry(sh, { depth: 0.45, bevelEnabled: false }); g.rotateX(-Math.PI / 2); g.translate(0, -0.75, 0); add('earth', g); }
+    // and the sides of the cut-away: an earth face round the hole in the street from the pavement down to below the lower ground floor
+    // (not cut by the section plane, so looking down past the cut you meet earth, never the underside of the pavement)
+    { const sp = [...BOUND, [4.86, -11.8], [5.25, -11.8], [5.25, 12.3], [-12.68, 12.66], ...FRONT.slice(1).reverse().map(([u, v]) => [u - 0.05, v])];
+      const pos = [], nB = BOUND.length;
+      for (let i = 0; i < sp.length; i++) {
+        if (i < nB) continue;                     // the garden boundary has its own brick wall; the High Street end meets the extension
+        const a = sp[i], b = sp[(i + 1) % sp.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / 0.5));
+        for (let k = 0; k < n; k++) {
+          const p0 = [a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n], p1 = [a[0] + (b[0] - a[0]) * (k + 1) / n, a[1] + (b[1] - a[1]) * (k + 1) / n];
+          const t0 = groundAt(...tw(p0[0], p0[1])) - y0 + 0.03, t1 = groundAt(...tw(p1[0], p1[1])) - y0 + 0.03;
+          pos.push(p0[0], -0.75, p0[1], p1[0], -0.75, p1[1], p1[0], t1, p1[1], p0[0], -0.75, p0[1], p1[0], t1, p1[1], p0[0], t0, p0[1]);
+        }
+      }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+      const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1, side: THREE.DoubleSide })); m.name = 'ubl_earth_sides'; group.add(m); }
+    add('earth', box(-12.68, 10.82, -8.25, 12.66, -0.3, 2.0)); add('earth', box(-8.25, 9.66, 0, 12.66, -0.3, 2.0));          // the bins yard behind the old building
+    add('earth', box(0, 9.4, 5.25, 12.3, -0.3, 2.0)); add('earth', box(0, 7.6, 2.3, 9.4, -0.3, 2.0));                         // behind the courtyard and terrace
+    add('earth', box(2.3, 4.1, 5.2, 9.4, -0.3, 1.6)); add('earth', box(0.25, 4.1, 2.3, 7.6, -0.3, WELL - 0.1));            // under the terrace and the courtyard well
+    add('earth', box(4.86, -11.8, 5.25, 12.3, -0.3, 2.0));                                                                      // the strip along the extension's east side
+    for (const [a, b, c, d] of [[-8.25, 9.66, 0, 10.85], [0, 9.4, 5.25, 10.85], [0, 7.6, 2.3, 9.4], [4.86, -11.8, 5.25, 10.85]]) add('pavers', box(a, b, c, d, 1.995, 2.055));   // paved over where the yard paving stops
     // the courtyard light well beside the extension (east of the old building): lower well, planted terrace, steps
     add('pavers', box(0.25, 4.1, 2.3, 7.6, WELL - 0.1, WELL - 0.05 + 0.0));
     add('pavers', box(2.3, 4.1, 5.2, 9.4, 1.6, 1.69));
@@ -392,7 +422,7 @@ export function buildUBL(M, opts = {}) {
     slate: M.slate || M.cSlate, roofLead: std({ color: '#4a4e51', roughness: 0.8 }),
     rooflight: new THREE.MeshPhysicalMaterial({ color: '#1d2329', roughness: 0.05, metalness: 0.3, clearcoat: 1, clippingPlanes: clip }),
     steel: std({ color: '#1d1f21', roughness: 0.45, metalness: 0.55 }), pavers: M.paving || M.pavers, lawn: M.grass,
-    planterDark: std({ color: '#2a2c2e', roughness: 0.6, metalness: 0.4 }), soil: std({ color: '#3b2f26', roughness: 1 }), gravel: std({ color: '#9c9285', roughness: 1 }),
+    planterDark: std({ color: '#2a2c2e', roughness: 0.6, metalness: 0.4 }), soil: std({ color: '#3b2f26', roughness: 1 }), hedgeCore: std({ color: '#33502a', roughness: 1 }), earth: std({ color: '#4a3a2c', roughness: 1, side: THREE.DoubleSide }), gravel: std({ color: '#9c9285', roughness: 1 }),
   };
   const meshes = {};
   for (const [k, list] of Object.entries(G)) {
@@ -446,7 +476,12 @@ export function buildUBL(M, opts = {}) {
     for (const [u, v, y, r] of G._shrubs || []) { const p = W(u, y, v); opts.forest.add?.(p.x, p.z, { kind: 'pot', h: r * 1.4, r, y: p.y, seed: Math.round(u * 31 + v * 7) }); }
     { const p = W(-7.4, GARDEN, -5.9); opts.forest.add?.(p.x, p.z, { kind: 'birch', h: 6.0, r: 1.5, y: p.y, seed: 4407 }); }
     // clipped box hedges along the garden side of the boundary wall, lavender and grasses on the bank
-    for (let i = 0; i < BOUND.length - 1; i++) { const a = BOUND[i + 1 === BOUND.length ? i : i], b = BOUND[i + 1]; for (let t = 0.15; t < 1; t += 0.3) { const bv = a[1] + (b[1] - a[1]) * t, u = a[0] + (b[0] - a[0]) * t, v = bv + 0.55; if (v > -Math.max(1.3, Math.min(2.6, -bv - 1.1)) - 0.45) continue; const p = W(u, GARDEN, v); opts.forest.add?.(p.x, p.z, { kind: 'hedge', h: 0.9, r: 0.5, y: p.y, seed: 4500 + i * 10 + Math.round(t * 10) }); } }   // hedges only where there is garden between the wall and the light well
+    // the clipped hedge behind the boundary wall: its top rises from the wall's coping (so from the street it reads as brick, then hedge),
+    // its lower half leafed on the garden side
+    (G._hedge || []).forEach(([u, v, gu, gv], k) => {
+      const p = W(u, GARDEN + 1.42, v); opts.forest.add?.(p.x, p.z, { kind: 'hedge', h: 1.15, r: 0.4, y: p.y, seed: 4500 + k });
+      const q = W(gu, GARDEN, gv); opts.forest.add?.(q.x, q.z, { kind: 'hedge', h: 1.7, r: 0.35, y: q.y, seed: 4700 + k });
+    });
   }
   // rooms behind the glass (light up with the floor)
   const roomTex = new THREE.TextureLoader().load((opts.base || 'assets/') + 'tex/room_atlas.jpg'); roomTex.colorSpace = THREE.SRGBColorSpace;

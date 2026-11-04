@@ -108,14 +108,15 @@ export function phPitch(u) {
       'Closest apartment to the lift and stairs, so the shortest walk along the gallery.',
     ];
   } else {
-    p.head = u.plot === 37 ? 'My top pick for a one-bed: top floor with rooflights, looking out to the viaducts.' : 'Kitchen-living to St Joseph’s, bedroom to the garden: the quietest plot in Stockport.';
+    p.head = u.plot === 37 ? 'My top pick for a one-bed: the top-floor loft, with 2.65 m ceilings and a big twin roof window looking out to the viaducts.' : 'Kitchen-living to St Joseph’s, bedroom to the garden: the quietest plot in Stockport.';
     p.points = [
-      'Your 8 ft by 8 ft window runs from shin height right up to the ceiling. Loads of light, makes the room feel big and airy.',
+      top ? 'The big twin roof window in the slate mansard gives loads of light: a much better set-up than the small Velux rooflights you see in most top-floor flats.'
+        : 'Your 8 ft by 8 ft window runs from shin height right up to the ceiling. Loads of light, makes the room feel big and airy.',
       'It faces St Joseph’s Church and the primary school: dead quiet in the evenings and dead quiet at the weekend, unlike the blocks in the middle of the Underbanks.',
       'Front door and bedroom at the back on the steel walkway, looking down into the garden every day.',
     ];
   }
-  if (top && u.type !== '2A') p.points.push('Top floor under the roof, with rooflights and nobody above you.');
+  if (top && u.type !== '2A') p.points.push('Top floor in the slate mansard: the only floor with 2.65 m ceilings, and nobody above you.');
   if (lg) p.points.push('Lower ground floor, at garden level: the most affordable way in.');
   p.points.push('Six and a half to eight minutes’ walk straight down to the station, and 30 seconds to the Underbanks.');
   return p;

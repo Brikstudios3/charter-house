@@ -9,27 +9,27 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793524242';
-import { buildUBL } from './ublbuild.js?v=1793524242';
-import { buildUBLFitout } from './ublfit.js?v=1793524242';
-import { UBL_LEVELS } from './ubl_data.js?v=1793524242';
-import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793524242';
-import { buildOSL } from './oslbuild.js?v=1793524242';
-import { buildOSLFitout } from './oslfit.js?v=1793524242';
-import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793524242';
-import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793524242';
-import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793524242';
-import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole } from './world.js?v=1793524242';
-import { buildFar, hazeUniforms } from './far.js?v=1793524242';
-import { Forest, windUniforms } from './trees.js?v=1793524242';
-import { Interior } from './interior.js?v=1793524242';
-import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793524242';
-import { buildPHFitout } from './phfit.js?v=1793524242';
-import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793524242';
-import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793524242';
-import { createTour } from './tour.js?v=1793524242';
-import { buildCrowd } from './crowd.js?v=1793524242';
-import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793524242';
+import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793799229';
+import { buildUBL } from './ublbuild.js?v=1793799229';
+import { buildUBLFitout } from './ublfit.js?v=1793799229';
+import { UBL_LEVELS } from './ubl_data.js?v=1793799229';
+import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793799229';
+import { buildOSL } from './oslbuild.js?v=1793799229';
+import { buildOSLFitout } from './oslfit.js?v=1793799229';
+import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793799229';
+import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793799229';
+import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793799229';
+import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole, insetPoly } from './world.js?v=1793799229';
+import { buildFar, hazeUniforms } from './far.js?v=1793799229';
+import { Forest, windUniforms } from './trees.js?v=1793799229';
+import { Interior } from './interior.js?v=1793799229';
+import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793799229';
+import { buildPHFitout } from './phfit.js?v=1793799229';
+import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793799229';
+import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793799229';
+import { createTour } from './tour.js?v=1793799229';
+import { buildCrowd } from './crowd.js?v=1793799229';
+import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793799229';
 const pitch = IS_UBL ? ublPitch : IS_OSL ? oslPitch : IS_PH ? phPitch : chPitch, PICKS = IS_UBL ? UBL_PICKS : IS_OSL ? OSL_PICKS : IS_PH ? PH_PICKS : CH_PICKS;
 const RK = IS_UBL ? 'ubl' : IS_OSL ? 'osl' : IS_PH;   // which site's rents
 const PROOFS = IS_UBL ? UBL_PROOF : IS_OSL ? OSL_PROOF : PROOF;
@@ -722,6 +722,17 @@ function toFloor(f, fly = true) {
   if (fly) { const v = floorView(f); flyTo(v.pos, v.tgt, 1.7); }
   renderPanel(); setHash('floor-' + (f === 0 ? 'g' : f));
 }
+// Charter House plots with their own photoreal rooms (2 Nov, Charlie): the photoreal kitchen/living replaces the real-time walk-around
+function ownPano(plot) {
+  if (IS_PH || IS_UBL || IS_OSL || NO_INSIDE) return -1;
+  const i = SPOTS.findIndex(x => x.pano && x.plot === plot && /living|kitchen/i.test(x.room || x.name));
+  return i >= 0 ? i : SPOTS.findIndex(x => x.pano && x.plot === plot);
+}
+function openOwnPano(plot) {
+  const i = ownPano(plot); if (i < 0) return false;
+  if (S.plot !== plot || S.mode !== 'unit') toUnit(plot, false);
+  T.door = plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${plot}`; return true;
+}
 function toUnit(plot, fly = true) {
   const u = unitByPlot.get(plot); if (!u) return;
   dropOverlays();
@@ -1086,10 +1097,12 @@ function renderPanel() {
       <button class="back" data-act="floor" data-floor="${u.floor}">${chev}Level ${floorWord(u.floor)}</button>
       <div class="uhead"><div><span class="label">${FLOORS[u.floor].name} · ${u.beds} bedroom${u.beds > 1 ? 's' : ''}</span><h2>Plot ${u.plot}</h2></div><span class="status ${s.key}">${s.label}</span></div>
       <div class="acts uacts">
-        ${NO_INSIDE ? '' : `<button class="btn brass wide" data-act="inside">${IS_PH || IS_UBL ? 'See the interiors' : hasPano ? 'Step inside · 360°' : 'Step inside'}</button>`}
+        ${NO_INSIDE ? '' : (!IS_PH && !IS_UBL && !IS_OSL && hasPano)   /* Charter House (2 Nov, Charlie): Step inside opens the photoreal rooms; the real-time walk-through is its own button */
+          ? '<button class="btn brass wide" data-act="p360">Step inside · photoreal 360°</button>'
+          : `<button class="btn brass wide" data-act="inside">${IS_PH || IS_UBL ? 'See the interiors' : 'Step inside'}</button>`}
         <button class="btn ${NO_INSIDE ? 'brass' : 'ghost'}${IS_OSL ? ' wide' : ''}" data-act="view">View from window</button>
         ${IS_OSL || IS_UBL ? '' : '<button class="btn ghost" data-act="door">Walk to the door</button>'}
-        ${SPOTS.some(x => x.pano && (x.plot === u.plot || x.type === u.type)) ? '<button class="btn ghost wide" data-act="p360">Photoreal 360° rooms</button>' : ''}
+        ${(!IS_PH && !IS_UBL && !IS_OSL && hasPano) ? (NO_INSIDE || ownPano(u.plot) >= 0 ? '' : '<button class="btn ghost wide" data-act="inside">Walk around in 3D</button>') : hasPano ? '<button class="btn ghost wide" data-act="p360">Photoreal 360° rooms</button>' : ''}
       </div>
       <div class="facts"><div><span class="label">Price</span><b class="num">${fmtGBP(u.price)}</b></div><div><span class="label">Rent</span><b class="num">${fmtGBP(rent)}<small> pcm</small></b></div><div><span class="label">Size</span><b class="num">${u.sqft}<small> sq ft</small></b></div></div>
       <div class="acts uacts"><button class="btn ghost angle" data-act="angle" data-a="0" aria-pressed="${viewAlt === 0}">${IS_UBL ? 'Garden angle' : IS_OSL ? 'Street angle' : IS_PH ? 'Front angle' : 'Street-side angle'}</button><button class="btn ghost angle" data-act="angle" data-a="1" aria-pressed="${viewAlt === 1}">${IS_UBL ? 'St Petersgate angle' : IS_OSL ? 'Courtyard angle' : IS_PH ? 'Garden-side angle' : 'Other-side angle'}</button></div>
@@ -1144,6 +1157,7 @@ $('#panel').addEventListener('click', (e) => {
   if (b.dataset.act === 'floor') return toFloor(+b.dataset.floor);
   if (b.dataset.act === 'door') return walkToDoor(S.plot);
   if (b.dataset.act === 'walk3d') return stepInside(S.plot);
+  if ((b.dataset.act === 'p360' || (b.dataset.act === 'inside' && !PLANF)) && openOwnPano(S.plot)) return;
   if (b.dataset.act === 'p360') { const u = unitByPlot.get(S.plot); let i = SPOTS.findIndex(x => x.pano && x.plot === u.plot); if (i < 0) i = SPOTS.findIndex(x => x.pano && x.type === u.type); if (i >= 0) { T.door = S.plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${S.plot}`; } return; }
   if (b.dataset.act === 'inside' && !PLANF) { const u = unitByPlot.get(S.plot); let i = SPOTS.findIndex(x => x.pano && x.plot === u.plot); if (i < 0) i = SPOTS.findIndex(x => x.pano && x.type === u.type); if (i >= 0) { T.door = S.plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${S.plot}`; return; } }
   if (b.dataset.act === 'inside') return PLANF ? openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === (IS_UBL ? (S.plot === 13 ? 'ubl_loft' : 'ubl_living') : 'ph_kitchen')))) : stepInside(S.plot);
@@ -1281,24 +1295,37 @@ function clearUnitTags() {
   if (unitTagGroup) { scene.remove(unitTagGroup); unitTagGroup.traverse(o => o.geometry && o.geometry.dispose()); unitTagGroup = null; }
   unitTags.forEach(t => t.el.remove()); unitTags = [];
 }
+// a home whose plan is not a rectangle (Underbank Plot 1: the curved St Petersgate wall, and the bike store taken out of its corner) is
+// outlined, tinted, ringed and veiled along its real walls (u.poly: [u, v] in the plan frame the tags use)
+function polyTagGeoms(P, y, i, lvl) {
+  const ins = insetPoly(P, i) || insetPoly(P.slice().reverse(), i) || P;
+  const fill = new THREE.ShapeGeometry(new THREE.Shape(ins.map(([a, b]) => new THREE.Vector2(a, b)))); fill.rotateX(Math.PI / 2); fill.translate(0, y, 0);
+  const edge = new THREE.BufferGeometry().setFromPoints([...ins, ins[0]].map(([a, b]) => new THREE.Vector3(a, y + 0.01, b)));
+  const ry = lvl + 1.36, t = 0.09, rw = [];
+  for (let k = 0; k < ins.length; k++) { const [a, b] = ins[k], [c, d] = ins[(k + 1) % ins.length], L = Math.hypot(c - a, d - b); if (L < 0.02) continue; const g = new THREE.BoxGeometry(L + t, 0.05, t); g.rotateY(-Math.atan2(d - b, c - a)); g.translate((a + c) / 2, ry, (b + d) / 2); rw.push(g); }
+  const veil = new THREE.ExtrudeGeometry(new THREE.Shape(P.map(([a, b]) => new THREE.Vector2(a, -b))), { depth: 1.12, bevelEnabled: false }); veil.rotateX(-Math.PI / 2); veil.translate(0, lvl + 0.08, 0);
+  const glow = (y0, y1) => { const g = new THREE.ExtrudeGeometry(new THREE.Shape(P.map(([a, b]) => new THREE.Vector2(a, -b))), { depth: y1 - y0, bevelEnabled: false }); g.rotateX(-Math.PI / 2); g.translate(0, y0, 0); return g; };
+  return { fill, edge, ring: mergeGeometries(rw, false), veil, glow };
+}
 function buildUnitTags(f) {
   clearUnitTags();
   unitTagGroup = new THREE.Group();
   for (const u of floorUnits(f)) {
     const [x0, z0, x1, z1] = PLANF ? [u.fp[0], -u.fp[3], u.fp[2], -u.fp[1]] : u.fp, y = (IS_UBL ? u.level : u.house ? CH.houseFloors[Math.floor((u.plot - 1) / 3)] : f * FH) + 0.07, i = 0.16;
     const col = new THREE.Color(st(u).color);
-    const g = new THREE.PlaneGeometry(x1 - x0 - 2 * i, z1 - z0 - 2 * i); g.rotateX(-Math.PI / 2); g.translate((x0 + x1) / 2, y, (z0 + z1) / 2);
+    const PG = (u.poly && PLANF) ? polyTagGeoms(u.poly, y, i, IS_UBL ? u.level : f * FH) : null;
+    const g = PG ? PG.fill : new THREE.PlaneGeometry(x1 - x0 - 2 * i, z1 - z0 - 2 * i); if (!PG) { g.rotateX(-Math.PI / 2); g.translate((x0 + x1) / 2, y, (z0 + z1) / 2); }
     // multiplicative tint: works on the HDR floor before tone mapping, so it reads in bright sun too
     const m = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, depthWrite: false, blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.ZeroFactor, blendDst: THREE.SrcColorFactor, toneMapped: false });
     const mesh = new THREE.Mesh(g, m); mesh.userData.plot = u.plot; mesh.renderOrder = 5;
-    const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(x1 - x0 - 2 * i, 0.02, z1 - z0 - 2 * i)), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.7 }));
-    edge.position.set((x0 + x1) / 2, y + 0.01, (z0 + z1) / 2);
+    const edge = PG ? new THREE.Line(PG.edge, new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.7 })) : new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(x1 - x0 - 2 * i, 0.02, z1 - z0 - 2 * i)), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.7 }));
+    if (!PG) edge.position.set((x0 + x1) / 2, y + 0.01, (z0 + z1) / 2);
     // glowing brass ring laid on top of the cut walls, shown when the apartment is hovered or chosen
     const ry = (IS_UBL ? u.level : f * FH) + 1.36, t = 0.09, rw = [];
     for (const [ax0, az0, ax1, az1] of [[x0 + i, z0 + i, x1 - i, z0 + i + t], [x0 + i, z1 - i - t, x1 - i, z1 - i], [x0 + i, z0 + i, x0 + i + t, z1 - i], [x1 - i - t, z0 + i, x1 - i, z1 - i]]) {
       const bg = new THREE.BoxGeometry(ax1 - ax0, 0.05, az1 - az0); bg.translate((ax0 + ax1) / 2, ry, (az0 + az1) / 2); rw.push(bg);
     }
-    const ring = new THREE.Mesh(mergeGeometries(rw, false), new THREE.MeshBasicMaterial({ color: new THREE.Color(st(u).color).multiplyScalar(2.2), transparent: true, opacity: 0, toneMapped: false }));
+    const ring = new THREE.Mesh(PG ? PG.ring : mergeGeometries(rw, false), new THREE.MeshBasicMaterial({ color: new THREE.Color(st(u).color).multiplyScalar(2.2), transparent: true, opacity: 0, toneMapped: false }));
     ring.renderOrder = 6; edge.userData.ring = ring; unitTagGroup.add(ring);
     unitTagGroup.add(mesh, edge);
     // taken: the same lit outline, in red, with a red cross from corner to corner
@@ -1312,11 +1339,11 @@ function buildUnitTags(f) {
     }
     const el = document.createElement('div'); el.className = 'tag ' + st(u).key;
     el.innerHTML = `<div class="b"><strong class="num">${u.plot}</strong><em>${u.beds} bed · ${u.status === 'Available' ? fmtGBP(u.price) : st(u).label}</em></div><div class="stem"></div><div class="pin"></div>`;
-    el.onclick = () => toUnit(u.plot);
+    el.onclick = () => { if (!openOwnPano(u.plot)) toUnit(u.plot); };   /* plots with photoreal rooms open straight into the kitchen/living */
     el.onpointerenter = () => { S.hoverPlot = u.plot; }; el.onpointerleave = () => { S.hoverPlot = null; };
     $('#labels').appendChild(el);
     const tp = new THREE.Vector3((x0 + x1) / 2, y + 0.2, (z0 + z1) / 2); if (PLANF) tp.applyMatrix4(CH.group.matrixWorld);
-    const vg = new THREE.BoxGeometry(x1 - x0 - 2 * i + 0.1, 1.12, z1 - z0 - 2 * i + 0.1); vg.translate((x0 + x1) / 2, (IS_UBL ? u.level : f * FH) + 0.64, (z0 + z1) / 2);
+    const vg = PG ? PG.veil : new THREE.BoxGeometry(x1 - x0 - 2 * i + 0.1, 1.12, z1 - z0 - 2 * i + 0.1); if (!PG) vg.translate((x0 + x1) / 2, (IS_UBL ? u.level : f * FH) + 0.64, (z0 + z1) / 2);
     const veil = new THREE.Mesh(vg, new THREE.MeshBasicMaterial({ color: '#2b2723', transparent: true, opacity: 0, depthWrite: false, toneMapped: false, side: THREE.DoubleSide })); veil.renderOrder = 8; veil.visible = false; unitTagGroup.add(veil);
     unitTags.push({ el, plot: u.plot, p: tp, mesh, edge, veil });
   }
@@ -1411,6 +1438,7 @@ canvas.addEventListener('pointerup', (e) => {
   ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   const hit = pick();
   if (S.mode === 'explore' && hit.floor != null) toFloor(hit.floor);
+  else if ((S.mode === 'floor' || S.mode === 'unit') && hit.plot != null && ownPano(hit.plot) >= 0) openOwnPano(hit.plot);   /* straight into the photoreal kitchen/living */
   else if ((S.mode === 'floor' || S.mode === 'unit') && hit.plot != null && !(S.mode === 'unit' && hit.plot === S.plot)) toUnit(hit.plot);
 });
 function pick() {
@@ -1657,6 +1685,7 @@ function route() {
   let m;
   if ((m = h.match(/^floor-(g|[0-9])$/)) && (m[1] === 'g' || +m[1] < FLOORS.length)) toFloor(m[1] === 'g' ? 0 : +m[1]);
   else if ((m = h.match(/^plot-(\d+)$/)) && unitByPlot.has(+m[1])) toUnit(+m[1]);
+  else if ((m = h.match(/^inside-(\d+)$/)) && unitByPlot.has(+m[1]) && ownPano(+m[1]) >= 0) openOwnPano(+m[1]);
   else if ((m = h.match(/^inside-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); if (PLANF) openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === 'ph_kitchen'))); else stepInside(+m[1]); }
   else if ((m = h.match(/^view-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); seeView(+m[1]); }
   else if (h === 'gallery') openGallery(0);
@@ -1729,7 +1758,7 @@ function updateHighlights(dt) {
       for (const u of floorUnits(hf)) {
         const [x0, z0, x1, z1] = PLANF ? [u.fp[0], -u.fp[3], u.fp[2], -u.fp[1]] : u.fp, e = 0.32, b0 = PLANF ? 0 : SY(), hy = u.house ? CH.houseFloors[Math.floor((u.plot - 1) / 3)] : hf * FH, y0 = b0 + hy + 0.12, y1 = u.house ? y0 + 9.2 : b0 + (hf + 1) * FH - 0.12;
         const col = new THREE.Color(u.status === 'Available' ? '#f4d79a' : '#e3242b');
-        const bg = new THREE.BoxGeometry(x1 - x0 + 2 * e - 0.12, y1 - y0, z1 - z0 + 2 * e - 0.12); bg.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+        let bg; if (u.poly && PLANF) bg = polyTagGeoms(u.poly, 0, 0.16, 0).glow(y0, y1); else { bg = new THREE.BoxGeometry(x1 - x0 + 2 * e - 0.12, y1 - y0, z1 - z0 + 2 * e - 0.12); bg.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); }
         const fill = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
         const lines = new THREE.LineSegments(new THREE.EdgesGeometry(bg), new THREE.LineBasicMaterial({ color: col.clone().multiplyScalar(1.3), transparent: true, opacity: 0, toneMapped: false }));
         fill.renderOrder = 4; lines.renderOrder = 5; g.add(fill, lines); g.userData.items.push({ fill, lines });
@@ -1926,11 +1955,22 @@ function loadPano(url) {
   if (!panoCache.has(url)) panoCache.set(url, new Promise((res, rej) => new THREE.TextureLoader().load(BASE + url, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.generateMipmaps = true; res(t); }, undefined, rej)));
   return panoCache.get(url);
 }
-async function showPano(url) {
+// the showcase rooms also come at double resolution (8K): shown first at 4K, then swapped for the sharp one on screens and GPUs that can take it;
+// only the room on screen keeps its 8K texture (each is ~180 MB of video memory)
+let panoHD = null;
+const HD_OK = (() => { try { return renderer.capabilities.maxTextureSize >= 8192 && Math.min(screen.width, screen.height) >= 700 && !(navigator.connection && navigator.connection.saveData); } catch (e) { return false; } })();
+async function showPano(url, hd = null) {
   const req = ++panoReq;
-  if (!url) { panoOn = false; return; }
-  try { const t = await loadPano(url); if (req !== panoReq) return; panoSphere.material.map = t; panoSphere.material.needsUpdate = true; panoOn = true; stillFrames = Math.max(stillFrames, 3); }
+  const dropHD = () => { if (panoHD && panoHD.url !== hd) { panoHD.tex.dispose(); panoHD = null; } };
+  if (!url) { panoOn = false; dropHD(); return; }
+  try { const t = await loadPano(url); if (req !== panoReq) return; panoSphere.material.map = (panoHD && panoHD.url === hd) ? panoHD.tex : t; panoSphere.material.needsUpdate = true; dropHD(); panoOn = true; stillFrames = Math.max(stillFrames, 3); }
   catch (e) { console.warn('pano', url, e); }
+  if (hd && HD_OK && !(panoHD && panoHD.url === hd)) new THREE.TextureLoader().load(BASE + hd, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.generateMipmaps = true;
+    if (req !== panoReq) { t.dispose(); return; }
+    if (panoHD) panoHD.tex.dispose(); panoHD = { url: hd, tex: t };
+    panoSphere.material.map = t; panoSphere.material.needsUpdate = true; stillFrames = Math.max(stillFrames, 3);
+  }, undefined, (e) => console.warn('pano hd', hd, e));
 }
 
 // ------------------------------------------------------------------ 360° walk-around (Nifty-style fixed spots) and the walk to the front door
@@ -1949,7 +1989,7 @@ function buildSpots() {
       { id: 'garden', name: 'Residents’ garden', at: L(24.6, 1.65, 17.0), look: L(8, 4.5, 11), note: 'The private garden, with the walkways and front doors wrapped round it.' },
       { id: 'garden2', name: 'By the side block', at: L(14.0, 1.65, 19.8), look: L(24, 5, 11), note: 'Gravel paths, birch trees and loose planting, as in the 21 Living CGIs.' },
       { id: 'walk1', name: 'First-floor walkway', at: L(25.6, F * 2 + 1.65, 10.95), look: L(4.5, F * 2 + 1.4, 10.95), note: 'Your own front door off an open steel walkway, looking down into the garden.', glide: false },
-      { id: 'walktop', name: 'Top-floor walkway', at: L(5.2, F * 4 + 1.65, 10.95), look: L(26, F * 4 + 1.0, 13), note: 'The top floor, under the canopy, with rooflights in every apartment.', glide: false },
+      { id: 'walktop', name: 'Top-floor walkway', at: L(5.2, F * 4 + 1.65, 10.95), look: L(26, F * 4 + 1.0, 13), note: 'The top floor, under the canopy: 2.65 m ceilings and a big twin roof window in every apartment.', glide: false },
       { id: 'stjoseph', name: 'St Joseph’s side', at: L(14, 1.65, -13), look: L(14, 7, 0), note: 'Every apartment’s big 8 ft window faces this way: St Joseph’s Church and the primary school.' },
       { id: 'fletcher', name: 'Fletcher Street', at: L(-7, 1.65, 13), look: L(1, 6, 15), note: 'The side block sits back behind a hedge and a cobbled wall.' },
       { id: 'roof', name: 'Above the roof', at: L(14, F * 5 + 12, 8), look: L(-60, 10, -40), note: 'Drag round: the viaduct, the town centre and the hills beyond.', glide: false },
@@ -1971,7 +2011,7 @@ function buildSpots() {
     ];
   }
   // photoreal path-traced 360s of the rooms (rendered offline from this model; listed in assets/pano/index.json)
-  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793524242`, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
+  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793799229`, hd: !!p.hd, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
   const LINKS = {"wellington": [], "garden": ["garden2", "walk1", "walktop"], "garden2": ["garden", "walk1"], "walk1": ["garden", "walktop"], "walktop": ["garden", "walk1"], "stjoseph": ["fletcher"], "fletcher": ["stjoseph"], "roof": [], "corner": ["park", "arch", "harvey", "smg"], "park": ["corner", "arch"], "arch": ["corner", "park"], "harvey": ["smg", "corner"], "smg": ["harvey", "corner"], "courtyard": ["walkway"], "walkway": ["courtyard"], "church": [], "market": []};   // the spots you can actually see from each spot (pins never show through walls)
   for (const sp of SPOTS) sp.links = LINKS[sp.id] || [];
   spotPins = SPOTS.map((sp, i) => { const el = document.createElement('button'); el.className = 'spin'; el.style.opacity = 0; el.style.pointerEvents = 'none'; el.innerHTML = `<span>${sp.name}</span><i></i>`; el.onclick = () => goSpot(i); $('#labels').appendChild(el); return el; });
@@ -2026,7 +2066,7 @@ function goSpot(i) {
   const sib = sp.pano ? SPOTS.map((x, j) => [x, j]).filter(([x]) => x.pano && x.plot === sp.plot) : [];
   const roomActs = sib.length > 1 ? sib.map(([x, j]) => `<button class="btn ${j === i ? 'brass' : 'ghost'}" data-tact="room" data-spot="${j}">${(x.room || x.name).replace(/^./, ch => ch.toUpperCase())}</button>`).join('') : '';
   tourCaption(sp.pano ? `Apartment ${sp.plot} · photoreal 360°` : `360° walk-around · ${i + 1} of ${SPOTS.length}`, sp.name, sp.note, roomActs);
-  if (sp.pano) { tour.walk([{ to: sp.at, cut: true, look: sp.look }], {}); setTimeout(() => { showPano(sp.pano); tour.setFov(innerWidth < innerHeight ? 100 : 92); }, 400); }
+  if (sp.pano) { tour.walk([{ to: sp.at, cut: true, look: sp.look }], {}); setTimeout(() => { showPano(sp.pano, sp.hd ? sp.pano.replace('.jpg', '_8k.jpg') : null); tour.setFov(innerWidth < innerHeight ? 100 : 92); }, 400); }
   else { showPano(null); tour.walk([near ? { to: sp.at, speed: 6, look: sp.look } : { to: sp.at, cut: true, look: sp.look }]); }
   stillFrames = Math.max(stillFrames, 4);
 }
@@ -2108,6 +2148,7 @@ $('#t-acts').addEventListener('click', (e) => {
   if (b.dataset.tact === 'room') return goSpot(+b.dataset.spot);
   if (b.dataset.tact === 'unit') exitTour(plot);
   else if (b.dataset.tact === 'interiors') { exitTour(plot); openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === 'ph_kitchen'))); }
+  else if (b.dataset.tact === 'inside' && ownPano(plot) >= 0) { const i = ownPano(plot); T.door = plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${plot}`; }
   else if (b.dataset.tact === 'inside' && SPOTS.some(x => x.pano && x.type === unitByPlot.get(plot).type)) { const i = SPOTS.findIndex(x => x.pano && x.type === unitByPlot.get(plot).type); T.door = plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${plot}`; }
   else if (b.dataset.tact === 'inside') {
     const f = $('#tfade'); f.style.transitionDuration = '.35s'; f.style.opacity = 1;
@@ -2204,7 +2245,7 @@ function loop() {
   try {
     await build();
     placeLandmarks();
-    try { const j = await fetch(BASE + 'pano/index.json?v=1793524242').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
+    try { const j = await fetch(BASE + 'pano/index.json?v=1793799229').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
     buildSpots();
   } catch (e) { console.error(e); lmsg.textContent = 'Something went wrong loading the model. Please refresh.'; return; }
   applyTOD('day');
