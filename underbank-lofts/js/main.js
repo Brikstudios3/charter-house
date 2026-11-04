@@ -9,27 +9,27 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793801086';
-import { buildUBL } from './ublbuild.js?v=1793801086';
-import { buildUBLFitout } from './ublfit.js?v=1793801086';
-import { UBL_LEVELS } from './ubl_data.js?v=1793801086';
-import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793801086';
-import { buildOSL } from './oslbuild.js?v=1793801086';
-import { buildOSLFitout } from './oslfit.js?v=1793801086';
-import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793801086';
-import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793801086';
-import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793801086';
-import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole, insetPoly } from './world.js?v=1793801086';
-import { buildFar, hazeUniforms } from './far.js?v=1793801086';
-import { Forest, windUniforms } from './trees.js?v=1793801086';
-import { Interior } from './interior.js?v=1793801086';
-import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793801086';
-import { buildPHFitout } from './phfit.js?v=1793801086';
-import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793801086';
-import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793801086';
-import { createTour } from './tour.js?v=1793801086';
-import { buildCrowd } from './crowd.js?v=1793801086';
-import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793801086';
+import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793817499';
+import { buildUBL } from './ublbuild.js?v=1793817499';
+import { buildUBLFitout } from './ublfit.js?v=1793817499';
+import { UBL_LEVELS } from './ubl_data.js?v=1793817499';
+import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793817499';
+import { buildOSL } from './oslbuild.js?v=1793817499';
+import { buildOSLFitout } from './oslfit.js?v=1793817499';
+import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793817499';
+import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793817499';
+import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793817499';
+import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole, insetPoly } from './world.js?v=1793817499';
+import { buildFar, hazeUniforms } from './far.js?v=1793817499';
+import { Forest, windUniforms } from './trees.js?v=1793817499';
+import { Interior } from './interior.js?v=1793817499';
+import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793817499';
+import { buildPHFitout } from './phfit.js?v=1793817499';
+import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793817499';
+import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793817499';
+import { createTour } from './tour.js?v=1793817499';
+import { buildCrowd } from './crowd.js?v=1793817499';
+import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793817499';
 const pitch = IS_UBL ? ublPitch : IS_OSL ? oslPitch : IS_PH ? phPitch : chPitch, PICKS = IS_UBL ? UBL_PICKS : IS_OSL ? OSL_PICKS : IS_PH ? PH_PICKS : CH_PICKS;
 const RK = IS_UBL ? 'ubl' : IS_OSL ? 'osl' : IS_PH;   // which site's rents
 const PROOFS = IS_UBL ? UBL_PROOF : IS_OSL ? OSL_PROOF : PROOF;
@@ -315,6 +315,16 @@ async function build() {
   }
   // the low brewery stores across Apsley Street read as odd wedges with OSM's pitched roofs: flat felt roofs, as in the drone footage
   for (const b of W.bld) if (b.id === 179636 || b.id === 179637) b.r = 'flat';
+  // the Churchgate neighbours' backs round the courtyard, from the site plan (A839_P_200I): the shop beyond the two hand-built
+  // ones (OSM 179634) is clipped where they stand and brought down to their two storeys (as the context elevation), and the
+  // long rear wing of the second shop and the first one's back extension are added; both face the residents' courtyard
+  if (!IS_OSL) {
+    const c = W.bld.find(b => b.id === 179634);
+    if (c) { c.p = [[44, 6.8], [43.3, 7.8], [41.3, 10.8], [36.9, 13.5], [35.4, 12.5], [34, 14.8], [31.4, 13.5], [32.8, 10.6], [32.85, 10.5], [36.4, 10.5], [36.4, 3.65], [37.1, 2.3]]; c.h = 6.4; c.lv = 2; }
+    if (!W.bld.some(b => b.id === 9001001)) W.bld.push(
+      { id: 9001001, p: [[28.36, 10.5], [31.38, 10.5], [30.09, 15.66], [27.35, 15.03]], h: 5.8, lv: 2, r: 'gable', s: 'house', n: '' },
+      { id: 9001002, p: [[22.65, 10.5], [25.27, 10.5], [25.27, 11.74], [22.65, 11.7]], h: 3.3, lv: 1, r: 'flat', s: 'house', n: '' });
+  }
   contextGroup = buildContext(M, forest, { lampHeads, festoon });
   scene.add(contextGroup);
   worldGroup = buildWorld(W, M, BASE, forest, {
@@ -1160,7 +1170,7 @@ $('#panel').addEventListener('click', (e) => {
   if ((b.dataset.act === 'p360' || (b.dataset.act === 'inside' && !PLANF)) && openOwnPano(S.plot)) return;
   if (b.dataset.act === 'p360') { const u = unitByPlot.get(S.plot); let i = SPOTS.findIndex(x => x.pano && x.plot === u.plot); if (i < 0) i = SPOTS.findIndex(x => x.pano && x.type === u.type); if (i >= 0) { T.door = S.plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${S.plot}`; } return; }
   if (b.dataset.act === 'inside' && !PLANF) { const u = unitByPlot.get(S.plot); let i = SPOTS.findIndex(x => x.pano && x.plot === u.plot); if (i < 0) i = SPOTS.findIndex(x => x.pano && x.type === u.type); if (i >= 0) { T.door = S.plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${S.plot}`; return; } }
-  if (b.dataset.act === 'inside') return PLANF ? openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === (IS_UBL ? (S.plot === 13 ? 'ubl_loft' : 'ubl_living') : 'ph_kitchen')))) : stepInside(S.plot);
+  if (b.dataset.act === 'inside') return PLANF ? openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === (IS_UBL ? (S.plot === 13 ? 'ubl_loft' : 'ubl_living') : phCGI(S.plot))))) : stepInside(S.plot);
   if (b.dataset.act === 'view') return seeView(S.plot);
   if (b.dataset.act === 'plan') { showPlan('card'); $('#zoomplan').classList.add('on'); return; }
   if (b.dataset.plot) return toUnit(+b.dataset.plot);
@@ -1640,6 +1650,7 @@ const GALLERY = IS_OSL ? [
   ['ubl_loft', 'Plot 13: kitchen and living under the rooflights'], ['ubl_living', 'Kitchen and living in the converted building'], ['ubl_bed', 'Bedroom'], ['ubl_bath', 'Shower room'],
 ] : IS_PH ? [
   ['ph_front', 'Seaton House on Wellington Street: Brik Studios’ new home'], ['ph_court', 'The residents’ garden and the walkways'], ['ph_kitchen', 'Kitchen and living, ground floor'],
+  ['ph_top', 'Kitchen and living on the top floor, under the twin roof window'],
   ['ph_bed', 'Bedroom, black accents and oak'], ['ph_bath', 'Shower room in monochrome tile'],
 ] : [
   ['ext_corner', 'The corner of Churchgate and Harvey Street'], ['ext_churchgate', 'Churchgate, with St Mary’s Gate beyond'], ['ext_front', 'The Churchgate frontage and arched entrance'],
@@ -1647,6 +1658,8 @@ const GALLERY = IS_OSL ? [
   ['int_living2b', 'Two bedroom: kitchen and dining'], ['int_bedroom', 'Bedroom'], ['int_bathroom', 'Shower room'],
 ];
 let gi = 0;
+// the Print House top floor (in the mansard) opens on its own CGI, the floors below on the ground-floor one
+function phCGI(plot) { return unitByPlot.get(plot)?.floor === 4 ? 'ph_top' : 'ph_kitchen'; }
 function openGallery(i = 0) { gi = i; $('#gallery').classList.add('on'); showG(); }
 function showG() {
   const [k, cap] = GALLERY[gi];
@@ -1686,7 +1699,7 @@ function route() {
   if ((m = h.match(/^floor-(g|[0-9])$/)) && (m[1] === 'g' || +m[1] < FLOORS.length)) toFloor(m[1] === 'g' ? 0 : +m[1]);
   else if ((m = h.match(/^plot-(\d+)$/)) && unitByPlot.has(+m[1])) toUnit(+m[1]);
   else if ((m = h.match(/^inside-(\d+)$/)) && unitByPlot.has(+m[1]) && ownPano(+m[1]) >= 0) openOwnPano(+m[1]);
-  else if ((m = h.match(/^inside-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); if (PLANF) openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === 'ph_kitchen'))); else stepInside(+m[1]); }
+  else if ((m = h.match(/^inside-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); if (PLANF) openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === phCGI(+m[1])))); else stepInside(+m[1]); }
   else if ((m = h.match(/^view-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); seeView(+m[1]); }
   else if (h === 'gallery') openGallery(0);
   else if (h === 'film' && !PLANF) playFilm();
@@ -2011,7 +2024,7 @@ function buildSpots() {
     ];
   }
   // photoreal path-traced 360s of the rooms (rendered offline from this model; listed in assets/pano/index.json)
-  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793801086`, hd: !!p.hd, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
+  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793817499`, hd: !!p.hd, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
   const LINKS = {"wellington": [], "garden": ["garden2", "walk1", "walktop"], "garden2": ["garden", "walk1"], "walk1": ["garden", "walktop"], "walktop": ["garden", "walk1"], "stjoseph": ["fletcher"], "fletcher": ["stjoseph"], "roof": [], "corner": ["park", "arch", "harvey", "smg"], "park": ["corner", "arch"], "arch": ["corner", "park"], "harvey": ["smg", "corner"], "smg": ["harvey", "corner"], "courtyard": ["walkway"], "walkway": ["courtyard"], "church": [], "market": []};   // the spots you can actually see from each spot (pins never show through walls)
   for (const sp of SPOTS) sp.links = LINKS[sp.id] || [];
   spotPins = SPOTS.map((sp, i) => { const el = document.createElement('button'); el.className = 'spin'; el.style.opacity = 0; el.style.pointerEvents = 'none'; el.innerHTML = `<span>${sp.name}</span><i></i>`; el.onclick = () => goSpot(i); $('#labels').appendChild(el); return el; });
@@ -2147,7 +2160,7 @@ $('#t-acts').addEventListener('click', (e) => {
   if (b.dataset.tact === 'skip') return tour.skip();
   if (b.dataset.tact === 'room') return goSpot(+b.dataset.spot);
   if (b.dataset.tact === 'unit') exitTour(plot);
-  else if (b.dataset.tact === 'interiors') { exitTour(plot); openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === 'ph_kitchen'))); }
+  else if (b.dataset.tact === 'interiors') { exitTour(plot); openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === phCGI(plot)))); }
   else if (b.dataset.tact === 'inside' && ownPano(plot) >= 0) { const i = ownPano(plot); T.door = plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${plot}`; }
   else if (b.dataset.tact === 'inside' && SPOTS.some(x => x.pano && x.type === unitByPlot.get(plot).type)) { const i = SPOTS.findIndex(x => x.pano && x.type === unitByPlot.get(plot).type); T.door = plot; goSpot(i); $('#t-backlbl').textContent = `Back to Plot ${plot}`; }
   else if (b.dataset.tact === 'inside') {
@@ -2245,7 +2258,7 @@ function loop() {
   try {
     await build();
     placeLandmarks();
-    try { const j = await fetch(BASE + 'pano/index.json?v=1793801086').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
+    try { const j = await fetch(BASE + 'pano/index.json?v=1793817499').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
     buildSpots();
   } catch (e) { console.error(e); lmsg.textContent = 'Something went wrong loading the model. Please refresh.'; return; }
   applyTOD('day');

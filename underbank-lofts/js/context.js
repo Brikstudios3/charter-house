@@ -3,8 +3,8 @@
 // Positions are approximate, from Google Earth and the Ollier Smurthwaite site/context drawings.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { boxGeom, boxUV } from './building.js?v=1793801086';
-import { groundAt, letteringTexture } from './world.js?v=1793801086';
+import { boxGeom, boxUV } from './building.js?v=1793817499';
+import { groundAt, letteringTexture } from './world.js?v=1793817499';
 
 // street level comes from the terrain model (world.js): estimated levels relative to Charter House's ground floor
 export function groundY(x, z) { return groundAt(x, z); }
@@ -360,17 +360,36 @@ export function buildContext(M, forest, { lampHeads = [], festoon = [] } = {}) {
     const fs = boxGeom(a + 0.2, gy + 2.85, -0.42, b - 0.2, gy + 3.4, -0.15); B.add('timberBlack', fs);
   });
 
-  // ---------------- behind the site: open, low-rise. The residents' car park and a lawn, looking across to the brewery
+  // ---------------- behind the site: open, low-rise. The yard behind the building (no marked bays: block paving on the near
+  // half, a planted grass verge along the back wall on the far half) and a lawn, looking across to the brewery
   {
     const flat = (pts, key, y, uv = 8) => {
       const s = new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, -z)));
       const g = new THREE.ShapeGeometry(s); g.rotateX(-Math.PI / 2); const p = g.attributes.position;
       for (let i = 0; i < p.count; i++) p.setY(i, groundY(p.getX(i), p.getZ(i)) + y); g.computeVertexNormals(); boxUV(g, uv); B.add(key, g);
     };
-    flat([[-2.6, 21.6], [31, 21.6], [31, 33.6], [-2.6, 33.6]], 'asphalt', 0.05);
-    // bays facing the building, and a second row against the back wall
-    for (let x = 0.2; x < 30; x += 2.5) {
-      for (const [za, zb] of [[22.0, 26.6], [29.0, 33.4]]) { const g = boxGeom(x, 0, za, x + 0.08, 0.012, zb); g.translate(0, groundY(x, za) + 0.065, 0); B.add('lineWhite', g); }
+    // gridded so they follow the terrain (whose baked OSM ground cover marks this as a car park) instead of dipping under it
+    const grid = (x0, z0, x1, z1, key, y, uv) => {
+      const g = new THREE.PlaneGeometry(x1 - x0, z1 - z0, Math.ceil((x1 - x0) / 0.8), Math.ceil((z1 - z0) / 0.8)); g.rotateX(-Math.PI / 2); g.translate((x0 + x1) / 2, 0, (z0 + z1) / 2);
+      const p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, groundY(p.getX(i), p.getZ(i)) + y); g.computeVertexNormals(); boxUV(g, uv); B.add(key, g);
+    };
+    grid(-2.6, 21.6, 31, 27.6, 'paving', 0.05, 2.4);
+    grid(-2.6, 27.75, 31, 33.6, 'grassCtx', 0.07, 4);
+    // a stone kerb between the paving and the verge
+    for (let x = -2.6; x < 31; x += 1.4) { const x1 = Math.min(31, x + 1.4), gy = groundY((x + x1) / 2, 27.67); const k = boxGeom(x, gy - 0.15, 27.6, x1, gy + 0.17, 27.75); boxUV(k, 1.2); B.add('stone', k); }
+    // the verge: a clipped hedge along the back wall, birches, and clumps of shrubs and grasses through the grass
+    for (let x = -2.0; x < 30.6; x += 1.15) forest.add(x, 33.05 + Math.sin(x * 1.7) * 0.08, { kind: 'hedge', h: 1.25, r: 0.6, seed: 1700 + Math.round(x * 7) });
+    for (const [x, z, h] of [[1.5, 30.6, 7.5], [9.5, 31.2, 8.5], [17.5, 30.4, 7], [25.5, 31.0, 8]]) forest.add(x, z, { kind: 'birch', h, r: 2.8, seed: 1800 + x });
+    for (let i = 0; i < 34; i++) {
+      const x = -1.8 + ((i * 0.618) % 1) * 32.2, z = 28.4 + ((i * 0.377) % 1) * 3.9;
+      forest.add(x, z, { kind: i % 3 ? 'shrub' : 'grass', h: 0.7 + (i % 4) * 0.18, r: 0.7 + (i % 3) * 0.2, seed: 1900 + i });
+    }
+    // on the paved half, a few low brick planters (stone copings) full of shrubs and grasses
+    for (const x0 of [2.0, 10.0, 18.0, 26.0]) {
+      const gy = groundY(x0 + 1.3, 24.6), x1 = x0 + 2.6, z0 = 23.9, z1 = 25.3;
+      const w = boxGeom(x0, gy - 0.2, z0, x1, gy + 0.5, z1); boxUV(w); B.add('cBrickOld', w);
+      const c = boxGeom(x0 - 0.05, gy + 0.5, z0 - 0.05, x1 + 0.05, gy + 0.56, z1 + 0.05); B.add('stone', c);
+      for (let x = x0 + 0.35; x < x1 - 0.2; x += 0.62) forest.add(x, (z0 + z1) / 2 + Math.sin(x * 3) * 0.2, { kind: Math.sin(x * 5) > 0 ? 'shrub' : 'grass', h: 0.75, r: 0.55, y: gy + 0.5, seed: 2000 + Math.round(x * 10) });
     }
     // low brick boundary walls with stone copings
     for (const [x0, z0, x1, z1] of [[-2.6, 33.6, 31, 33.9], [31, 21.6, 31.3, 33.9]]) {
