@@ -1,13 +1,13 @@
 // The Print House new-build blocks behind Seaton House (61 Wellington Street): the main rear block (2A, four 1Bs,
 // 1C per floor) facing St Joseph's, the side block on Fletcher Street (two 1As per floor), the lift and stair core,
-// black steel-and-glass access galleries round the residents' garden, 8 ft square picture windows, a zinc top storey
-// with rooflights, and the garden itself. Built in the plan's own frame: local x = u (south along the block),
+// black steel-and-glass access galleries round the residents' garden, 8 ft square picture windows, the top storey in a
+// slate mansard with big twin roof windows (2.65 m ceilings, as the Apt 37 unit selection pack), and the garden itself. Built in the plan's own frame: local x = u (south along the block),
 // local z = -v (v runs east into the garden), so the plan coordinates read straight across.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { PH_SITE, PH_FH, PH_UNITS } from './ph_data.js?v=1793706138';
-import { roomBox } from './building.js?v=1793706138';
-import { roomMaterial } from './materials.js?v=1793706138';
+import { PH_SITE, PH_FH, PH_UNITS, PH_ROOF, phTopY } from './ph_data.js?v=1793799207';
+import { roomBox } from './building.js?v=1793799207';
+import { roomMaterial } from './materials.js?v=1793799207';
 
 const FH = PH_FH, NF = 5;
 const MAIN = [0, 0, 27.2, 10.2];      // u0 v0 u1 v1
@@ -44,6 +44,9 @@ export function buildPrintHouse(M, opts = {}) {
   const TOPB = (NF - 1) * FH;            // top of the brick storeys (zinc top floor above)
   const EAV = NF * FH + 0.3;
   const windows = [], roomGeo = {};
+  // the slate mansard over the top floor: brick to the knee wall, a 63° slope up to the flat roof (PH_ROOF in ph_data.js)
+  const R = PH_ROOF, SA = Math.sin(R.PITCH), CA = Math.cos(R.PITCH), RISE = R.TOP - R.KNEE, SL = RISE / SA, RUN = RISE / Math.tan(R.PITCH);
+  const roofOps = {};   // face id -> the top-floor windows on that face (in the facade's own coordinate), made roof windows
   // ---- walls with openings, per facade: a facade is a line in plan (p0 -> p1) with an outward normal
   const facade = (p0, p1, n, openingsAll, yTop, mat, yBase = 0) => {
     const openings = openingsAll.filter(o => o.y0 >= yBase - 0.01 && o.y1 <= yTop + 0.01);
@@ -83,7 +86,9 @@ export function buildPrintHouse(M, opts = {}) {
         // the lit room behind the glass (same shader as Charter House: lights up when the floor is hovered)
         const fy = o.floor * FH, rg = roomBox(o.a - 0.5, fy + 0.02, 0.38, o.b + 0.5, fy + FH - 0.28, 3.6, (o.y1 - o.y0) > 2 ? 0 : 1, (o.plot * 7.3) % 1);
         const rm = new THREE.Matrix4().makeBasis(new THREE.Vector3(dir[0], 0, -dir[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(-n[0], 0, n[1]));
-        rm.setPosition(p0[0], 0, -p0[1]); rg.applyMatrix4(rm); (roomGeo[o.plot] ||= []).push(rg);
+        rm.setPosition(p0[0], 0, -p0[1]); rg.applyMatrix4(rm);
+        if (o.floor === NF - 1) { const p = rg.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, Math.min(p.getY(i), Math.max(o.floor * FH + 0.1, phTopY(p.getX(i), -p.getZ(i)) - 0.03))); }   // kept under the mansard
+        (roomGeo[o.plot] ||= []).push(rg);
       } else {
         piece(o.a, o.b, o.y0, o.y1, dIn - 0.05, dIn, 'door');
       }
@@ -117,28 +122,94 @@ export function buildPrintHouse(M, opts = {}) {
     }
   }
   // facades (p0 -> p1 along the face, normal outward), in plan (u, v)
-  const both = (p0, p1, n, ops) => { facade(p0, p1, n, ops, EAV, 'brick'); };
-  both([0, 0], [27.2, 0], [0, -1], op.mainW);
+  // the street faces stop at the mansard's knee wall (their top-floor windows become roof windows in the slope); the garden
+  // faces under the walkways, the end walls and the core run up to the eaves
+  const both = (p0, p1, n, ops, face) => {
+    if (face) { roofOps[face] = ops.filter(o => o.floor === NF - 1 && o.kind !== 'door'); facade(p0, p1, n, ops, R.KNEE, 'brick'); }
+    else facade(p0, p1, n, ops, EAV, 'brick');
+  };
+  both([0, 0], [27.2, 0], [0, -1], op.mainW, 'W');
   both([27.2, 10.2], [0, 10.2], [0, 1], op.mainE.map(o => ({ ...o, a: 27.2 - o.b, b: 27.2 - o.a })));
-  both([27.2, 0], [27.2, 10.2], [1, 0], op.mainS);
-  both([0, 10.2], [0, 0], [-1, 0], op.mainN.map(o => ({ ...o, a: 10.2 - o.b, b: 10.2 - o.a })));
-  both([0.6, 20.5], [0.6, 11.9], [-1, 0], op.sideN.map(o => ({ ...o, a: 20.5 - o.b, b: 20.5 - o.a })));
+  both([27.2, 0], [27.2, 10.2], [1, 0], op.mainS, 'S');
+  both([0, 10.2], [0, 0], [-1, 0], op.mainN.map(o => ({ ...o, a: 10.2 - o.b, b: 10.2 - o.a })), 'N');
+  both([0.6, 20.5], [0.6, 11.9], [-1, 0], op.sideN.map(o => ({ ...o, a: 20.5 - o.b, b: 20.5 - o.a })), 'F');
   both([10.2, 11.9], [10.2, 20.5], [1, 0], op.sideS.map(o => ({ ...o, a: o.a - 11.9, b: o.b - 11.9 })));
   both([10.2, 20.5], [0.6, 20.5], [0, 1], []);     // (each facade runs so that dir x up = outward normal)
   both([4.0, 11.9], [10.2, 11.9], [0, -1], []);   // the side block's flank on the landing beside the core
-  // top storey in anthracite zinc (same openings, cut from a zinc skin) handled by colouring the top band: a zinc wrap
   // floor slabs edges (string courses in dark brick) + parapet/eaves
   for (let f = 1; f < NF; f++) { add('band', box(MAIN[0] - 0.06, MAIN[1] - 0.06, MAIN[2] + 0.06, MAIN[1] + 0.02, f * FH - 0.12, f * FH + 0.02)); add('band', box(SIDE[0] - 0.06, SIDE[1], SIDE[0] + 0.02, SIDE[3], f * FH - 0.12, f * FH + 0.02)); }
   // ---- core (lift + stairs) and the solid gable walls of the core
   add('brick', box(CORE[0], CORE[1], CORE[2], CORE[3], 0, NF * FH + 1.2));
   add('zinc', box(CORE[0] - 0.05, CORE[1] - 0.05, CORE[2] + 0.05, CORE[3] + 0.05, NF * FH + 1.2, NF * FH + 1.5));
-  // flat roofs behind a brick parapet with a stone coping, rooflights over the top-floor apartments
-  const flat = (u0, v0, u1, v1) => {
-    add('roof', box(u0 + 0.2, v0 + 0.2, u1 - 0.2, v1 - 0.2, EAV - 0.25, EAV + 0.05));
-    for (const [a, b, c, d] of [[u0, v0, u1, v0 + 0.35], [u0, v1 - 0.35, u1, v1], [u0, v0, u0 + 0.35, v1], [u1 - 0.35, v0, u1, v1]]) { add('brick', box(a, b, c, d, EAV - 0.1, EAV + 0.85)); add('sill', box(a - 0.04, b - 0.04, c + 0.04, d + 0.04, EAV + 0.85, EAV + 0.95)); }
-  };
-  flat(...MAIN); flat(...SIDE);
-  for (const u of PH_UNITS.filter(q => q.floor === NF - 1)) { const [a, b, c, d] = u.fp, cu = (a + c) / 2, cv = (b + d) / 2; add('glass', box(cu - 0.55, cv - 0.7, cu + 0.55, cv + 0.7, EAV + 0.05, EAV + 0.32)); add('frame', box(cu - 0.62, cv - 0.77, cu + 0.62, cv + 0.77, EAV + 0.02, EAV + 0.2)); }
+  // ---- the mansard: per street face a slate slope (hipped at the outside corners, stopped against brick end walls), a stone
+  // coping and a dark brick course at the knee, lead hips and a lead roll at the top, and a big twin roof window over every flat
+  for (const f of R.faces) {
+    const len = Math.hypot(f.p1[0] - f.p0[0], f.p1[1] - f.p0[1]), dir = [(f.p1[0] - f.p0[0]) / len, (f.p1[1] - f.p0[1]) / len], n = f.n;
+    const X = new THREE.Vector3(dir[0], 0, -dir[1]), N3 = new THREE.Vector3(n[0], 0, -n[1]), UP = new THREE.Vector3(0, 1, 0);
+    const Y = UP.clone().multiplyScalar(SA).addScaledVector(N3, -CA), Z = N3.clone().multiplyScalar(SA).addScaledVector(UP, CA);
+    const Mx = new THREE.Matrix4().makeBasis(X, Y, Z).setPosition(f.p0[0], R.KNEE, -f.p0[1]);   // local: s along, t up the slope, -d into it
+    const [h0, h1] = f.hip, s0 = h0 ? 0 : 0.02, s1 = h1 ? len : len - 0.02;
+    const V = (a, b) => new THREE.Vector2(a, b);
+    const rw = (roofOps[f.id] || []).map(o => { const c = (o.a + o.b) / 2, w = Math.min(1.6, o.b - o.a - 0.1); return { o, c, w, t0: 0.14, t1: 1.62 }; });
+    const sh = new THREE.Shape([V(s0, 0), V(s1, 0), V(h1 ? len - RUN : s1, SL), V(h0 ? RUN : s0, SL)]);
+    for (const r of rw) { const h = new THREE.Path(); h.moveTo(r.c - r.w / 2, r.t0); h.lineTo(r.c + r.w / 2, r.t0); h.lineTo(r.c + r.w / 2, r.t1); h.lineTo(r.c - r.w / 2, r.t1); h.lineTo(r.c - r.w / 2, r.t0); sh.holes.push(h); }
+    const g = new THREE.ExtrudeGeometry(sh, { depth: R.TH, bevelEnabled: false, curveSegments: 1 }); g.translate(0, 0, -R.TH);
+    { const p = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) + p.getZ(i)) / 2.6, (p.getY(i) - p.getZ(i)) / 2.6); }
+    g.applyMatrix4(Mx);
+    const [outer, inner] = splitBy(g, (nv) => nv.x * Z.x + nv.y * Z.y + nv.z * Z.z < -0.7);   // seen from inside it is the plastered sloping ceiling
+    add('slate', outer); add('plasterIn', inner);
+    const lbox = (sA, sB, tA, tB, dA, dB, key) => { const b = new THREE.BoxGeometry(Math.max(0.005, sB - sA), Math.max(0.005, tB - tA), Math.max(0.005, dB - dA)); b.translate((sA + sB) / 2, (tA + tB) / 2, -(dA + dB) / 2); b.applyMatrix4(Mx); add(key, b); };
+    const P = (s, l) => [f.p0[0] + dir[0] * s - n[0] * l, f.p0[1] + dir[1] * s - n[1] * l];
+    const ab = (sA, sB, lA, lB, yA, yB, key) => { const a = P(sA, lA), b = P(sB, lB); add(key, box(Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1]), yA, yB)); };
+    ab(h0 ? -0.12 : 0, h1 ? len + 0.12 : len, -0.12, 0.3, R.KNEE - 0.07, R.KNEE + 0.02, 'sill');
+    ab(h0 ? -0.06 : 0, h1 ? len + 0.06 : len, -0.06, 0.1, R.KNEE - 0.5, R.KNEE - 0.32, 'band');
+    ab(h0 ? RUN : s0, h1 ? len - RUN : s1, RUN - 0.1, RUN + 0.12, R.TOP - 0.03, R.TOP + 0.06, 'lead');
+    // lead hips (built once, from the long St Joseph's face, at both its corners)
+    if (f.id === 'W') for (const [end, on] of [[0, [-1, 0]], [1, [1, 0]]]) {
+      const c0 = new THREE.Vector3(end ? f.p1[0] : f.p0[0], R.KNEE, -(end ? f.p1[1] : f.p0[1]));
+      const O3 = new THREE.Vector3(on[0], 0, -on[1]), c1 = c0.clone().addScaledVector(N3, -RUN).addScaledVector(O3, -RUN).setY(R.TOP);
+      const zA = c1.clone().sub(c0), L = zA.length(); zA.normalize();
+      const upH = Z.clone().add(O3.clone().multiplyScalar(SA).addScaledVector(UP, CA)).normalize(), xA = upH.clone().cross(zA).normalize(), yA = zA.clone().cross(xA);
+      const hg = new THREE.BoxGeometry(0.16, 0.06, L); hg.applyMatrix4(new THREE.Matrix4().makeBasis(xA, yA, zA).setPosition(c0.clone().add(c1).multiplyScalar(0.5).addScaledVector(yA, 0.02))); add('lead', hg);
+    }
+    // brick cheeks over the slope where it stops against an end wall (the wall's inside face would show above the slates)
+    for (const [end, hip] of [[0, h0], [1, h1]]) {
+      if (hip || (f.id === 'F' && end === 1)) continue;   // the side block's slope runs into the stair core at its south end
+      const tri = new THREE.Shape([V(0, R.KNEE), V(RUN + 0.02, R.TOP), V(0, R.TOP)]);
+      const cg = new THREE.ExtrudeGeometry(tri, { depth: 0.1, bevelEnabled: false });
+      const sA = end ? len - 0.45 : 0.35, o3 = P(sA, 0);
+      cg.applyMatrix4(new THREE.Matrix4().makeBasis(N3.clone().negate(), UP, X).setPosition(o3[0], 0, -o3[1])); add('brick', cg);
+    }
+    // the roof windows: a dark aluminium frame and flashing outside, white linings and sashes inside, a mullion between the pair
+    for (const r of rw) {
+      const a = r.c - r.w / 2, b = r.c + r.w / 2, twin = r.w > 1.3;
+      lbox(a - 0.07, b + 0.07, r.t0 - 0.07, r.t0 + 0.05, -0.05, 0.06, 'frame'); lbox(a - 0.07, b + 0.07, r.t1 - 0.05, r.t1 + 0.07, -0.05, 0.06, 'frame');
+      lbox(a - 0.07, a + 0.05, r.t0, r.t1, -0.05, 0.06, 'frame'); lbox(b - 0.05, b + 0.07, r.t0, r.t1, -0.05, 0.06, 'frame');
+      if (twin) lbox(r.c - 0.05, r.c + 0.05, r.t0, r.t1, -0.04, 0.06, 'frame');
+      lbox(a, b, r.t0, r.t1, 0.03, 0.04, 'glass');
+      lbox(a, b, r.t0, r.t0 + 0.02, 0.06, R.TH + 0.01, 'sash'); lbox(a, b, r.t1 - 0.02, r.t1, 0.06, R.TH + 0.01, 'sash');
+      lbox(a, a + 0.02, r.t0, r.t1, 0.06, R.TH + 0.01, 'sash'); lbox(b - 0.02, b, r.t0, r.t1, 0.06, R.TH + 0.01, 'sash');
+      for (const [sa, sb] of twin ? [[a, r.c - 0.04], [r.c + 0.04, b]] : [[a, b]]) {
+        lbox(sa, sb, r.t0, r.t0 + 0.07, 0.05, 0.11, 'sash'); lbox(sa, sb, r.t1 - 0.07, r.t1, 0.05, 0.11, 'sash');
+        lbox(sa, sa + 0.06, r.t0, r.t1, 0.05, 0.11, 'sash'); lbox(sb - 0.06, sb, r.t0, r.t1, 0.05, 0.11, 'sash');
+        lbox(sa, sb, r.t1 - 0.32, r.t1 - 0.27, 0.05, 0.1, 'sash');   // the handle bar across the top of each sash
+      }
+      if (twin) lbox(r.c - 0.06, r.c + 0.06, r.t0, r.t1, 0.05, 0.115, 'sash');
+      // the window list (View from window): from just outside the slope, level with the floor's eye height
+      const lp = P(r.c, 0.6); windows.push({ id: r.o.id, plot: r.o.plot, floor: r.o.floor, local: new THREE.Vector3(lp[0], R.TF + 1.5, -lp[1]), n: [n[0], n[1]], w: r.w, h: r.t1 - r.t0, roof: true });
+    }
+  }
+  // the flat roof inside the mansard (its underside is the top floor's 2.65 m ceiling); the garden faces, end walls and flank stand
+  // a little above it with a stone coping, lined in brick on the roof side
+  for (let i = 0; i < 6; i++) { const ua = MAIN[0] + RUN + (MAIN[2] - MAIN[0] - 2 * RUN) * i / 6, ub = MAIN[0] + RUN + (MAIN[2] - MAIN[0] - 2 * RUN) * (i + 1) / 6; add('roof', box(ua, MAIN[1] + RUN, ub, MAIN[3] - 0.2, R.CEIL, R.TOP)); }
+  add('roof', box(SIDE[0] + RUN, SIDE[1] + 0.2, SIDE[2] - 0.2, SIDE[3] - 0.2, R.CEIL, R.TOP));
+  for (const [u0, v0, u1, v1, lu0, lv0, lu1, lv1] of [
+    [MAIN[0], MAIN[3] - 0.38, MAIN[2], MAIN[3] + 0.03, MAIN[0] + RUN, MAIN[3] - 0.41, MAIN[2] - RUN, MAIN[3] - 0.35],     // main block, garden side
+    [SIDE[2] - 0.38, SIDE[1], SIDE[2] + 0.03, SIDE[3], SIDE[2] - 0.41, SIDE[1] + 0.35, SIDE[2] - 0.35, SIDE[3] - 0.35],   // side block, garden side
+    [SIDE[0], SIDE[3] - 0.38, SIDE[2], SIDE[3] + 0.03, SIDE[0] + RUN, SIDE[3] - 0.41, SIDE[2] - 0.35, SIDE[3] - 0.35],     // side block, north end
+    [4.0, SIDE[1] - 0.03, SIDE[2], SIDE[1] + 0.38, 4.0, SIDE[1] + 0.35, SIDE[2] - 0.35, SIDE[1] + 0.41]]) {               // side block flank by the core
+    add('sill', box(u0, v0, u1, v1, EAV, EAV + 0.08)); add('brick', box(lu0, lv0, lu1, lv1, R.TOP - 0.05, EAV));
+  }
   // ---- galleries: black steel decks, posts, glass balustrades, a canopy over the top deck
   const galleries = [];
   const deckRun = (u0, v0, u1, v1) => galleries.push([u0, v0, u1, v1]);
@@ -211,6 +282,8 @@ export function buildPrintHouse(M, opts = {}) {
     deck: new THREE.MeshStandardMaterial({ color: '#55595d', roughness: 0.8, metalness: 0.2, clippingPlanes: M.brick?.clippingPlanes }),
     balGlass: M.balGlass, roof: new THREE.MeshStandardMaterial({ color: '#4a4c4f', roughness: 0.9, clippingPlanes: M.brick?.clippingPlanes }), lawn: M.grass, path: (() => { const m = M.paving.clone(); m.color = new THREE.Color('#cfc6b6'); m.roughness = 1; return m; })(), planter: new THREE.MeshStandardMaterial({ color: '#2b2e31', roughness: 0.55, metalness: 0.4 }),
     plasterIn: new THREE.MeshStandardMaterial({ color: '#ebe7e1', roughness: 0.92, clippingPlanes: M.brick?.clippingPlanes }),
+    slate: M.slate || M.cSlate, lead: new THREE.MeshStandardMaterial({ color: '#3c4043', roughness: 0.55, metalness: 0.35, clippingPlanes: M.brick?.clippingPlanes }),
+    sash: new THREE.MeshStandardMaterial({ color: '#f2f1ec', roughness: 0.45, clippingPlanes: M.brick?.clippingPlanes }),
     soil: new THREE.MeshStandardMaterial({ color: '#3b2c22', roughness: 1 }), oak: new THREE.MeshStandardMaterial({ color: '#a5774a', roughness: 0.6 }),
   };
   const meshes = {};
@@ -254,6 +327,13 @@ export function buildPrintHouse(M, opts = {}) {
         if (!ext('v', d)) list.push(box(a, d - 0.12, c, d, y, y + FH - 0.3));
         if (!ext('u', a)) list.push(box(a, b + 0.36, a + 0.12, d - 0.36, y, y + FH - 0.3));
         if (!ext('u', c)) list.push(box(c - 0.12, b + 0.36, c, d - 0.36, y, y + FH - 0.3));
+        if (f === NF - 1) for (let i = 0; i < list.length; i++) {   // under the mansard: follow the sloping ceiling, stop at the flat one
+          const bb = list[i]; bb.computeBoundingBox(); const { min: q0, max: q1 } = bb.boundingBox;
+          const g = new THREE.BoxGeometry(q1.x - q0.x, q1.y - q0.y, q1.z - q0.z, Math.max(1, Math.ceil((q1.x - q0.x) / 0.12)), 1, Math.max(1, Math.ceil((q1.z - q0.z) / 0.12)));
+          g.translate((q0.x + q1.x) / 2, (q0.y + q1.y) / 2, (q0.z + q1.z) / 2);
+          const p = g.attributes.position; for (let k = 0; k < p.count; k++) { const lim = phTopY(p.getX(k), -p.getZ(k)) + 0.03; if (p.getY(k) > lim) p.setY(k, Math.max(lim, y + 0.1)); }
+          g.computeVertexNormals(); list[i] = g;
+        }
         for (const g of list) walls.push(g.index ? g.toNonIndexed() : g);
       }
     }
