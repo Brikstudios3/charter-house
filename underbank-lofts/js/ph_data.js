@@ -27,7 +27,7 @@ export const PH_FLOORS = [
   { id: 1, name: 'Ground floor', short: 'G', level: 1 },
   { id: 2, name: 'First floor', short: '1', level: 2 },
   { id: 3, name: 'Second floor', short: '2', level: 3 },
-  { id: 4, name: 'Third floor', short: '3', level: 4, note: 'Top floor, under the roof' },
+  { id: 4, name: 'Third floor', short: '3', level: 4, note: 'Top floor in the slate mansard: 2.65 m ceilings, big twin roof windows' },
 ];
 // footprints [u0, v0, u1, v1] in the local frame; facing = which way the big 8 ft window looks
 const SLOTS = [
@@ -55,3 +55,28 @@ export const PH_UNITS = SF.map(([plot, fl, beds, sqft, price, status]) => {
     : 'Kitchen-living looks out to St Joseph’s Church; bedroom and front door over the residents’ garden';
   return { plot, apt: `${PH_FLOORS[floor].short}.${String(k + 1).padStart(2, '0')}`, floor, type: s.type, beds, sqft: Math.round(sqft), price, status, note, view, fp: s.fp.slice(), slot: k, side: !!s.side };
 });
+
+// The top floor sits in a slate mansard (as the Position-in-Build CGI): brick to a knee wall, then a steep slate slope
+// with big twin roof windows over every flat, 2.65 m ceilings inside. Faces are façade lines in the plan frame with the
+// outward normal; a hip meets the next slope at that end, otherwise the slope stops against a brick end wall.
+export const PH_ROOF = {
+  TF: 4 * PH_FH, KNEE: 4 * PH_FH + 0.85, TOP: 4 * PH_FH + 3.0, CEIL: 4 * PH_FH + 0.02 + 2.65, TH: 0.3, PITCH: 63 * Math.PI / 180,
+  faces: [
+    { id: 'W', p0: [0, 0], p1: [27.2, 0], n: [0, -1], hip: [true, true] },
+    { id: 'S', p0: [27.2, 0], p1: [27.2, 10.2], n: [1, 0], hip: [true, false] },
+    { id: 'N', p0: [0, 10.2], p1: [0, 0], n: [-1, 0], hip: [false, true] },
+    { id: 'F', p0: [0.6, 20.5], p1: [0.6, 11.9], n: [-1, 0], hip: [false, false] },
+  ],
+};
+// the highest point inside a top-floor flat at plan (u, v): the flat ceiling, or the underside of the slope near a façade
+export function phTopY(u, v) {
+  const R = PH_ROOF, tn = Math.tan(R.PITCH), inset = R.TH / Math.sin(R.PITCH);
+  let y = R.CEIL;
+  for (const f of R.faces) {
+    const len = Math.hypot(f.p1[0] - f.p0[0], f.p1[1] - f.p0[1]), d = [(f.p1[0] - f.p0[0]) / len, (f.p1[1] - f.p0[1]) / len];
+    const s = (u - f.p0[0]) * d[0] + (v - f.p0[1]) * d[1]; if (s < -0.4 || s > len + 0.4) continue;
+    const L = -((u - f.p0[0]) * f.n[0] + (v - f.p0[1]) * f.n[1]); if (L < -0.5 || L > 4) continue;
+    y = Math.min(y, R.KNEE + (L - inset) * tn);
+  }
+  return y;
+}
