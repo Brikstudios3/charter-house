@@ -3,7 +3,7 @@
 // the Manchester skyline, St George's spire, the 1840 viaduct and the oval Interchange with its rooftop park.
 import * as THREE from 'three';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { midH, groundAt } from './world.js?v=1793817492';
+import { midH, groundAt } from './world.js?v=1793880905';
 
 // aerial perspective shared by every far mesh (they skip the scene fog): haze rises with distance like real air
 export const hazeUniforms = { uHaze: { value: new THREE.Color('#b9c9dc') }, uHazeL: { value: 14000 }, uSunTint: { value: new THREE.Color('#ffffff') } };
@@ -53,7 +53,7 @@ export function buildFar(F, M, opts = {}) {
     const c = new THREE.Color();
     for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
       const x = -HALF + i * C, z = -HALF + j * C;
-      const inNear = Math.abs(x) < inner + 40 && Math.abs(z) < inner + 40;
+      const inNear = Math.abs(x) < inner + 40 && Math.abs(z) < inner + 40 || (opts.hole && x > opts.hole[0] - 40 && x < opts.hole[1] + 40 && z > opts.hole[2] - 40 && z < opts.hole[3] + 40);
       let h = midH(x, z); if (inNear) h -= 1.4;
       const d = Math.hypot(x, z);
       // land cover: town near the centre (fading out with noise), fields with hedged patchwork, woods in the valleys
@@ -68,6 +68,7 @@ export function buildFar(F, M, opts = {}) {
     for (let j = 0; j < n - 1; j++) for (let i = 0; i < n - 1; i++) {
       const x0 = -HALF + i * C, z0 = -HALF + j * C;
       if (x0 >= -inner && x0 + C <= inner && z0 >= -inner && z0 + C <= inner) continue;
+      if (opts.hole && x0 >= opts.hole[0] + 8 && x0 + C <= opts.hole[1] - 8 && z0 >= opts.hole[2] + 8 && z0 + C <= opts.hole[3] - 8) continue;
       const a = vid[j * n + i], b = vid[j * n + i + 1], cc = vid[(j + 1) * n + i], d = vid[(j + 1) * n + i + 1];
       idx.push(a, cc, b, b, cc, d);
     }
@@ -112,6 +113,7 @@ export function buildFar(F, M, opts = {}) {
     for (let gz = -4650; gz < 4650; gz += CELL) for (let gx = -4650; gx < 4650; gx += CELL) {
       const cx = gx + CELL / 2, cz = gz + CELL / 2, d = Math.hypot(cx, cz);
       if (d < 560 || d > 4700) continue;
+      if (opts.hole && cx > opts.hole[0] - 20 && cx < opts.hole[1] + 20 && cz > opts.hole[2] - 20 && cz < opts.hole[3] + 20) continue;   // the tour world maps this ground street by street
       const hc = midH(cx, cz);
       const urb = (3300 - d) / 2000 + (smoothNoise(cx / 900, cz / 900) - 0.5) * 1.2;
       if (hc < -15 || urb < R() * 0.9) {   // countryside / valley: copses and hedgerow trees

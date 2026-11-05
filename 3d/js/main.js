@@ -9,27 +9,30 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793817492';
-import { buildUBL } from './ublbuild.js?v=1793817492';
-import { buildUBLFitout } from './ublfit.js?v=1793817492';
-import { UBL_LEVELS } from './ubl_data.js?v=1793817492';
-import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793817492';
-import { buildOSL } from './oslbuild.js?v=1793817492';
-import { buildOSLFitout } from './oslfit.js?v=1793817492';
-import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793817492';
-import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793817492';
-import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793817492';
-import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole, insetPoly } from './world.js?v=1793817492';
-import { buildFar, hazeUniforms } from './far.js?v=1793817492';
-import { Forest, windUniforms } from './trees.js?v=1793817492';
-import { Interior } from './interior.js?v=1793817492';
-import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793817492';
-import { buildPHFitout } from './phfit.js?v=1793817492';
-import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793817492';
-import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793817492';
-import { createTour } from './tour.js?v=1793817492';
-import { buildCrowd } from './crowd.js?v=1793817492';
-import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793817492';
+import { UNITS, FLOORS, STATUS, SITE, INTERIORS, SUN, fmtGBP, sqm, FLOOR_H, IS_PH, START_AREA, IS_OSL, IS_UBL, PLANF } from './site.js?v=1793880905';
+import { buildUBL } from './ublbuild.js?v=1793880905';
+import { buildUBLFitout } from './ublfit.js?v=1793880905';
+import { UBL_LEVELS } from './ubl_data.js?v=1793880905';
+import { buildPrintHouse, buildSeatonSign, buildSeatonHouse } from './printhouse.js?v=1793880905';
+import { buildOSL } from './oslbuild.js?v=1793880905';
+import { buildOSLFitout } from './oslfit.js?v=1793880905';
+import { makeMaterials, CUT, setAniso, tex } from './materials.js?v=1793880905';
+import { buildCharterHouse, buildFloorPlates } from './building.js?v=1793880905';
+import { buildContext, buildCourtyard, groundY, buildBreweryFront } from './context.js?v=1793880905';
+import { setTerrain, setMid, buildWorld, obb, groundAt, townUniforms, setGroundHole, insetPoly } from './world.js?v=1793880905';
+import { buildFar, hazeUniforms } from './far.js?v=1793880905';
+import { buildRailway } from './railway.js?v=1793880905';
+import { buildExchange, EXCHANGE_IDS } from './exchange.js?v=1793880905';
+const TOUR_WORLD = new URLSearchParams(location.search).get('world') === 'tour';   // the wide world for the Stockport tour renders
+import { Forest, windUniforms } from './trees.js?v=1793880905';
+import { Interior } from './interior.js?v=1793880905';
+import { buildFurniture, LAYOUTS, furnitureMaterials } from './furniture.js?v=1793880905';
+import { buildPHFitout } from './phfit.js?v=1793880905';
+import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793880905';
+import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793880905';
+import { createTour } from './tour.js?v=1793880905';
+import { buildCrowd } from './crowd.js?v=1793880905';
+import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793880905';
 const pitch = IS_UBL ? ublPitch : IS_OSL ? oslPitch : IS_PH ? phPitch : chPitch, PICKS = IS_UBL ? UBL_PICKS : IS_OSL ? OSL_PICKS : IS_PH ? PH_PICKS : CH_PICKS;
 const RK = IS_UBL ? 'ubl' : IS_OSL ? 'osl' : IS_PH;   // which site's rents
 const PROOFS = IS_UBL ? UBL_PROOF : IS_OSL ? OSL_PROOF : PROOF;
@@ -250,9 +253,11 @@ const CHURCHGATE = [[-145, -11.5], [-121, -8.9], [-104, -7.5], [-85, -6.8], [-62
 const roadZ = (x) => { for (let i = 0; i < CHURCHGATE.length - 1; i++) { const a = CHURCHGATE[i], b = CHURCHGATE[i + 1]; if (x >= a[0] && x <= b[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); } return null; };
 async function build() {
   if (IS_OSL) return buildOSLScene();
-  const [wallsJson, W, F] = await Promise.all([fetch(BASE + 'plans/walls.json').then(r => r.json()), fetch(BASE + 'world.json').then(r => r.json()), fetch(BASE + 'far.json').then(r => r.json())]);
+  const [wallsJson, W, F] = await Promise.all([fetch(BASE + 'plans/walls.json').then(r => r.json()), fetch(BASE + (TOUR_WORLD ? 'tour/world_tour.json' : 'world.json')).then(r => r.json()), fetch(BASE + 'far.json').then(r => r.json())]);
   setTerrain(W.terrain); setMid(F.mid); wallsData = wallsJson;
-  W.bld.push(...(F.bld || []));
+  W.bld.push(...(F.bld || []).filter(b => !TOUR_WORLD || ![561905, 561914, 561919].includes(b.id)));   // tour: the station is built by railway.js
+  const exchangeBld = TOUR_WORLD ? W.bld.filter(b => EXCHANGE_IDS.includes(b.id)) : [];
+  if (TOUR_WORLD) W.bld = W.bld.filter(b => !EXCHANGE_IDS.includes(b.id));   // tour: Stockport Exchange is modelled by exchange.js
   // Seaton House (the Print House frontage) is built in detail from the CGI, so it comes out of the generic town
   const seatonI = W.bld.findIndex(b => b.n === 'Seaton House'), seaton = seatonI >= 0 ? W.bld.splice(seatonI, 1)[0] : null;
   CH = buildCharterHouse(M, BASE);
@@ -328,7 +333,7 @@ async function build() {
   contextGroup = buildContext(M, forest, { lampHeads, festoon });
   scene.add(contextGroup);
   worldGroup = buildWorld(W, M, BASE, forest, {
-    tex, white: [539188, 539180], churchgate: CHURCHGATE,
+    tex, ...(TOUR_WORLD ? { splat: 'tour/world_tour_splat.png' } : {}), white: [539188, 539180], churchgate: CHURCHGATE,
     exclude: [[-50, -44, 0.5, -11], [-1, -38, 32, -11], [-4, -2, 46, 36], [-66, -2, -8, 40], [-110, -3, -74, 13]],
     keepOut: [PLACES.churchKeep, (x, z) => Math.hypot(x + 156, z - 105) < 24,   // Underbank Lofts' garden is planted by the building itself
       (x, z) => {   // no stray trees inside The Print House plot or Seaton House
@@ -341,7 +346,8 @@ async function build() {
   });
   scene.add(worldGroup);
   if (W.special.brewery) scene.add(buildBreweryFront(M, W.special.brewery_front_offset || [0, 0]));   // Robinsons' street front in detail
-  farGroup = buildFar(F, M, { forest, blds: W.bld }); scene.add(farGroup);
+  farGroup = buildFar(F, M, { forest, blds: W.bld, hole: TOUR_WORLD ? W.box : null }); scene.add(farGroup);
+  if (TOUR_WORLD) { scene.add(buildRailway(W, M, groundAt)); scene.add(buildExchange(exchangeBld, M, groundAt)); }
   if (farGroup.userData.interchange) PLACES.interchange = farGroup.userData.interchange;
   courtyard = buildCourtyard(M, forest, festoon);
   scene.add(courtyard);
@@ -1702,6 +1708,7 @@ function route() {
   else if ((m = h.match(/^inside-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); if (PLANF) openGallery(Math.max(0, GALLERY.findIndex(g => g[0] === phCGI(+m[1])))); else stepInside(+m[1]); }
   else if ((m = h.match(/^view-(\d+)$/)) && unitByPlot.has(+m[1])) { toUnit(+m[1], false); seeView(+m[1]); }
   else if (h === 'gallery') openGallery(0);
+  else if (h === 'stockport' && SK_ON) openSkTour();
   else if (h === 'film' && !PLANF) playFilm();
   routing = false;
   return !!h;
@@ -2024,7 +2031,7 @@ function buildSpots() {
     ];
   }
   // photoreal path-traced 360s of the rooms (rendered offline from this model; listed in assets/pano/index.json)
-  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793817492`, hd: !!p.hd, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
+  for (const p of PANO_INDEX) SPOTS.push({ id: 'pano-' + p.file, name: p.name, at: V3(...p.pos), look: V3(...p.look), pano: `pano/${p.file}.jpg?v=1793880905`, hd: !!p.hd, glide: false, type: p.type, plot: p.plot, room: p.room || p.name, note: p.note || 'Photoreal 360°. Drag to look round.' });
   const LINKS = {"wellington": [], "garden": ["garden2", "walk1", "walktop"], "garden2": ["garden", "walk1"], "walk1": ["garden", "walktop"], "walktop": ["garden", "walk1"], "stjoseph": ["fletcher"], "fletcher": ["stjoseph"], "roof": [], "corner": ["park", "arch", "harvey", "smg"], "park": ["corner", "arch"], "arch": ["corner", "park"], "harvey": ["smg", "corner"], "smg": ["harvey", "corner"], "courtyard": ["walkway"], "walkway": ["courtyard"], "church": [], "market": []};   // the spots you can actually see from each spot (pins never show through walls)
   for (const sp of SPOTS) sp.links = LINKS[sp.id] || [];
   spotPins = SPOTS.map((sp, i) => { const el = document.createElement('button'); el.className = 'spin'; el.style.opacity = 0; el.style.pointerEvents = 'none'; el.innerHTML = `<span>${sp.name}</span><i></i>`; el.onclick = () => goSpot(i); $('#labels').appendChild(el); return el; });
@@ -2208,8 +2215,34 @@ function updateTourPins() {
 const clock = new THREE.Clock();
 let frames = 0, slowFrames = 0;
 let stillFrames = 0;
+// ------------------------------------------------------------------ the Stockport 360° regeneration tour (Charter House edition only)
+// The tour lives beside the app at 3d/stockport/ and opens full screen over the 3D, which pauses underneath;
+// its own back button (or "Explore in 3D") hands control back here.
+let SK_OPEN = false;
+function openSkTour() {
+  let ov = document.getElementById('sk360');
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'sk360'; ov.hidden = true;
+    ov.innerHTML = '<iframe src="stockport/" title="Stockport 360° regeneration tour" allow="fullscreen"></iframe>';
+    document.body.appendChild(ov);
+  }
+  if (filmOn) endFilm(true);
+  SK_OPEN = true; ov.hidden = false; requestAnimationFrame(() => ov.classList.add('on'));
+  setTimeout(() => { try { ov.querySelector('iframe').focus(); } catch (e) {} }, 300);
+  setHash('stockport');
+}
+function closeSkTour() {
+  const ov = document.getElementById('sk360'); if (!ov || !SK_OPEN) return;
+  SK_OPEN = false; ov.classList.remove('on'); setTimeout(() => { if (!SK_OPEN) ov.hidden = true; }, 500);
+  if (location.hash === '#stockport') setHash('');
+  stillFrames = Math.max(stillFrames, 30);
+}
+addEventListener('message', (e) => { if (e.origin === location.origin && e.data && e.data.type === 'brik-tour-close') closeSkTour(); });
+const SK_ON = !IS_PH && !IS_OSL && !IS_UBL && !START_AREA;
+if (SK_ON) { $('#btn-sk360').onclick = openSkTour; if (location.hash === '#stockport') openSkTour(); } else $('#btn-sk360').hidden = true;
 function loop() {
   requestAnimationFrame(loop);
+  if (SK_OPEN) return;   // the 360° tour is over the 3D: save the GPU
   if (STILL) { if (stillFrames <= 0) return; stillFrames--; }
   const rawDt = clock.getDelta();
   const dt = Math.min(0.05, rawDt);
@@ -2258,7 +2291,7 @@ function loop() {
   try {
     await build();
     placeLandmarks();
-    try { const j = await fetch(BASE + 'pano/index.json?v=1793817492').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
+    try { const j = await fetch(BASE + 'pano/index.json?v=1793880905').then(r => r.ok ? r.json() : []); PANO_INDEX = (j || []).filter(p => !!p.type === true && (IS_UBL ? p.site === 'ubl' : IS_OSL ? p.site === 'osl' : IS_PH ? p.site === 'ph' : p.site !== 'ph' && p.site !== 'osl' && p.site !== 'ubl')); } catch (e) { PANO_INDEX = []; }
     buildSpots();
   } catch (e) { console.error(e); lmsg.textContent = 'Something went wrong loading the model. Please refresh.'; return; }
   applyTOD('day');
