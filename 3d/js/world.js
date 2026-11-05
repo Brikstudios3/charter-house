@@ -535,7 +535,9 @@ gWet = S.b;`)
         if (!pipXZ(x, z, p) || blocked(x, z, 4)) continue;
         if (a.k === 'grass' && R() < 0.5) continue;
         const d = Math.hypot(x - 11, z - 10);
-        forest.add(x, z, { h: 13 + R() * 8, r: 4.5 + R() * 2.2, kind: R() < 0.6 ? 'oak' : 'sycamore', seed: Math.floor(R() * 1e6), density: d > 220 ? 0.4 : 0.75 }); n++;
+        // the wood across Churchgate from Charter House is kept lower (Charlie, 5 Nov) so the hills show over it from the flats
+        const low = a.k === 'wood' && z < -8 && d < 190;
+        forest.add(x, z, { h: low ? 8 + R() * 4 : 13 + R() * 8, r: low ? 3.8 + R() * 1.7 : 4.5 + R() * 2.2, kind: R() < 0.6 ? 'oak' : 'sycamore', seed: Math.floor(R() * 1e6), density: d > 220 ? 0.4 : 0.75 }); n++;
       }
     } else if (a.k === 'garden' && ar > 60 && R() < 0.22) {
       const c = centroidOf(p); if (blocked(c[0], c[1], 2.5)) continue;
