@@ -197,7 +197,7 @@ function loadTex(url) {
   if (!texCache.has(url)) texCache.set(url, new Promise((res, rej) => loader.load(url, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, maxAniso); t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; res(t); }, undefined, rej)));
   return texCache.get(url);
 }
-const big = Math.min(screen.width, screen.height) * devicePixelRatio > 900 && renderer.capabilities.maxTextureSize >= 8192;
+const big = renderer.capabilities.maxTextureSize >= 4096 && !(navigator.connection && navigator.connection.saveData);   // 4K everywhere it fits
 const panoUrl = (stop) => stop.pano + (big ? '.jpg' : '_2k.jpg');
 
 // ------------------------------------------------------------------ view state
@@ -276,8 +276,10 @@ let panelOpen = innerWidth > 760;
 function setPanel(open) { panelOpen = open; panel.classList.toggle('hide', !open); panelToggle.classList.toggle('show', !open); tPanel.setAttribute('aria-pressed', String(open)); }
 function renderPanel(stop) {
   panel.innerHTML = `<button class="close" aria-label="Hide the story panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 6l-6 6 6 6"/></svg></button>
-    <div class="label">${stop.label}</div><h1>${stop.name}</h1><p class="lede">${stop.lede}</p>${stop.panel()}`;
+    <div class="label">${stop.label}</div><h1>${stop.name}</h1><p class="lede">${stop.lede}</p>${stop.panel()}
+    ${(() => { const i = STOPS.indexOf(stop), nx = STOPS[(i + 1) % STOPS.length]; return `<button class="btn next" data-next="${nx.id}">${i === STOPS.length - 1 ? 'Back to the overview' : 'Next: ' + nx.short} <span aria-hidden="true">→</span></button>`; })()}`;
   panel.querySelector('.close').onclick = () => setPanel(false);
+  panel.querySelector('[data-next]').onclick = (e) => { const id = e.currentTarget.dataset.next; const sp = stop.spots.find((q) => q.go === id); goTo(id, sp && sp.at); };
   panel.querySelectorAll('[data-dev]').forEach((b) => (b.onclick = () => openDev(b.dataset.dev)));
   panel.scrollTop = 0;
 }
