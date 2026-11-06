@@ -2099,7 +2099,7 @@ html.coverlock,html.coverlock body{overflow:hidden!important}
 <script>
 
 /* ============ CLIENT (set per proposal) ============ */
-const CLIENT = "Jenny";   // e.g. "Sam" – personalises the welcome and header
+const CLIENT = "Jennie";   // e.g. "Sam" – personalises the welcome and header
 const DRAFT = false; // true shows a banner while plot details are placeholders
 
 /* ============ DATA (Plot 14 unit selection deck + ROI breakdown) ============ */
@@ -2127,7 +2127,7 @@ const U=[
   quote:"If value matters most, this is the one. Plot 8 sits directly below Plot 22 with exactly the same layout and the same outlook across Churchgate to the trees and the new play park. You give up the top floor and save £4,000, which nudges the yield up a touch."}
 ];
 const ONE=U.length===1;
-const D3="../3d/?for=jenny";
+const D3="../3d/?for=jennie";
 const d3btn=(u,cls)=>`<a class="b ${cls}" href="${D3}#plot-${u.num}" target="_blank" rel="noopener">See ${u.name} in 3D</a>`;
 const SC_RATE=2.50; // £ per sq ft per year (estimate)
 U.forEach(u=>{u.sc=u.area*SC_RATE/12;u.dep=u.price*.2;u.num=u.name.replace(/\D/g,"");u.ref=(u.num||"CH")+"-CHARTER"});
@@ -2153,7 +2153,7 @@ const ARCH=[["var(--h_shop)","W. Harvey's saddlery shop"],["var(--h_town)","The 
 const MERCH=[["var(--tote)","The tote"],["var(--cap)","The cap"],["var(--keyring)","The keyring"],["var(--mug)","The camp mug"]];
 
 /* ============ STATE ============ */
-const KEY="ch-james-jenny-v1";
+const KEY="ch-james-jennie-v1";
 const S={tab:"overview",mapOld:false,yr:20,beds:1,pay:0,calcU:null,view:"cmp",favOnly:false,open:true,sort:{k:null,d:"asc"},react:{},req:{},log:[],updated:new Date(),car:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s){S.react=s.react||{};S.req=s.req||{};S.log=(s.log||[]).map(l=>({...l,t:new Date(l.t)}));if(s.updated)S.updated=new Date(s.updated)}}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify({react:S.react,req:S.req,log:S.log,updated:S.updated}))}catch(e){}};
