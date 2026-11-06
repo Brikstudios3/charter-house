@@ -110,7 +110,7 @@ export const SUN = {"1":[2.75,11.75,17.75,4.5,2,10],"2":[0,null,null,2.25,0,0],"
 // ---- Client view (James, 6 Nov 2026). Open the model with ?for=<client> (e.g. 3d/?for=christian#plot-21):
 // only that client's recommended plots show as available, every other available unit shows as not available,
 // and the contact details become James's. Without ?for the model is unchanged.
-const CLIENT_PICKS = { paul: [21, 22], christian: [21, 22, 8] };
+const CLIENT_PICKS = { paul: [21, 22], christian: [21, 22, 8], jenny: [21, 22, 8] };
 const _for = (() => { try { return (new URLSearchParams(location.search).get('for') || '').toLowerCase(); } catch (e) { return ''; } })();
 export const CLIENT = CLIENT_PICKS[_for] ? { key: _for, name: _for[0].toUpperCase() + _for.slice(1), picks: CLIENT_PICKS[_for] } : null;
 if (CLIENT) {
