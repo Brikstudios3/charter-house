@@ -2056,7 +2056,7 @@ html.coverlock,html.coverlock body{overflow:hidden!important}
 <main class="wrap">
   <section class="intro">
     <div>
-      <div class="cap" id="introFor">Investment report, September 2026</div>
+      <div class="cap" id="introFor">Investment report, November 2026</div>
       <h1 class="sr">Charter House, 50–72 Churchgate, Stockport, SK1 1YG</h1>
       <span class="mask plogo lg4 introlog" aria-hidden="true"></span><i class="htone" aria-hidden="true"></i>
       <div class="addr">The opportunity: a very limited number of buy-to-let apartments in the Underbanks conservation area, on the corner of Harvey Street and Churchgate.</div>
@@ -2823,7 +2823,7 @@ $("#dlg").addEventListener("click",e=>{if(e.target.id==="dlg")closeDlg()});
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){if(!$("#lb").hidden)$("#lb").hidden=true;else if(!$("#dlg").hidden)closeDlg();else closeTop()}
   if(!$("#lb").hidden&&(e.key==="ArrowLeft"||e.key==="ArrowRight")){LB.i=(LB.i+(e.key==="ArrowRight"?1:-1)+LB.slides.length)%LB.slides.length;drawLB()}});
-if(CLIENT){$("#wFor").textContent="Prepared for "+CLIENT;$("#introFor").textContent="Unit selection for "+CLIENT+", September 2026"}
+if(CLIENT){$("#wFor").textContent="Prepared for "+CLIENT;$("#introFor").textContent="Unit selection for "+CLIENT+", November 2026"}
 if(DRAFT)$("#draft").hidden=false;
 {const it=["Charter House","50–72 Churchgate","Stockport SK1 1YG","Private pre-launch","Completion early 2028"];$("#mq").innerHTML=[...it,...it,...it,...it].map(x=>`<span>${x}</span><i></i>`).join("")}
 try{if(sessionStorage.getItem("chu-seen")){$("#welcome").classList.add("out");document.body.classList.add("inapp")}}catch(e){}
