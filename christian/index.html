@@ -2119,12 +2119,12 @@ const U=[
   keys:["3rd (top) floor, park side","1 bed, 412 sq ft","Kitchen and living looks across Churchgate to the mature trees and the new play park","Bedroom and front door at the back, over the residents' courtyard, so it sleeps quiet","Plot 23 on the other side has already sold"],
   quoteShort:"Same layout and same outlook as Plot 21, right next door on the top floor. Take both and you have a pair side by side.",
   quote:"Plot 22 sits right next door to Plot 21, with the same layout, the same top floor outlook across Churchgate to the trees and the same price. Plot 23 on the other side has already gone, so these two are what's left on this stretch of the top floor. Together they make a really neat pair for an investor."},
- {id:"p7",name:"Plot 7",floor:"1st floor, end",bld:"Charter House",type:"1 bed",area:412,price:189000,rent:1300,
-  img:"var(--rear)",hero:"var(--rear)",heroCap:"Plot 7, first floor, below Plot 21",fa:"var(--p7_fa)",faCap:"First floor, same layout as the top floor, Plot 7 highlighted",fb:"var(--p7_fb)",stand:"Same end layout as Plot 21, for £4,000 less",
-  line:"The first floor end apartment on the park side, directly below Plot 21, for slightly better value.",
-  keys:["1st floor, the end apartment on the Churchgate wing, directly below Plot 21","1 bed, 412 sq ft","Kitchen and living looks across Churchgate to the trees and the new play park","End of the walkway: nobody walks past the bedroom window","£189,000, £4,000 less than the top floor"],
-  quoteShort:"If value matters most, this is the one. The same end of walkway layout as Plot 21, two floors down, for £4,000 less.",
-  quote:"This is the value option. It's directly below Plot 21 with exactly the same layout, the same park side outlook and the same unblocked bedroom window at the end of the walkway. You give up the top floor and save £4,000, which nudges the yield up a touch."}
+ {id:"p9",name:"Plot 9",floor:"1st floor, by the entrance",bld:"Charter House",type:"1 bed",area:412,price:189000,rent:1275,
+  img:"var(--front)",hero:"var(--front)",heroCap:"Plot 9, first floor, beside the arched entrance",fa:"url(../3d/assets/plans/floor1.jpg)",faCap:"First floor. Plot 9 sits right beside the main entrance",fb:"url(../3d/assets/plans/plot9.png)",stand:"Park facing, right beside the main entrance, for £4,000 less",
+  line:"A first floor one bed on the park side, right beside the arched main entrance on Churchgate.",
+  keys:["1st floor, right beside the arched main entrance on Churchgate","1 bed, 412 sq ft","Kitchen and living looks across Churchgate to the trees and the new play park","Short walk from the front door and the lift","£189,000, £4,000 less than the top floor"],
+  quoteShort:"The value option. Same park facing layout as the top floor, right beside the front door, for £4,000 less.",
+  quote:"If value matters most, this is the one. Plot 9 has the same park facing layout as Plots 21 and 22, looking across Churchgate to the trees, and it sits right beside the arched main entrance so it's a short walk from the front door and the lift. You give up the top floor and save £4,000, which nudges the yield up a touch."}
 ];
 const ONE=U.length===1;
 const D3="https://charliebrikstudios.github.io/charter-house/3d/";
@@ -2530,7 +2530,7 @@ const GNEXT={opportunity:["intel","Location and intel","Next: the location and i
 const groupOf=id=>GROUPS.find(g=>g[2].includes(id))||GROUPS[0];
 const T={overview:CH.overview,building:()=>CH.building().replace(/<\/section>$/,"")+galleryTab()+"</section>",heritage:CH.heritage,location:CH.location,stockport:CH.stockport,data:CH.data,
   returns:()=>chh("08","Returns","Worked through for each recommended apartment, with a 75% buy-to-let mortgage.")+returnsTab()+longView(),
-  units:()=>chh("07","Recommended units","Two top floor apartments side by side, plus a first floor option for slightly better value.")+EARLY+unitsTab(),
+  units:()=>chh("07","Recommended units","Two top floor apartments side by side, plus a first floor option by the entrance for slightly better value.")+EARLY+unitsTab(),
   next:()=>chh("09","Next steps","How to reserve, what happens next, and how it runs completely hands off after completion.")+nextTab()+howBlocks()+CONTACT};
 const CONTACT=`<section class="sec"><div class="cap"><span>Keep in touch</span></div><div class="contact"><div class="pic" role="img" aria-label="James Dempsey"></div><div><h3 class="big-h" style="margin:0 0 14px">Have questions? I'll be glad to help.</h3>
  <ul class="cfacts"><li><b>James Dempsey</b><span>CEO, BRIK Studios</span></li><li><b>Based in the Underbanks</b><span>Our office is two minutes from Charter House</span></li><li><b>Build, sell, let and manage</b><span>INCU builds, BRIK sells and FLOC Living lets and manages homes across Stockport Old Town</span></li></ul>
