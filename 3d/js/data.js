@@ -106,3 +106,15 @@ export const sqm = sqft => (sqft * 0.092903).toFixed(1);
 // Direct sunlight per apartment, raycast through the 3D model (buildings + tree crowns) at Stockport's latitude.
 // [hours on 21 June, first sun (BST), last sun (BST), hours at the equinox, morning weight, afternoon weight]. Model estimate.
 export const SUN = {"1":[2.75,11.75,17.75,4.5,2,10],"2":[0,null,null,2.25,0,0],"3":[5.75,5.25,18,3,11,12],"4":[3,15.25,18,1.75,0,12],"5":[3,15.25,18,3.5,0,12],"6":[6.25,9.25,18.5,5.25,5,19],"7":[4.75,5,17.75,2.75,12,7],"8":[2.25,5,11,3.5,9,0],"9":[2.25,5,11,2.25,9,0],"10":[7.25,5,18.75,3,14,15],"11":[3.75,15.25,18.75,2,0,15],"12":[3.75,15.25,18.75,4.75,0,15],"13":[5.5,9.25,18.75,3,5,17],"14":[7.5,5,18.25,6.5,16,14],"15":[3,5,17,4.25,9,3],"16":[2.25,8,11,2,9,0],"17":[7.75,5,19.25,3.75,14,17],"18":[4.75,15.25,19.75,2.5,0,19],"19":[5,9.75,19.75,6,1,19],"20":[10.75,8,19.75,8.75,18,25],"21":[9.25,8.75,20,7.5,16,21],"22":[5.25,8.5,18.75,5,10,11],"23":[2.5,7.75,11,2.25,10,0],"24":[9.75,7.25,21,4.25,15,24],"25":[6,15.25,21,3,0,24],"26":[8,8,21,7,8,24],"27":[13,7.25,21,9.75,22,30]};
+
+// ---- Client view (James, 6 Nov 2026). Open the model with ?for=<client> (e.g. 3d/?for=christian#plot-21):
+// only that client's recommended plots show as available, every other available unit shows as not available,
+// and the contact details become James's. Without ?for the model is unchanged.
+const CLIENT_PICKS = { paul: [21, 22], christian: [21, 22, 8] };
+const _for = (() => { try { return (new URLSearchParams(location.search).get('for') || '').toLowerCase(); } catch (e) { return ''; } })();
+export const CLIENT = CLIENT_PICKS[_for] ? { key: _for, name: _for[0].toUpperCase() + _for.slice(1), picks: CLIENT_PICKS[_for] } : null;
+if (CLIENT) {
+  STATUS['Not offered'] = { key: 'legals', label: 'Not available', color: '#9a8f86' };
+  for (const u of UNITS) if (u.status === 'Available' && !CLIENT.picks.includes(u.plot)) u.status = 'Not offered';
+  Object.assign(SITE, { whatsapp: '447772424372', phone: '07772 424372', email: 'james@brik-studios.com' });
+}

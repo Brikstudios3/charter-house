@@ -32,7 +32,14 @@ import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793905393';
 import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793905393';
 import { createTour } from './tour.js?v=1793905393';
 import { buildCrowd } from './crowd.js?v=1793905393';
+import { CLIENT } from './data.js?v=1793905393';
 import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793905393';
+const AGENT = CLIENT ? 'James' : 'Charlie';
+if (CLIENT) {
+  Object.assign(CHARLIE, { name: 'James Dempsey', role: 'CEO, BRIK Studios', bio: 'Runs BRIK Studios from the Underbanks, two minutes from Charter House', initials: 'JD' });
+  for (const k of Object.keys(CH_PICKS)) delete CH_PICKS[k];
+  for (const p of CLIENT.picks) CH_PICKS[p] = `Recommended for ${CLIENT.name}`;
+}
 const pitch = IS_UBL ? ublPitch : IS_OSL ? oslPitch : IS_PH ? phPitch : chPitch, PICKS = IS_UBL ? UBL_PICKS : IS_OSL ? OSL_PICKS : IS_PH ? PH_PICKS : CH_PICKS;
 const RK = IS_UBL ? 'ubl' : IS_OSL ? 'osl' : IS_PH;   // which site's rents
 const PROOFS = IS_UBL ? UBL_PROOF : IS_OSL ? OSL_PROOF : PROOF;
@@ -994,7 +1001,7 @@ function compassWord(n) {
 }
 
 // ------------------------------------------------------------------ panel
-const waLink = (u, reserve = false) => `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(u ? (reserve ? `Hi Charlie, I'd like to reserve Plot ${u.plot} at ${SITE.name} (${u.beds} bed, ${FLOORS[u.floor].name.toLowerCase()}, ${fmtGBP(u.price)}). What are the next steps?` : `Hi Charlie, I'm interested in Plot ${u.plot} at ${SITE.name} (${u.beds} bed, ${FLOORS[u.floor].name.toLowerCase()}, ${fmtGBP(u.price)}). Can you tell me more?`) : `Hi Charlie, I'd like to know more about ${SITE.name}.`)}`;
+const waLink = (u, reserve = false) => `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(u ? (reserve ? `Hi ${AGENT}, I'd like to reserve Plot ${u.plot} at ${SITE.name} (${u.beds} bed, ${FLOORS[u.floor].name.toLowerCase()}, ${fmtGBP(u.price)}). What are the next steps?` : `Hi ${AGENT}, I'm interested in Plot ${u.plot} at ${SITE.name} (${u.beds} bed, ${FLOORS[u.floor].name.toLowerCase()}, ${fmtGBP(u.price)}). Can you tell me more?`) : `Hi ${AGENT}, I'd like to know more about ${SITE.name}.`)}`;
 const waIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.8 4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .3-3.4-.7-2.9-1.2-4.7-4.1-4.8-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.3.5-.4.5c-.2.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>';
 const chev = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 6l-6 6 6 6"/></svg>';
 const floorUnits = (f) => UNITS.filter(u => u.floor === f);
@@ -1088,7 +1095,7 @@ function renderPanel() {
       }).join('')}</div>
       <div class="legend"><span><i class="dot"></i>Available</span><span><i class="dot reserved"></i>Reserved</span><span><i class="dot legals"></i>Sale agreed</span>${UNITS.some(u => st(u).key === 'sold') ? '<span><i class="dot sold"></i>Sold</span>' : ''}</div>
     </div>
-    <div class="pfoot"><span class="note">${IS_UBL ? 'Two one-bedroom homes left' : IS_OSL ? 'One bedroom apartments and townhouses' : 'One and two bedroom apartments'} from <b class="num" style="color:var(--ink)">${fmtGBP(from)}</b></span><a class="btn wa" href="${waLink()}" target="_blank" rel="noopener">${waIcon}WhatsApp Charlie</a></div>`;
+    <div class="pfoot"><span class="note">${IS_UBL ? 'Two one-bedroom homes left' : IS_OSL ? 'One bedroom apartments and townhouses' : 'One and two bedroom apartments'} from <b class="num" style="color:var(--ink)">${fmtGBP(from)}</b></span><a class="btn wa" href="${waLink()}" target="_blank" rel="noopener">${waIcon}WhatsApp ${AGENT}</a></div>`;
   } else if (S.mode === 'floor') {
     const f = S.floor, fu = floorUnits(f), fa = avail(fu);
     html = `<div class="pscroll">
@@ -1141,7 +1148,7 @@ function renderPanel() {
         <div><span>${scw} (estimate)</span><span class="num">about ${fmtGBP(scm)} a month</span></div>
         <div><span>Notes</span><span>${u.note}</span></div>
       </div>
-      <div class="contact"><span>Charlie Baxter, Co-founder and Sales Director</span><b>${SITE.phone}</b><b>${SITE.email}</b></div>`;
+      <div class="contact"><span>${CLIENT ? 'James Dempsey, CEO, BRIK Studios' : 'Charlie Baxter, Co-founder and Sales Director'}</span><b>${SITE.phone}</b><b>${SITE.email}</b></div>`;
   }
   P.classList.toggle('compact', S.mode === 'unit');
   P.innerHTML = html;
@@ -1154,7 +1161,7 @@ function pitchHTML(u, canBuy) {
     return `<div class="gone">This one’s gone. ${alts.length ? `The closest still available: ${alts.map(a => `<button data-plot="${a.plot}">Plot ${a.plot}</button>`).join(', ')}.` : 'Ask me about the next release.'}</div>`;
   }
   const sup = p.supply ? `<div class="supply"><div class="row">${Array.from({ length: p.supply.of }, (_, i) => `<i class="${i < p.supply.n ? 'on' : ''}"></i>`).join('')}</div><span>Only <b>${p.supply.n} of ${p.supply.of}</b> ${p.supply.label}</span></div>` : '';
-  return `<div class="pitch">${p.badge ? `<em class="badge">${p.badge}</em>` : ''}<div class="who"><span class="avatar" aria-hidden="true">${CHARLIE.initials}</span><span><b>Charlie’s take</b>${CHARLIE.role}</span></div>
+  return `<div class="pitch">${p.badge ? `<em class="badge">${p.badge}</em>` : ''}<div class="who"><span class="avatar" aria-hidden="true">${CHARLIE.initials}</span><span><b>${AGENT}’s take</b>${CHARLIE.role}</span></div>
     <q>${p.head}</q><ul>${p.points.map(t => `<li>${t}</li>`).join('')}</ul>${sup}</div>`;
 }
 function unitRow(u) {
@@ -1409,7 +1416,7 @@ function placeLandmarks() {
 // the floating card
 const acard = $('#acard'); let cardL = null, cardPinned = false, cardHideT = 0;
 function cardHTML(c) {
-  const own = c.avatar ? `<div class="own"><span class="avatar">${CHARLIE.initials}</span><span><b>${CHARLIE.name}</b> bought here himself: apartment 2.01.</span></div>` : '';
+  const own = c.avatar && !CLIENT ? `<div class="own"><span class="avatar">${CHARLIE.initials}</span><span><b>${CHARLIE.name}</b> bought here himself: apartment 2.01.</span></div>` : '';
   const vid = c.video ? `<video src="${BASE}${c.video}" poster="${BASE}${c.video.replace('.mp4', '.jpg')}" controls playsinline preload="none"></video>` : '';
   return `<button class="x" aria-label="Close">✕</button><span class="tg">${c.tag}</span><h4>${c.name}</h4>${own}<ul>${c.lines.map(t => `<li>${t}</li>`).join('')}</ul>${c.kicker ? `<span class="kick">${c.kicker}</span>` : ''}${vid}`;
 }
@@ -1683,8 +1690,8 @@ document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => b.close
 let lf = 'all';
 function renderList() {
   const F = IS_UBL ? [['all', 'All'], ['available', 'Available'], ['old', 'Converted 1872 building'], ['ext', 'New-build extension'], ['corner', 'Corner']]
-    : IS_OSL ? [['all', 'All'], ['available', 'Available'], ['1', 'Apartments'], ['3', 'Townhouses'], ['u160', 'Under £160k'], ['corner', 'Corner'], ['picks', 'Charlie’s picks']]
-    : [['all', 'All'], ['available', 'Available'], ['1', 'One bedroom'], ['2', 'Two bedroom'], ['u190', 'Under £190k'], IS_PH ? ['park', 'Side block'] : ['park', 'Park facing'], ['corner', 'Corner'], ['picks', 'Charlie’s picks']];
+    : IS_OSL ? [['all', 'All'], ['available', 'Available'], ['1', 'Apartments'], ['3', 'Townhouses'], ['u160', 'Under £160k'], ['corner', 'Corner'], ['picks', CLIENT ? 'Recommended' : 'Charlie’s picks']]
+    : [['all', 'All'], ['available', 'Available'], ['1', 'One bedroom'], ['2', 'Two bedroom'], ['u190', 'Under £190k'], IS_PH ? ['park', 'Side block'] : ['park', 'Park facing'], ['corner', 'Corner'], ['picks', CLIENT ? 'Recommended' : 'Charlie’s picks']];
   $('#l-filters').innerHTML = F.map(([k, t]) => `<button class="chip" data-f="${k}" aria-pressed="${lf === k}">${t}</button>`).join('');
   const test = { all: () => true, available: u => u.status === 'Available', 1: u => u.beds === 1, 2: u => u.beds === 2, 3: u => u.beds === 3, u160: u => u.price < 160000 && u.status === 'Available', u190: u => u.price < 190000 && u.status === 'Available',
     old: u => !u.ext, ext: u => !!u.ext,

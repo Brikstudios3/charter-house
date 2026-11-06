@@ -2121,7 +2121,7 @@ const U=[
   quote:"Plot 22 sits right next door to Plot 21, with the same layout, the same top floor outlook across Churchgate to the trees and the same price. Plot 23 on the other side has already gone, so these two are what's left on this stretch of the top floor. Together they make a really neat pair for an investor."}
 ];
 const ONE=U.length===1;
-const D3="https://charliebrikstudios.github.io/charter-house/3d/";
+const D3="../3d/?for=paul";
 const d3btn=(u,cls)=>`<a class="b ${cls}" href="${D3}#plot-${u.num}" target="_blank" rel="noopener">See ${u.name} in 3D</a>`;
 const SC_RATE=2.50; // £ per sq ft per year (estimate)
 U.forEach(u=>{u.sc=u.area*SC_RATE/12;u.dep=u.price*.2;u.num=u.name.replace(/\D/g,"");u.ref=(u.num||"CH")+"-CHARTER"});
