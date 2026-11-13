@@ -26,6 +26,20 @@
     8,
     9
    ]
+  },
+  "sarah": {
+   "name": "Sarah",
+   "date": "November 2026",
+   "units": [
+    "p21",
+    "p8",
+    "p9"
+   ],
+   "picks": [
+    21,
+    8,
+    9
+   ]
   }
  },
  "extra_units": {
