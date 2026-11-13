@@ -32,14 +32,7 @@ import { walkMaterials, buildApartment, Walker } from './walk.js?v=1793905393';
 import { landmarkMaterials, buildStMarys, buildMarketHallOSM, buildStJoseph } from './landmarks.js?v=1793905393';
 import { createTour } from './tour.js?v=1793905393';
 import { buildCrowd } from './crowd.js?v=1793905393';
-import { CLIENT } from './data.js?v=1793905393';
 import { pitch as chPitch, phPitch, PICKS as CH_PICKS, PH_PICKS, PROOF, RESERVE, CHARLIE, AREA_CARDS as ALL_CARDS, REGEN, AREA_HEADLINE, rentFor, oslPitch, OSL_PICKS, OSL_PROOF, ublPitch, UBL_PICKS, UBL_PROOF } from './sales.js?v=1793905393';
-const AGENT = CLIENT ? 'James' : 'Charlie';
-if (CLIENT) {
-  Object.assign(CHARLIE, { name: 'James Dempsey', role: 'CEO, BRIK Studios', bio: 'Runs BRIK Studios from the Underbanks, two minutes from Charter House', initials: 'JD' });
-  for (const k of Object.keys(CH_PICKS)) delete CH_PICKS[k];
-  for (const p of CLIENT.picks) CH_PICKS[p] = `Recommended for ${CLIENT.name}`;
-}
 const pitch = IS_UBL ? ublPitch : IS_OSL ? oslPitch : IS_PH ? phPitch : chPitch, PICKS = IS_UBL ? UBL_PICKS : IS_OSL ? OSL_PICKS : IS_PH ? PH_PICKS : CH_PICKS;
 const RK = IS_UBL ? 'ubl' : IS_OSL ? 'osl' : IS_PH;   // which site's rents
 const PROOFS = IS_UBL ? UBL_PROOF : IS_OSL ? OSL_PROOF : PROOF;
