@@ -138,8 +138,24 @@ const STOPS = [
       { dev: 'ch' },
       { info: 'market', at: [-188, 14, -4] }, { info: 'church', at: [-98, 28, -37] }, { info: 'bridge', at: [-194, 8, 72] },
       { info: 'smg', at: [-33, 14, 11] }, { info: 'brewery', at: [2, 14, 73] }, { info: 'underbanks', at: [-150, 4, 30] },
+      { go: 'market', at: [-127, 2, -13], t: 'Down to the Market Place' },
       { go: 'interchange', at: [-350, 22, 450], t: 'The Interchange' }, { go: 'exchange', at: [-120, 30, 700], t: 'Stockport Exchange & station' },
       { go: 'overview', at: [-120, 260, 40], t: 'Back up' },
+    ],
+  },
+  {
+    // 7 Nov: street level, path traced at 8K (the app's 'market' walk-round point, pt/scene meta.json)
+    id: 'market', name: 'Market Place', short: 'Market Place', pano: 'pano/market', hd: true, pos: [-127, -2.86, -13], look: [-152, 5.5, -9], fov: 75,
+    label: '05 · Market Place',
+    lede: 'Street level between the 1861 Market Hall and St Mary’s. Charter House is a two-minute walk down Churchgate.',
+    panel: () => `<div class="stats">
+        <div><b>1861</b><span>the Market Hall, Stockport’s glass umbrella</span></div>
+        <div><b>2 min</b><span>walk down Churchgate to Charter House</span></div>
+      </div>
+      <button class="btn ghost" data-dev="ch" style="justify-content:space-between;width:100%">Charter House<span style="color:var(--brass)">${DEVS.ch.kv[0][0]} · ${DEVS.ch.kv[2][0]}</span></button>`,
+    spots: [
+      { info: 'market', at: [-180, 8, -2] }, { info: 'church', at: [-98, 20, -37] }, { dev: 'ch' }, { info: 'smg', at: [-33, 8, 11] },
+      { go: 'underbanks', at: [-150, 10, 30], t: 'Up over the Underbanks' }, { go: 'overview', at: [-127, 120, -13], t: 'Back up' },
     ],
   },
 ];
@@ -186,16 +202,17 @@ function loadTex(url) {
   return texCache.get(url);
 }
 const big = renderer.capabilities.maxTextureSize >= 4096 && !(navigator.connection && navigator.connection.saveData);   // 4K everywhere it fits
-const panoUrl = (stop) => stop.pano + (big ? '.jpg' : '_2k.jpg');
+const huge = big && renderer.capabilities.maxTextureSize >= 8192 && innerWidth * Math.min(devicePixelRatio, 2) >= 1600;   // 8K where a stop has one and the screen can use it
+const panoUrl = (stop) => stop.pano + (stop.hd && huge ? '_8k.jpg' : big ? '.jpg' : '_2k.jpg');
 
 // ------------------------------------------------------------------ view state
-const V = { yaw: 0, pitch: -0.3, fov: 72, ty: 0, tp: -0.3, tf: 72, spin: false, stop: null, room: null, anim: null };
+const V = { yaw: 0, pitch: -0.3, fov: 72, ty: 0, tp: -0.3, tf: 72, spin: false, stop: null, room: null, anim: null, idle: 0, ae: 0 };
 const dirTo = (from, to) => new THREE.Vector3(to[0] - from[0], to[1] - from[1], to[2] - from[2]).normalize();
 const yawOf = (d) => Math.atan2(-d.x, -d.z), pitchOf = (d) => Math.asin(THREE.MathUtils.clamp(d.y, -1, 1));
 function aim(from, to, immediate) {
   const d = dirTo(from, to); let y = yawOf(d);
   while (y - V.yaw > Math.PI) y -= Math.PI * 2; while (y - V.yaw < -Math.PI) y += Math.PI * 2;
-  V.ty = y; V.tp = THREE.MathUtils.clamp(pitchOf(d), -1.45, 1.2);
+  V.ty = y; V.tp = THREE.MathUtils.clamp(pitchOf(d), -1.45, 1.2); V.idle = 0;
   if (immediate) { V.yaw = V.ty; V.pitch = V.tp; }
 }
 
@@ -404,18 +421,18 @@ stage.addEventListener('pointerdown', (e) => {
   stage.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
   if (pts.size === 1) drag = { x: e.clientX, y: e.clientY, yaw: V.ty, pitch: V.tp, t: performance.now() };
   if (pts.size === 2) { const [a, b] = [...pts.values()]; drag = { pinch: Math.hypot(a[0] - b[0], a[1] - b[1]), fov: V.tf }; }
-  stage.classList.add('drag'); V.spin = false; document.getElementById('tSpin').setAttribute('aria-pressed', 'false'); hint.classList.add('gone');
+  V.idle = 0; stage.classList.add('drag'); V.spin = false; document.getElementById('tSpin').setAttribute('aria-pressed', 'false'); hint.classList.add('gone');
 });
 stage.addEventListener('pointermove', (e) => {
   if (!pts.has(e.pointerId) || !drag) return; pts.set(e.pointerId, [e.clientX, e.clientY]);
-  if (drag.pinch && pts.size === 2) { const [a, b] = [...pts.values()]; V.tf = THREE.MathUtils.clamp(drag.fov * drag.pinch / Math.max(20, Math.hypot(a[0] - b[0], a[1] - b[1])), 30, 100); return; }
+  // (no pinch zoom in the 360s: taken out, Charlie 8 Nov)
   if (drag.pinch) return;
   const k = THREE.MathUtils.degToRad(V.fov) / innerHeight;
-  V.ty = drag.yaw + (e.clientX - drag.x) * k; V.tp = THREE.MathUtils.clamp(drag.pitch + (e.clientY - drag.y) * k, -1.45, 1.2);
+  V.ty = drag.yaw + (e.clientX - drag.x) * k;   // left and right only: tilting up and down too made it easy to get lost (Charlie, 8 Nov)
 });
 const endDrag = (e) => { pts.delete(e.pointerId); if (!pts.size) { drag = null; stage.classList.remove('drag'); } };
 stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
-stage.addEventListener('wheel', (e) => { e.preventDefault(); V.tf = THREE.MathUtils.clamp(V.tf * Math.exp(e.deltaY * 0.0012), 30, 100); }, { passive: false });
+stage.addEventListener('wheel', (e) => { e.preventDefault(); V.idle = 0; }, { passive: false });   // no zoom in the 360s (Charlie, 8 Nov)
 addEventListener('keydown', (e) => {
   if (e.target.closest && e.target.closest('input,textarea')) return;
   const k = e.key;
@@ -426,7 +443,6 @@ addEventListener('keydown', (e) => {
   else if (k === 'f' || k === 'F') toggleFull();
   else if (k === 'Escape') closeCard();
   else if (k === 'ArrowLeft') V.ty += 0.25; else if (k === 'ArrowRight') V.ty -= 0.25;
-  else if (k === 'ArrowUp') V.tp = Math.min(1.2, V.tp + 0.15); else if (k === 'ArrowDown') V.tp = Math.max(-1.45, V.tp - 0.15);
 });
 function toggleSpin() { V.spin = !V.spin; document.getElementById('tSpin').setAttribute('aria-pressed', String(V.spin)); }
 let labels = true;
@@ -441,7 +457,9 @@ addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); ca
 let last = performance.now(), mapT = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  if (V.spin && !drag) V.ty -= dt * 0.05;
+  // left alone for a few seconds, the view turns slowly round (Charlie, 8 Nov), eased in; the spin button keeps it turning regardless
+  V.idle += dt; V.ae = !drag && !V.anim && V.idle > 4 ? Math.min(1, V.ae + dt * 0.5) : 0;
+  if (!drag && (V.spin || V.ae > 0)) V.ty -= dt * 0.05 * (V.spin ? 1 : V.ae);
   const k = 1 - Math.exp(-dt * 9);
   V.yaw += (V.ty - V.yaw) * k; V.pitch += (V.tp - V.pitch) * k; V.fov += (V.tf - V.fov) * (1 - Math.exp(-dt * 6));
   camera.rotation.set(V.pitch, V.yaw, 0); camera.fov = V.fov; camera.updateProjectionMatrix(); camera.updateMatrixWorld();

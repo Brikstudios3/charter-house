@@ -34,6 +34,8 @@
 [hidden] { display: none !important; }
 html, body { height: 100%; }
 body { background: var(--night); color: var(--ink); font: 15px/1.45 var(--f-body); overflow: hidden; -webkit-font-smoothing: antialiased; }
+#disclaimer { position: fixed; z-index: 2100; top: calc(var(--gt) + 3px); left: 50%; transform: translateX(-50%); white-space: nowrap; text-align: center; font: 500 10px/13px system-ui, -apple-system, 'Segoe UI', sans-serif; letter-spacing: .01em; color: rgba(255,255,255,.66); text-shadow: 0 1px 2px rgba(0,0,0,.6), 0 0 8px rgba(0,0,0,.35); pointer-events: none; user-select: none; }
+@media (max-width: 700px) { :root { --gt: calc(env(safe-area-inset-top, 0px) + 12px); } #disclaimer { top: calc(env(safe-area-inset-top, 0px) + 3px); white-space: normal; width: calc(100vw - 24px); font-size: 9px; line-height: 10.5px; } }
 #stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; cursor: grab; }
 #stage.pointer { cursor: pointer; }
 #stage:active { cursor: grabbing; }
@@ -54,6 +56,18 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid
 #sk360.on { opacity: 1; }
 #sk360 iframe { width: 100%; height: 100%; border: 0; display: block; }
 .chip.sk360 { border-color: rgba(216,180,118,.55); }
+/* 3D street scans (Gaussian splats from Charlie's phone footage): a menu of places, each opening full screen like the tour */
+#scanov { position: fixed; inset: 0; z-index: 2000; background: #0e0c0b; opacity: 0; transition: opacity .45s ease; }
+#scanov.on { opacity: 1; }
+#scanov iframe { width: 100%; height: 100%; border: 0; display: block; }
+.chip.scan3d { border-color: rgba(216,180,118,.55); }
+.scanmenu { position: fixed; z-index: 60; width: min(320px, calc(100vw - 32px)); padding: 8px; border-radius: var(--r); background: var(--glass-hi); border: 1px solid var(--line-hi); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 24px 60px -20px rgba(0,0,0,.7); display: grid; gap: 2px; }
+.scanmenu .label { padding: 8px 10px 6px; }
+.scanmenu button { display: grid; grid-template-columns: 22px 1fr; column-gap: 10px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; }
+.scanmenu button:hover, .scanmenu button:focus-visible { background: rgba(216,180,118,.12); }
+.scanmenu button svg { width: 20px; height: 20px; color: var(--brass); grid-row: span 2; }
+.scanmenu button b { font: 500 14px/1.25 var(--f-body); color: var(--ink); }
+.scanmenu button span { font-size: 12.5px; line-height: 1.35; color: var(--ink-2); min-width: 0; }
 .chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; background: rgba(20,16,14,.74); border: 1px solid var(--line); font: 500 12.5px/1 var(--f-body); color: var(--ink); transition: background .2s, border-color .2s; white-space: nowrap; }
 .chip:hover { background: var(--glass-hi); border-color: var(--line-hi); }
 .chip[aria-pressed="true"] { border-color: var(--brass); color: var(--brass); }
@@ -297,6 +311,12 @@ body:has(#buildbar:not([hidden])) #navpad { left: var(--gx); right: auto; }
 .tag.sold .pin { opacity: .5; }
 .tag.dim { opacity: .45; }
 .tag.on .b { border-color: var(--brass); }
+/* homes with photoreal rooms: a 360° badge floating over the label (Charlie, 8 Nov) */
+.tag .p360 { display: none; align-items: center; gap: 4px; margin-bottom: 6px; padding: 4px 9px 4px 6px; border-radius: 999px; background: var(--brass); color: #1b1611; font: 600 11px/1 var(--f-body, inherit); letter-spacing: .04em; box-shadow: 0 6px 18px -6px rgba(0,0,0,.55), 0 0 0 3px rgba(216,180,118,.25); animation: p360bob 2.4s ease-in-out infinite; }
+.tag .p360 svg { width: 16px; height: 16px; }
+.tag.has360 .p360 { display: inline-flex; }
+@keyframes p360bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .tag .p360 { animation: none; } }
 .ltag { position: absolute; left: 0; top: 0; opacity: 0; transform: translate(-50%, -50%); font: 500 10px/1 var(--f-label); letter-spacing: .18em; text-transform: uppercase; color: rgba(255,250,240,.9); text-shadow: 0 1px 8px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.8); white-space: nowrap; transition: opacity .3s; }
 .ltag::before { content: ""; display: block; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,250,240,.85); margin: 0 auto 6px; box-shadow: 0 0 0 3px rgba(0,0,0,.25); }
 .ftag { position: absolute; transform: translate(12px, -50%); padding: 6px 10px; border-radius: 9px; background: rgba(18,14,12,.8); border: 1px solid var(--line-hi); font-size: 12.5px; white-space: nowrap; pointer-events: none; }
@@ -314,6 +334,44 @@ body:has(#buildbar:not([hidden])) #navpad { left: var(--gx); right: auto; }
 #backbtn { position: absolute; left: calc(var(--gx) + 6px); top: calc(var(--gt) + 112px); }
 /* camera presets */
 .views { position: absolute; left: calc(var(--gx) + 6px); bottom: calc(var(--gb) + 18px); }
+/* "Look around the area": a row of picture buttons, one per photoreal street 360, that jump straight to the spot (Charlie, 9 Nov:
+   like the Nifty tours; before this the spots hid behind the 360 walk-around). Shown on the landing view only */
+.looks { position: absolute; left: calc(var(--gx) + 6px); bottom: calc(var(--gb) + 74px); max-width: calc(100vw - 372px - var(--gx) - var(--gr) - 40px); display: grid; gap: 8px; z-index: 2; transition: opacity .35s, transform .35s; }
+.looks.off { opacity: 0; transform: translateY(8px); pointer-events: none; }
+/* the arrow tucks the strip away to a small pill, so it doesn't cover the building (Charlie, 11 Nov) */
+.looks .lk-head { cursor: pointer; align-items: center; }
+/* a drag that starts on a label turns the building (tapOrTurn in main.js), so the browser mustn't take the touch for panning */
+#labels .tag, #labels .winpin, #labels .ltag { touch-action: none; }
+.looks .lk-min { display: inline-grid; place-items: center; width: 26px; height: 26px; padding: 0; border-radius: 50%; background: rgba(20,16,14,.82); border: 1px solid var(--line); color: var(--ink); transition: transform .25s, border-color .2s; }
+.looks .lk-min:hover, .looks .lk-min:focus-visible { border-color: var(--brass); }
+.looks .lk-min svg { width: 15px; height: 15px; }
+.looks .lk-min::before { content: none; }   /* (not one of the picture buttons: no 360° badge) */
+.looks .lk-min:hover { transform: none; }
+.looks.min .lk-min:hover { transform: rotate(180deg); }
+.looks.min .lk-row { display: none; }
+.looks.min .lk-head { justify-self: start; padding: 7px 7px 7px 14px; border-radius: 999px; background: rgba(20,16,14,.82); border: 1px solid var(--line); text-shadow: none; }
+.looks.min .lk-head span { display: none; }
+.looks.min .lk-min { transform: rotate(180deg); background: transparent; border-color: transparent; }
+.looks .lk-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding-left: 2px; text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+.looks .lk-head b { white-space: nowrap; }
+.looks .lk-head b { font: 500 10.5px/1 var(--f-label); letter-spacing: .16em; text-transform: uppercase; color: #fff; }
+.looks .lk-head span { font-size: 12px; color: rgba(255,248,236,.8); }
+.looks .lk-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; scroll-snap-type: x proximity; }
+.looks .lk-row::-webkit-scrollbar { display: none; }
+.looks button { flex: none; width: 132px; display: grid; gap: 0; padding: 0; border-radius: 12px; overflow: hidden; background: rgba(20,16,14,.82); border: 1px solid var(--line); text-align: left; scroll-snap-align: start; transition: border-color .2s, transform .2s; }
+.looks button:hover, .looks button:focus-visible { border-color: var(--brass); transform: translateY(-2px); }
+.looks button img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: #2a2420; }
+.looks button span { display: block; padding: 7px 9px 8px; font: 500 12px/1.25 var(--f-body); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.looks button { position: relative; }
+.looks button::before { content: "360°"; position: absolute; left: 6px; top: 6px; padding: 3px 5px; border-radius: 6px; background: rgba(20,16,14,.72); font: 600 9px/1 var(--f-label); letter-spacing: .06em; color: var(--brass); }   /* (on the picture, so the name has the whole width) */
+@media (max-width: 760px) {
+  .looks { left: var(--gx); right: var(--gr); bottom: auto; top: calc(var(--gt) + 156px); max-width: none; gap: 6px; }
+  .looks .lk-head span { display: none; }
+  .looks button { width: 104px; border-radius: 10px; }
+  .looks button span { padding: 5px 7px 6px; font-size: 11px; }
+  body:has(.looks:not(.off)) #navpad { top: calc(var(--gt) + 262px); }
+}
+#tourui .tspots button img { width: 34px; height: 22px; border-radius: 5px; object-fit: cover; margin-left: -8px; }
 .views .vsep { width: 1px; align-self: stretch; margin: 4px 4px; background: var(--line-hi); }
 .views .vl { font: 500 10px/1 var(--f-label); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); padding: 0 6px 0 10px; display: inline-flex; align-items: center; }
 #hint { bottom: calc(var(--gb) + 70px); }
@@ -374,6 +432,16 @@ body:has(#buildbar:not([hidden])) #navpad { left: var(--gx); right: auto; }
 /* the painted timber window reveal, just in front of the eye */
 #viewui::after { content: ""; position: absolute; inset: 0; pointer-events: none; border: clamp(10px, 1.6vw, 22px) solid #e9e2d6; border-bottom-width: clamp(18px, 3vw, 40px); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), inset 0 0 22px 6px rgba(40,30,20,.35); opacity: .96; }
 #viewui > * { z-index: 1; }
+/* opened from a photoreal 360: the way back sits mid-height on the left, big enough to find at a glance */
+#vw-360 { position: absolute; left: calc(var(--gx) + clamp(22px, 2.6vw, 42px)); top: 50%; transform: translateY(-50%); height: 58px; padding: 0 26px 0 16px; font-size: 16px; box-shadow: 0 16px 40px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,240,210,.4) inset, 0 0 0 6px rgba(216,180,118,.22); }
+#vw-360:hover { transform: translateY(calc(-50% - 1px)); }
+/* a window in a photoreal 360 */
+.wpin { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px 5px 5px; border-radius: 999px; background: rgba(20,16,14,.62); border: 1px solid rgba(255,248,236,.42); color: #fff; font: 600 10.5px/1 var(--f-label); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; cursor: pointer; pointer-events: auto; transition: opacity .25s, background .2s, border-color .2s; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.wpin b { width: 30px; height: 30px; border-radius: 50%; background: var(--brass); color: #1a140f; display: grid; place-items: center; animation: wpin 2.6s ease-out infinite; }
+.wpin b svg { width: 16px; height: 16px; }
+.wpin:hover { background: rgba(20,16,14,.86); border-color: var(--brass); color: var(--brass); }
+@keyframes wpin { 0% { box-shadow: 0 0 0 0 rgba(216,180,118,.55); } 70%, 100% { box-shadow: 0 0 0 11px rgba(216,180,118,0); } }
+@media (prefers-reduced-motion: reduce) { .wpin b { animation: none; } }
 #viewui.on .cap { left: calc(var(--gx) + clamp(14px, 2vw, 30px)); bottom: calc(var(--gb) + clamp(34px, 4.5vw, 60px)); }
 #viewui.on .rooms { right: calc(var(--gr) + clamp(14px, 2vw, 30px)); bottom: calc(var(--gb) + clamp(34px, 4.5vw, 60px)); }
 #viewui.on .top { top: calc(var(--gt) + clamp(22px, 2.4vw, 34px)); left: calc(var(--gx) + clamp(10px, 1.4vw, 22px)); right: calc(var(--gr) + clamp(10px, 1.4vw, 22px)); }
@@ -533,6 +601,7 @@ input, textarea, #udet .kv, #udet .contact { -webkit-user-select: text; user-sel
 #udet .planimg { width: 100%; border-radius: 12px; background: #fff; }
 </style>
 
+<div id="disclaimer" role="note">Indicative only, based on the developer's CGIs. The developer reserves the right to make changes, subject to contract.</div>
 <canvas id="stage" tabindex="0" aria-label="3D model of Charter House. Drag to orbit, scroll or pinch to zoom, click a floor to explore it."></canvas>
 <div id="labels"></div>
 <div class="acard" id="acard" role="dialog" aria-live="polite"></div>
@@ -554,6 +623,7 @@ input, textarea, #udet .kv, #udet .contact { -webkit-user-select: text; user-sel
     <button class="chip" id="btn-list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="lg">All 27 apartments</span><span class="sm">All 27</span></button>
     <button class="chip" id="btn-area" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="lg">The area</span><span class="sm">Area</span></button>
     <button class="chip sk360" id="btn-sk360"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="12" rx="9" ry="4"/><path d="M12 3v2M12 19v2M7 8.5 5 6.5M17 8.5l2-2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg><span class="lg">Stockport 360° tour</span><span class="sm">360° tour</span></button>
+    <button class="chip scan3d" id="btn-scans" hidden aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/><circle cx="7.5" cy="13.5" r=".9" fill="currentColor"/><circle cx="9.5" cy="16.5" r=".9" fill="currentColor"/><circle cx="16" cy="11" r=".9" fill="currentColor"/></svg><span class="lg">3D street scans</span><span class="sm">3D scans</span></button>
     <button class="chip wide-only" id="btn-gallery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg>Gallery</button>
   </div>
 
@@ -562,6 +632,7 @@ input, textarea, #udet .kv, #udet .contact { -webkit-user-select: text; user-sel
     <button data-view="front" aria-pressed="true">Front corner</button><button data-view="rear">Rear entrances</button><button data-view="street">Up Churchgate</button><button data-view="above">From above</button>
     <span class="vsep" aria-hidden="true"></span><button id="btn-build" title="Scroll through the build, from groundworks to handover">Build timeline</button><button id="btn-360" class="v360" title="Stand at fixed spots around the building and look all the way round">360° walk-around</button><button id="btn-clay" aria-pressed="false" title="Turn every other building into a plain white architectural model so Charter House stands out">Highlight</button>
   </div>
+  <div class="looks off" id="looks" role="group" aria-label="Look around the area"><div class="lk-head"><b>Look around the area</b><span>Photoreal 360° views · tap to step in</span><button type="button" class="lk-min" id="lk-min" aria-controls="lk-row" aria-expanded="true" aria-label="Hide the 360° views"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div><div class="lk-row" id="lk-row"></div></div>
   <aside id="panel" aria-live="polite"></aside>
   <div id="navpad" role="group" aria-label="Floors and apartments">
     <button data-nav="fup" class="nfl" title="Floor up" aria-label="Floor up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m6 15 6-6 6 6"/></svg></button>
@@ -594,6 +665,7 @@ input, textarea, #udet .kv, #udet .contact { -webkit-user-select: text; user-sel
     <button class="bigback" id="vw-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg>Back to the apartment</button>
     <div class="vturn"><button class="chip" id="vw-left" aria-label="Look left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg>Look left</button><button class="chip" id="vw-right" aria-label="Look right">Look right<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 5 7 7-7 7"/></svg></button></div>
   </div>
+  <button class="bigback" id="vw-360" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg>Back to the 360° view</button>
   <div class="cap"><span class="label" id="vw-kicker"></span><h3 id="vw-title"></h3><p id="vw-text"></p></div>
   <div class="rooms" id="vw-dirs"></div>
 </div>
@@ -648,6 +720,6 @@ input, textarea, #udet .kv, #udet .contact { -webkit-user-select: text; user-sel
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
 } }
 </script>
-<script type="module" src="js/main.js?v=1793905393"></script>
+<script type="module" src="js/main.js?v=1794535000"></script>
 
 </body></html>

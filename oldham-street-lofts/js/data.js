@@ -69,7 +69,7 @@ export const UNITS = [
   P(19, '2.06', 2, '1B', 1, 412, 193000, 'Available', 'Facing St Mary’s Gate, rectangle', ['HV5', 'RH1'], [0.34, 13.3, 11.7, 17.2], 'Harvey Street to the front, courtyard to the rear'),
   P(20, '2.07', 2, '1B', 1, 412, 193000, 'Sold', 'Facing St Mary’s Gate, rectangle', ['HV6', 'RH2'], [0.34, 17.2, 11.7, 21.27], 'Harvey Street to the front, courtyard to the rear'),
 
-  P(21, '3.01', 3, '1A', 1, 412, 193000, 'Available', 'Park facing, top floor', ['CG6', 'RC1'], [18.55, -0.34, 22.6, 11.0], 'Top floor, looking across Churchgate to the treetops'),
+  P(21, '3.01', 3, '1A', 1, 412, 193000, 'Sold', 'Park facing, top floor', ['CG6', 'RC1'], [18.55, -0.34, 22.6, 11.0], 'Top floor, looking across Churchgate to the treetops'),
   P(22, '3.02', 3, '1A', 1, 412, 193000, 'Available', 'Park facing, top floor', ['CG5', 'RC2'], [14.72, -0.34, 18.55, 11.0], 'Top floor, looking across Churchgate to the treetops'),
   P(23, '3.03', 3, '1A', 1, 412, 193000, 'Sold', 'Park facing, top floor', ['CG4', 'RC3'], [10.9, -0.34, 14.72, 11.0], 'Top floor, looking across Churchgate to the treetops'),
   P(24, '3.04', 3, '2A', 2, 658, 303000, 'Available', 'Top-floor corner 2 bed, 5 windows', ['CG1', 'CG2', 'CG3', 'HV1', 'HV2'], [0, 0, 10.9, 6.2], 'Top-floor corner: views towards the Market Hall and St Mary’s Church'),

@@ -5,7 +5,8 @@
 // between rooms with the room chips.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { FLOOR_H as FH } from './data.js?v=1793905393';
+import { FLOOR_H as FH } from './data.js?v=1794535000';
+import { plankTexture, boxUV } from './finishes.js?v=1794535000';
 
 const RES = 0.05;              // occupancy grid resolution (m)
 const EYE = 1.52;              // eye height (a touch low, as interior photographers shoot: rooms read taller)
@@ -21,10 +22,11 @@ function pip(x, z, poly) {
   }
   return inside;
 }
+const KDIRS = { '+x': [1, 0], '-x': [-1, 0], '+z': [0, 1], '-z': [0, -1] };
 const box = (x0, y0, z0, x1, y1, z1) => { const g = new THREE.BoxGeometry(Math.max(1e-3, x1 - x0), Math.max(1e-3, y1 - y0), Math.max(1e-3, z1 - z0)); g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); return g; };
 
 // ------------------------------------------------------------------ procedural finishes
-function herringboneTexture() {
+function herringboneTexture(rgb = [176, 134, 92]) {
   const N = 1024, n = 6, W = 0.085;                    // plank 85 x 510 mm
   const tileX = Math.SQRT2 * n * W, tileY = tileX;      // square tile, 6 lattice periods high
   const c = document.createElement('canvas'); c.width = c.height = N; const ctx = c.getContext('2d');
@@ -46,7 +48,7 @@ function herringboneTexture() {
     // grout: long edges and plank ends
     const eLong = Math.min(across, 1 - across), eEnd = Math.min(along, n - along);
     if (eLong < 0.035 || eEnd < 0.012) v *= 0.55;
-    const r = (176 + 18 * warm) * v, g = (134 + 10 * warm) * v, bl = (92 - 8 * warm) * v;
+    const r = (rgb[0] + 18 * warm) * v, g = (rgb[1] + 10 * warm) * v, bl = (rgb[2] - 8 * warm) * v;
     const o = (py * N + px) * 4; d[o] = r; d[o + 1] = g; d[o + 2] = bl; d[o + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
@@ -97,9 +99,12 @@ export function artCanvas(seed, style) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 export function walkMaterials(tex, base) {
-  const herr = herringboneTexture();
+  // floors as the developer's CGIs (Charlie, 11 Nov): straight pale oak planks (premium LVT) through the kitchen-living
+  // room and hall; the bedroom CGI shows a dark walnut herringbone, so the bedrooms keep that
+  const herr = herringboneTexture([72, 50, 46]), plank = plankTexture({ base: '#d6b894', w: 0.19, len: 4.4, seed: 5 });
   const m = {
-    floor: new THREE.MeshPhysicalMaterial({ map: herr, roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.32, envMapIntensity: 0.9 }),
+    floor: new THREE.MeshPhysicalMaterial({ map: plank, roughness: 0.5, clearcoat: 0.18, clearcoatRoughness: 0.4, envMapIntensity: 0.9, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
+    floorBed: new THREE.MeshPhysicalMaterial({ map: herr, roughness: 0.42, clearcoat: 0.3, clearcoatRoughness: 0.32, envMapIntensity: 0.9 }),
     ceiling: new THREE.MeshStandardMaterial({ color: '#f6f2ea', roughness: 0.92, emissive: new THREE.Color('#efe6d8'), emissiveIntensity: 0.55 }),   // bounce light off the floor and walls
     white: new THREE.MeshStandardMaterial({ color: '#f3efe7', roughness: 0.6 }),
     oak: new THREE.MeshPhysicalMaterial({ color: '#b98d5f', roughness: 0.45, clearcoat: 0.3 }),
@@ -115,6 +120,8 @@ export function walkMaterials(tex, base) {
     ceramic: new THREE.MeshPhysicalMaterial({ color: '#f4f2ee', roughness: 0.18, clearcoat: 0.8 }),
     showerGlass: new THREE.MeshPhysicalMaterial({ color: '#e8f2f0', roughness: 0.02, transparent: true, opacity: 0.18, envMapIntensity: 2, depthWrite: false, side: THREE.DoubleSide }),
     mirror: new THREE.MeshStandardMaterial({ color: '#d9dcdf', metalness: 1, roughness: 0.03, envMapIntensity: 1.6 }),
+    towel: new THREE.MeshStandardMaterial({ color: '#8fa08a', roughness: 1 }), towelW: new THREE.MeshStandardMaterial({ color: '#f1ece3', roughness: 1 }),
+    bathmat: new THREE.MeshStandardMaterial({ color: '#d8cdb9', roughness: 1 }), sprig: new THREE.MeshStandardMaterial({ color: '#4f6b3a', roughness: 0.85 }),
     frame: new THREE.MeshStandardMaterial({ color: '#2a2420', roughness: 0.5 }),
     giltFrame: new THREE.MeshStandardMaterial({ color: '#b48b4a', metalness: 0.9, roughness: 0.32 }),
     art: [
@@ -125,11 +132,14 @@ export function walkMaterials(tex, base) {
     paint: {},
     artCache: {},
   };
-  m.herrSize = herr.userData.size;
+  m.herrSize = herr.userData.size; m.plankSize = plank.userData.size;
   return m;
 }
-// heritage paint colours: walls and panelling in one colour, as a decorator would do it
-const PAINT = { living: '#d9cfc1', kitchen: '#d9cfc1', bedroom: '#c8b7a6', feature: '#3f4a42', hall: '#e3dccf', bath: '#e7e2da' };
+// heritage paint colours. Panelling runs to the dado only, as in the CGIs, in a slightly darker tone than the plain wall
+// above it for contrast ('<room>_lo' keys; Andy and Charlie, 11 Nov): it makes the rooms read bigger.
+const PAINT = { living: '#ddd4c7', kitchen: '#ddd4c7', bedroom: '#cdbdad', feature: '#3f4a42', hall: '#e3dccf', bath: '#e7e2da',
+  living_lo: '#c2b5a4', kitchen_lo: '#c2b5a4', bedroom_lo: '#b3a190', feature_lo: '#343d37', hall_lo: '#c9bdad', bath_lo: '#e7e2da' };
+const DADO = 0.98;             // top of the dado rail: panelling and the darker paint stop here
 function paintMat(m, key) { if (!m.paint[key]) m.paint[key] = new THREE.MeshStandardMaterial({ color: PAINT[key] || PAINT.hall, roughness: 0.8, envMapIntensity: 0.8 }); return m.paint[key]; }
 
 // ------------------------------------------------------------------ the fitted-out apartment
@@ -245,7 +255,22 @@ export function buildApartment(u, ctx) {
   const BPLOT = { 7: 'A', 14: 'A', 21: 'A', 8: 'B', 15: 'B', 22: 'B', 9: 'C', 16: 'C', 23: 'C', 4: 'D', 11: 'D', 18: 'D', 25: 'D', 5: 'E', 12: 'E', 19: 'E', 26: 'E', 6: 'F', 13: 'F', 20: 'F', 27: 'F' };
   let bathPlan = null;
   if (BPLOT[u.plot]) {
-    const [bx0, bz0, bx1, bz1, dx, dz] = BP[BPLOT[u.plot]];
+    let [bx0, bz0, bx1, bz1, dx, dz] = BP[BPLOT[u.plot]];
+    // snap each side to the plan's wall face where there is one within 0.45 m: types A-C were drawn 0.34 m out over the
+    // kitchen wall, and their vanity, backlit mirror and WC showed through into the kitchen (11 Nov)
+    {
+      const isWall = (x, z) => { const [i, j] = toCell(x, z); return i >= 0 && j >= 0 && i < nx && j < nz && !!wallMask[idx(i, j)]; };
+      const snap = (edge, alongX, sgn, lo, hi) => {
+        const mid = alongX ? (bx0 + bx1) / 2 : (bz0 + bz1) / 2, hits = [];
+        for (const fr of [0.2, 0.35, 0.5, 0.65, 0.8]) { const c = lo + (hi - lo) * fr;
+          for (let t = 0; t < 3.5; t += RES / 2) { const q = mid + sgn * t; if (alongX ? isWall(q, c) : isWall(c, q)) { if (Math.abs(q - edge) < 0.45) hits.push(q); break; } } }
+        if (!hits.length) return edge;
+        hits.sort((a, b) => a - b); return hits[Math.floor(hits.length / 2)];
+      };
+      const nx0 = snap(bx0, true, -1, bz0, bz1), nx1 = snap(bx1, true, 1, bz0, bz1), nz0 = snap(bz0, false, -1, bx0, bx1), nz1 = snap(bz1, false, 1, bx0, bx1);
+      if (dx === bx0) dx = nx0; else if (dx === bx1) dx = nx1; if (dz === bz0) dz = nz0; else if (dz === bz1) dz = nz1;
+      [bx0, bz0, bx1, bz1] = [nx0, nz0, nx1, nz1];
+    }
     if (bath) bath.type = null;
     bath = null;
     bathPlan = { id: -50, type: 'bath', name: 'Shower room', x0: bx0 + RES / 2, z0: bz0 + RES / 2, x1: bx1 - RES / 2, z1: bz1 - RES / 2, cx: (bx0 + bx1) / 2, cz: (bz0 + bz1) / 2, area: (bx1 - bx0) * (bz1 - bz0), windows: [], door: [dx, dz] };
@@ -262,14 +287,16 @@ export function buildApartment(u, ctx) {
   // ------------------------------------------------------------------ geometry
   const G = {};   // material key -> geometries
   const add = (k, g) => { if (!g) return; (G[k] ||= []).push(g.index ? g.toNonIndexed() : g); };
-  // floor: oak herringbone everywhere except the shower room (marble)
+  // floor: straight oak planks through the flat; the bedrooms' dark herringbone and the shower room's marble go on top (below)
   {
     const g = new THREE.PlaneGeometry(fx1 - fx0 + 0.2, fz1 - fz0 + 0.2); g.rotateX(-Math.PI / 2); g.translate((fx0 + fx1) / 2, y0 + 0.004, (fz0 + fz1) / 2);
-    const p = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / mats.herrSize, p.getZ(i) / mats.herrSize); add('floor', g);
+    const main = live.filter(R => R.type === 'living').sort((a, b) => b.area - a.area)[0];
+    const alongX = main ? (main.x1 - main.x0) >= (main.z1 - main.z0) : (fx1 - fx0) >= (fz1 - fz0);
+    add('floor', boxUV(g, mats.plankSize[0], mats.plankSize[1], alongX));
     const c = new THREE.PlaneGeometry(fx1 - fx0 + 0.2, fz1 - fz0 + 0.2); c.rotateX(Math.PI / 2); c.translate((fx0 + fx1) / 2, yC, (fz0 + fz1) / 2); add('ceiling', c);
   }
   // wall runs: boundary edges between a room cell and a solid cell, merged into straight runs
-  const runs = [];
+  const runs = [], stubs = [];
   const wallRun = (dir) => {   // dir: [di, dj] direction to the solid neighbour
     const [di, dj] = dir, alongI = dj !== 0;   // walls facing ±z run along x
     const lines = new Map();
@@ -283,11 +310,14 @@ export function buildApartment(u, ctx) {
       const [line, r] = key.split(':').map(Number); list.sort((a, b) => a - b);
       let s = list[0], prev = list[0];
       const flush = (a, b) => {
-        const len = (b - a + 1) * RES; if (len < 0.12) return;
+        const len = (b - a + 1) * RES;
         const n = new THREE.Vector3(-di, 0, -dj);   // into the room
         let p0, p1;
         if (alongI) { const zf = gz0 + (line + (dj > 0 ? 1 : 0)) * RES; p0 = new THREE.Vector3(gx0 + a * RES, 0, zf); p1 = new THREE.Vector3(gx0 + (b + 1) * RES, 0, zf); }
         else { const xf = gx0 + (line + (di > 0 ? 1 : 0)) * RES; p0 = new THREE.Vector3(xf, 0, gz0 + a * RES); p1 = new THREE.Vector3(xf, 0, gz0 + (b + 1) * RES); }
+        // the end of a stub wall is too short for panelling, but it still has to be there: without it there is a slot in the wall
+        // you can see out through (Apt 21, 6 Nov)
+        if (len < 0.12) { stubs.push({ p0, p1, n, len, room: rooms[r] }); return; }
         runs.push({ p0, p1, n, len, room: rooms[r] });
       };
       for (let t = 1; t < list.length; t++) { if (list[t] !== prev + 1) { flush(s, prev); s = list[t]; } prev = list[t]; }
@@ -323,32 +353,90 @@ export function buildApartment(u, ctx) {
     const c = run.p0.clone().addScaledVector(dirV, (a + b) / 2).addScaledVector(run.n, depth / 2);
     g.translate(c.x, y0 + (y0b + y1b) / 2, c.z); add(key, g);
   };
+  // a run end is open when the floor carries on past it (an external corner, a pier, the edge of a doorway): the paint skin,
+  // skirting, dado and cornice then run on by their own depth so they close round the corner (Charlie's Plot 26 bedroom, 6 Nov:
+  // black notches at the corners where the profiles stopped short and showed the void behind)
+  const openEnd = (run, atEnd) => {
+    const dirV = run.p1.clone().sub(run.p0).normalize(), p = (atEnd ? run.p1 : run.p0).clone().addScaledVector(dirV, atEnd ? 0.06 : -0.06).addScaledVector(run.n, 0.06);
+    const [i, j] = toCell(p.x, p.z); return i >= 0 && j >= 0 && i < nx && j < nz && !!free[idx(i, j)];
+  };
+  // at an inside corner both runs used to reach into the same depth x depth square, and the two overlapping solids' coincident
+  // faces path-trace as black specks (27's cornice steps, 6 Nov): each run now stops short and one shared block fills the square
+  const cornerDone = new Set();
+  const placeX = (run, a, b, y0b, y1b, depth, key) => {
+    const s0 = a <= 0.001, s1 = b >= run.len - 0.001;
+    const a2 = s0 ? (run.o0 ? a - depth : a + depth) : a, b2 = s1 ? (run.o1 ? b + depth : b - depth) : b;
+    place(run, a2, b2, y0b, y1b, depth, key);
+    for (const [hit, at] of [[s0 && !run.o0, 0], [s1 && !run.o1, run.len - depth]]) {
+      if (!hit) continue;
+      const dirV = run.p1.clone().sub(run.p0).normalize(), c = run.p0.clone().addScaledVector(dirV, at + depth / 2).addScaledVector(run.n, depth / 2);
+      const k = [key, c.x.toFixed(2), c.z.toFixed(2), y0b.toFixed(3), depth].join('|'); if (cornerDone.has(k)) continue; cornerDone.add(k);
+      place(run, at, at + depth, y0b, y1b, depth, key);
+    }
+  };
+  for (const run of [...runs, ...stubs]) { run.o0 = openEnd(run, false); run.o1 = openEnd(run, true); }
   const lights = [], arts = [];
+  for (const st of stubs) {
+    const PK = 'paint_' + (st.room.type === 'bath' ? 'bath' : st.room.type === 'bedroom' ? 'bedroom' : st.room.type === 'hall' ? 'hall' : 'living');
+    if (st.room.type === 'bath') { place(st, -0.012, st.len + 0.012, 0, CEIL, 0.012, PK); continue; }
+    const PL = PK + '_lo';
+    place(st, -0.012, st.len + 0.012, 0, DADO, 0.012, PL); place(st, -0.012, st.len + 0.012, DADO, CEIL, 0.012, PK);
+    place(st, 0, st.len, 0, 0.19, 0.022, PL); place(st, 0, st.len, 0.17, 0.2, 0.032, PL); place(st, 0, st.len, 0.92, DADO, 0.034, PL);
+  }
   for (const run of runs) {
     const R = run.room, pk = R.type === 'bath' ? 'bath' : feature.has(run) ? 'feature' : R.type === 'bedroom' ? 'bedroom' : R.type === 'hall' ? 'hall' : 'living';
-    const PK = 'paint_' + pk;
+    const PK = 'paint_' + pk, PL = PK + '_lo', bath = R.type === 'bath';
     // solid intervals between windows
     const solid = []; let s = 0; for (const w of run.win) { if (w.a > s) solid.push([s, Math.min(w.a, run.len)]); s = Math.max(s, w.b); } if (s < run.len) solid.push([s, run.len]);
-    // paint skin (covers brick on the inside of the external walls) incl. below/above windows
-    for (const [a, b] of solid) place(run, a, b, 0, CEIL, 0.012, PK);
-    for (const w of run.win) { const a = Math.max(0, w.a), b = Math.min(run.len, w.b); place(run, a, b, 0, Math.max(0.02, w.sill), 0.012, PK); place(run, a, b, Math.min(CEIL - 0.02, w.head), CEIL, 0.012, PK); }
-    if (R.type === 'bath') {
+    // paint skin (covers brick on the inside of the external walls) incl. below/above windows: the darker panel tone up to
+    // the dado, the lighter wall paint above it (one colour throughout in shower rooms)
+    const skin = (fn, a, b, y0b, y1b) => {
+      if (bath || y0b >= DADO) return fn(run, a, b, y0b, y1b, 0.012, PK);
+      if (y1b <= DADO) return fn(run, a, b, y0b, y1b, 0.012, PL);
+      fn(run, a, b, y0b, DADO, 0.012, PL); fn(run, a, b, DADO, y1b, 0.012, PK);
+    };
+    for (const [a, b] of solid) skin(placeX, a, b, 0, CEIL);
+    for (const w of run.win) { const a = Math.max(0, w.a), b = Math.min(run.len, w.b); skin(place, a, b, 0, Math.max(0.02, w.sill)); skin(place, a, b, Math.min(CEIL - 0.02, w.head), CEIL); }
+    if (bath) {
       // large-format marble to 2.2 m in 600 x 1200 tiles
       for (const [a, b] of solid) for (let t = a; t < b - 0.01; t += 0.6) for (let h = 0; h < 2.2 - 0.01; h += 1.2) place(run, t + 0.0015, Math.min(b, t + 0.6) - 0.0015, h + 0.0015, Math.min(2.2, h + 1.2) - 0.0015, 0.02, 'marble');
       continue;
     }
-    // skirting, dado rail, picture-frame panels above and below, cornice
-    place(run, 0, run.len, 0, 0.19, 0.022, PK); place(run, 0, run.len, 0.17, 0.2, 0.032, PK);
-    for (const [a, b] of solid) {
+    // skirting, dado rail and picture-frame panels below it (half height, as in the CGIs), cornice
+    placeX(run, 0, run.len, 0, 0.19, 0.022, PL); placeX(run, 0, run.len, 0.17, 0.2, 0.032, PL);
+    // no dado rail or panel mouldings behind a kitchen: they stood proud of the splashback tiles and cut through them halfway
+    // up (Charlie, 8 Nov). The wall above the tiles is left plain, as a real panelled kitchen wall stops at the units.
+    const ks = [];
+    { const dirV = run.p1.clone().sub(run.p0).normalize();
+      for (const o of layout) {
+        if (o.t !== 'kitchen') continue;
+        const fd = Array.isArray(o.f) ? o.f : KDIRS[o.f || '+z'] || [0, 1];
+        if (run.n.x * fd[0] + run.n.z * fd[1] < 0.9) continue;                       // the units face out from this wall
+        const bx = o.x - fd[0] * 0.3, bz = o.z - fd[1] * 0.3;                         // the back of the units
+        if (Math.abs((bx - run.p0.x) * run.n.x + (bz - run.p0.z) * run.n.z) > 0.35) continue;
+        const t = (o.x - run.p0.x) * dirV.x + (o.z - run.p0.z) * dirV.z, h = (o.len || 1.8) / 2 + 0.06;
+        if (t + h > 0 && t - h < run.len) ks.push([Math.max(0, t - h), Math.min(run.len, t + h)]);
+        // the splashback, laid on the real wall face: white vertical metro tiles (75 x 300 mm, stack bond) from the worktop to
+        // the underside of the wall units, as the CGIs. The units' own tiles sat a few cm inside the wall and never showed (11 Nov)
+        const ta = Math.max(0, t - (o.len || 1.8) / 2), tb = Math.min(run.len, t + (o.len || 1.8) / 2);
+        for (const [sa, sb] of solid) {
+          const a = Math.max(ta, sa), b = Math.min(tb, sb); if (b - a < 0.05) continue;
+          place(run, a, b, 0.905, 1.495, 0.016, 'grout');
+          const nT = Math.max(1, Math.round((b - a) / 0.075)), tw = (b - a) / nT;
+          for (let r = 0; r < 2; r++) for (let q = 0; q < nT; q++) place(run, a + q * tw + 0.0015, a + (q + 1) * tw - 0.0015, 0.905 + r * 0.295 + 0.0015, 0.905 + (r + 1) * 0.295 - 0.0015, 0.022, 'ceramic');
+        }
+      } }
+    const cutK = (iv) => { let out = [iv]; for (const [ka, kb] of ks) out = out.flatMap(([a, b]) => kb <= a || ka >= b ? [[a, b]] : [[a, ka], [kb, b]].filter(([p, q]) => q - p > 0.01)); return out; };
+    for (const [a, b] of solid.flatMap(cutK)) {
       const L = b - a; if (L < 0.18) continue;
-      place(run, a, b, 0.92, 0.98, 0.034, PK);
+      placeX(run, a, b, 0.92, DADO, 0.034, PL);
       const nP = Math.max(1, Math.round(L / 0.72)), pw = L / nP;
       for (let k = 0; k < nP; k++) {
         const pa = a + k * pw + 0.1, pb = a + (k + 1) * pw - 0.1; if (pb - pa < 0.12) continue;
-        for (const [h0, h1] of [[0.32, 0.8], [1.12, CEIL - 0.42]]) {
+        for (const [h0, h1] of [[0.3, 0.82]]) {     // lower panels only: the wall above the dado is left plain (11 Nov)
           const t = 0.035, dpt = 0.024;
-          place(run, pa, pb, h0, h0 + t, dpt, PK); place(run, pa, pb, h1 - t, h1, dpt, PK);
-          place(run, pa, pa + t, h0 + t, h1 - t, dpt, PK); place(run, pb - t, pb, h0 + t, h1 - t, dpt, PK);   // stiles stop at the rails (no overlapping solids: they render black when path-traced)
+          place(run, pa, pb, h0, h0 + t, dpt, PL); place(run, pa, pb, h1 - t, h1, dpt, PL);
+          place(run, pa, pa + t, h0 + t, h1 - t, dpt, PL); place(run, pb - t, pb, h0 + t, h1 - t, dpt, PL);   // stiles stop at the rails (no overlapping solids: they render black when path-traced)
         }
       }
       // art on the middle panel of long walls in living rooms and bedrooms
@@ -364,12 +452,15 @@ export function buildApartment(u, ctx) {
       }
       if (w.sill > 0.15) { const g = new THREE.BoxGeometry(w.b - w.a + 0.12, 0.035, depth + 0.07); g.rotateY(Math.atan2(-run.n.x, -run.n.z) + Math.PI); const c = run.p0.clone().addScaledVector(dirV, (w.a + w.b) / 2).addScaledVector(run.n, -depth / 2 + 0.035); g.translate(c.x, y0 + w.sill, c.z); add('oak', g); }
       if (R.type !== 'bath') {
-        const pa = w.a - 0.32, pb = w.b + 0.32, py = Math.min(CEIL - 0.12, w.head + 0.22);
+        // drapes stack on the wall beside the window, clear of the glass, so the whole window shows (Charlie, 12 Nov:
+        // the top-floor windows looked narrow). The pole stops short of a corner if the wall runs out.
+        const runL = run.p1.distanceTo(run.p0);
+        const pa = Math.max(0.06, w.a - 0.42), pb = Math.min(runL - 0.06, w.b + 0.42), py = Math.min(CEIL - 0.12, w.head + 0.22);
         const pole = new THREE.CylinderGeometry(0.014, 0.014, pb - pa, 10); pole.rotateZ(Math.PI / 2); pole.rotateY(Math.atan2(-run.n.x, -run.n.z) + Math.PI / 2 + Math.PI / 2);
         const pc = run.p0.clone().addScaledVector(dirV, (pa + pb) / 2).addScaledVector(run.n, 0.11); pole.translate(pc.x, y0 + py, pc.z); add('brass', pole);
         for (const e of [pa, pb]) { const fin = new THREE.SphereGeometry(0.03, 10, 8); const q = run.p0.clone().addScaledVector(dirV, e).addScaledVector(run.n, 0.11); fin.translate(q.x, y0 + py, q.z); add('brass', fin); }
         // two linen drapes gathered at the sides, with soft folds
-        for (const [da, db] of [[pa + 0.02, w.a + 0.1], [w.b - 0.1, pb - 0.02]]) {
+        for (const [da, db] of [[pa + 0.02, Math.max(w.a - 0.03, pa + 0.17)], [Math.min(w.b + 0.03, pb - 0.17), pb - 0.02]]) {
           const wd = db - da, hh = py - 0.02, seg = 24;
           const g = new THREE.PlaneGeometry(wd, hh, seg, 1); const p = g.attributes.position;
           for (let i = 0; i < p.count; i++) { const u = (p.getX(i) / wd) + 0.5; p.setZ(i, Math.sin(u * Math.PI * 7) * 0.035 + 0.035); }
@@ -379,10 +470,10 @@ export function buildApartment(u, ctx) {
       }
     }
   }
-  // roman blinds in linen, drawn a quarter of the way down inside each reveal (bathrooms get a frosted lower pane instead)
+  // (roman blinds used to be drawn a quarter of the way down inside each reveal; taken out, 6 Nov)
   for (const run of runs) for (const w of run.win) {
     const dirV = run.p1.clone().sub(run.p0).normalize(), ang = Math.atan2(-run.n.x, -run.n.z) + Math.PI;
-    const wd = w.b - w.a - 0.04, drop = run.room.type === 'bath' ? 0 : (w.head - w.sill) * 0.24;
+    const wd = w.b - w.a - 0.04, drop = 0;   // no blinds pulled down over the glass (Charlie, 2 and 6 Nov): drapes at the sides only
     if (drop > 0.05) {
       const folds = Math.max(2, Math.round(drop / 0.11)), g = new THREE.PlaneGeometry(wd, drop, 2, folds * 4); const p = g.attributes.position;
       for (let i = 0; i < p.count; i++) { const v = (p.getY(i) / drop) + 0.5; p.setZ(i, Math.max(0, Math.sin(v * Math.PI * folds)) * 0.03); }
@@ -391,19 +482,15 @@ export function buildApartment(u, ctx) {
       const rail = new THREE.BoxGeometry(wd, 0.04, 0.05); rail.rotateY(ang); rail.translate(c.x, y0 + w.head - 0.02, c.z); add('white', rail);
     }
   }
-  // cove lighting: a warm LED line just under the cornice in living rooms and bedrooms
-  for (const run of runs) {
-    if (run.room.type !== 'living' && run.room.type !== 'bedroom') continue;
-    place(run, 0.05, run.len - 0.05, CEIL - 0.142, CEIL - 0.13, 0.012, 'glow');
-  }
+  // (no LED strip under the cornice: taken out, Charlie 6 Nov)
   // cornice: a stepped profile right round every room at the ceiling
-  for (const run of runs) {
+  for (const run of [...runs, ...stubs]) {
     const PK = 'paint_' + (run.room.type === 'bath' ? 'bath' : 'hall');
-    place(run, 0, run.len, CEIL - 0.13, CEIL, 0.05, 'white'); place(run, 0, run.len, CEIL - 0.07, CEIL, 0.1, 'white'); place(run, 0, run.len, CEIL - 0.025, CEIL, 0.14, 'white');
+    placeX(run, 0, run.len, CEIL - 0.13, CEIL, 0.05, 'white'); placeX(run, 0, run.len, CEIL - 0.07, CEIL, 0.1, 'white'); placeX(run, 0, run.len, CEIL - 0.025, CEIL, 0.14, 'white');
   }
   // framed art
   arts.forEach((A, i) => {
-    const run = A.run, dirV = run.p1.clone().sub(run.p0).normalize(), h = A.w * 1.25, yc = 1.62;
+    const run = A.run, dirV = run.p1.clone().sub(run.p0).normalize(), h = A.w * 1.25, yc = Math.max(1.62, DADO + 0.2 + h / 2);
     const fg = new THREE.BoxGeometry(A.w + 0.08, h + 0.08, 0.04); fg.rotateY(Math.atan2(-run.n.x, -run.n.z) + Math.PI);
     const c = run.p0.clone().addScaledVector(dirV, A.a).addScaledVector(run.n, 0.06); fg.translate(c.x, y0 + yc, c.z); add(i === 0 ? 'giltFrame' : 'frame', fg);
     const pg = new THREE.PlaneGeometry(A.w, h); pg.rotateY(Math.atan2(run.n.x, run.n.z)); const c2 = c.clone().addScaledVector(run.n, 0.021); pg.translate(c2.x, y0 + yc, c2.z); add('art' + (i % 3), pg);
@@ -419,6 +506,44 @@ export function buildApartment(u, ctx) {
       add('glow', new THREE.CylinderGeometry(0.055, 0.055, 0.004, 16).translate(q.x, y0 + 1.84, q.z));
     }
   });
+  const doorsMade = [];
+  const doorAt = (di, pos, a0, a1) => {
+    doorsMade.push({ di, pos, a0, a1 });
+      // head (fills the opening above 2.1 m) and architrave on both faces
+      const hd = di ? box(pos - 0.07, y0 + 2.1, a0, pos + 0.07, yC, a1) : box(a0, y0 + 2.1, pos - 0.07, a1, yC, pos + 0.07); add('paint_hall', hd);
+      // jamb linings: the reveals were open to the void inside the wall and showed as a black slit beside the door
+      for (const [e, sg] of [[a0, 1], [a1, -1]]) { const e0 = Math.min(e, e + sg * 0.022), e1 = Math.max(e, e + sg * 0.022); add('white', di ? box(pos - 0.078, y0, e0, pos + 0.078, y0 + 2.1, e1) : box(e0, y0, pos - 0.078, e1, y0 + 2.1, pos + 0.078)); }
+      // the cornice runs on across the head, both faces
+      for (const s of [-1, 1]) for (const [h, d] of [[0.13, 0.05], [0.07, 0.1], [0.025, 0.14]]) {
+        const f0 = pos + s * 0.07, f1 = pos + s * (0.07 + d);
+        add('white', di ? box(Math.min(f0, f1), yC - h, a0 - 0.15, Math.max(f0, f1), yC, a1 + 0.15) : box(a0 - 0.15, yC - h, Math.min(f0, f1), a1 + 0.15, yC, Math.max(f0, f1)));
+      }
+      for (const s of [-1, 1]) {
+        const o = s * 0.085;
+        if (di) { add('white', box(pos + o - 0.012, y0, a0 - 0.07, pos + o + 0.012, y0 + 2.17, a0)); add('white', box(pos + o - 0.012, y0, a1, pos + o + 0.012, y0 + 2.17, a1 + 0.07)); add('white', box(pos + o - 0.012, y0 + 2.1, a0 - 0.07, pos + o + 0.012, y0 + 2.17, a1 + 0.07)); }
+        else { add('white', box(a0 - 0.07, y0, pos + o - 0.012, a0, y0 + 2.17, pos + o + 0.012)); add('white', box(a1, y0, pos + o - 0.012, a1 + 0.07, y0 + 2.17, pos + o + 0.012)); add('white', box(a0 - 0.07, y0 + 2.1, pos + o - 0.012, a1 + 0.07, y0 + 2.17, pos + o + 0.012)); }
+      }
+      // the door itself: a white painted four-panel door with a brass lever (Charlie, 6 Nov: no door on the bedroom doorway; the flat
+      // oak slab read as a peach board in the photoreal 360s). Standing open against the hinge side for the walk-through; shut in the
+      // photoreal exports (export_apt.mjs sets __closedDoors), the way an interior photographer would leave a bedroom door.
+      const wid = a1 - a0 - 0.05, shut = !!globalThis.__closedDoors;
+      // leaf in its own frame: u along the leaf (0..wid from the hinge), v up, t through it; P(u, v, t) -> world box
+      const L = (u0, v0, t0, u1, v1, t1, k) => {
+        if (shut) { if (di) add(k, box(pos + t0, v0, a0 + 0.025 + u0, pos + t1, v1, a0 + 0.025 + u1)); else add(k, box(a0 + 0.025 + u0, v0, pos + t0, a0 + 0.025 + u1, v1, pos + t1)); }
+        else { if (di) add(k, box(pos + 0.03 + u0, v0, a0 + 0.02 + t0 + 0.0225, pos + 0.03 + u1, v1, a0 + 0.02 + t1 + 0.0225)); else add(k, box(a0 + 0.02 + t0 + 0.0225, v0, pos + 0.03 + u0, a0 + 0.02 + t1 + 0.0225, v1, pos + 0.03 + u1)); }
+      };
+      const T2 = 0.0225, lw = shut ? a1 - a0 - 0.05 : wid;
+      L(0, y0 + 0.01, -T2, lw, y0 + 2.08, T2, 'white');
+      for (const s of [-1, 1]) {   // raised panels both faces: two tall above the lock rail, two short below
+        for (const [va, vb] of [[0.98, 1.92], [0.16, 0.86]]) for (const [ua, ub] of [[0.11, lw / 2 - 0.05], [lw / 2 + 0.05, lw - 0.11]]) {
+          const t0 = s > 0 ? T2 : -T2 - 0.012, t1 = s > 0 ? T2 + 0.012 : -T2;
+          L(ua, y0 + va, t0, ub, y0 + vb, t1, 'white');
+        }
+        const t0 = s > 0 ? T2 : -T2 - 0.05, t1 = s > 0 ? T2 + 0.05 : -T2;
+        L(lw - 0.13, y0 + 1.0, t0, lw - 0.03, y0 + 1.025, t1, 'brass');   // lever
+        L(lw - 0.075, y0 + 0.96, s > 0 ? T2 : -T2 - 0.008, lw - 0.045, y0 + 1.08, s > 0 ? T2 + 0.008 : -T2, 'brass');   // rose / backplate
+      }
+  };
   // doorways: architraves and heads where two rooms meet through a narrow opening
   {
     const seen = new Map();
@@ -436,23 +561,106 @@ export function buildApartment(u, ctx) {
       if (!wallAt(lo, -1) || !wallAt(hi, 1)) { globalThis.__doorSkips = (globalThis.__doorSkips || 0) + 1; continue; }
       const pos = di ? gx0 + (line + 1) * RES : gz0 + (line + 1) * RES;
       const a0 = (di ? gz0 : gx0) + lo * RES, a1 = (di ? gz0 : gx0) + (hi + 1) * RES;
-      // head (fills the opening above 2.1 m) and architrave on both faces
-      const hd = di ? box(pos - 0.07, y0 + 2.1, a0, pos + 0.07, yC, a1) : box(a0, y0 + 2.1, pos - 0.07, a1, yC, pos + 0.07); add('paint_hall', hd);
-      for (const s of [-1, 1]) {
-        const o = s * 0.085;
-        if (di) { add('white', box(pos + o - 0.012, y0, a0 - 0.07, pos + o + 0.012, y0 + 2.17, a0)); add('white', box(pos + o - 0.012, y0, a1, pos + o + 0.012, y0 + 2.17, a1 + 0.07)); add('white', box(pos + o - 0.012, y0 + 2.1, a0 - 0.07, pos + o + 0.012, y0 + 2.17, a1 + 0.07)); }
-        else { add('white', box(a0 - 0.07, y0, pos + o - 0.012, a0, y0 + 2.17, pos + o + 0.012)); add('white', box(a1, y0, pos + o - 0.012, a1 + 0.07, y0 + 2.17, pos + o + 0.012)); add('white', box(a0 - 0.07, y0 + 2.1, pos + o - 0.012, a1 + 0.07, y0 + 2.17, pos + o + 0.012)); }
+      doorAt(di, pos, a0, a1);
+    }
+    // plan doorways the room finder merged away (a bedroom opening off a narrow hall reads as one space with it): every gap of
+    // door width in a plan wall, with the wall running on past both ends and rooms either side, gets its frame and door too
+    // (Charlie, 6 Nov: Plots 25 and 26's bedrooms had a bare opening)
+    const isW = (i, j) => i >= 0 && j >= 0 && i < nx && j < nz && !!wallMask[idx(i, j)];
+    const isF = (i, j) => i >= 0 && j >= 0 && i < nx && j < nz && !!free[idx(i, j)];
+    const cand = [];
+    for (const di of [0, 1]) {   // di 1: wall along z at x = pos (scan columns); di 0: wall along x at z = pos (scan rows)
+      const NA = di ? nz : nx, NL = di ? nx : nz, at = (L, a) => di ? [L, a] : [a, L];
+      for (let L = 0; L < NL; L++) {
+        let a = 0;
+        while (a < NA) {
+          const [i, j] = at(L, a);
+          if (!isW(i, j)) { a++; continue; }
+          let b2 = a + 1; while (b2 < NA && isW(...at(L, b2))) b2++;           // wall cells a..b2-1
+          let e = b2; while (e < NA && !isW(...at(L, e)) && isF(...at(L, e))) e++; // gap b2..e-1
+          const w = e - b2;
+          if (e < NA && isW(...at(L, e)) && w >= 12 && w <= 21) {
+            let wallOn = 0; while (wallOn < 4 && isW(...at(L, e + wallOn))) wallOn++;
+            const wallBack = Math.min(4, b2 - a);
+            const mid = Math.round((b2 + e - 1) / 2);
+            const sideA = [3, 4, 5].some(k => isF(...at(L - k, mid))), sideB = [3, 4, 5].some(k => isF(...at(L + k, mid)));
+            if (wallOn >= 3 && wallBack >= 3 && sideA && sideB) cand.push({ di, L, a0: b2, a1: e - 1 });
+          }
+          a = Math.max(a + 1, e);
+        }
       }
-      // the door itself: solid oak, standing open against the hinge side, with a brass lever
-      const wid = a1 - a0 - 0.05;
-      if (di) { add('oak', box(pos + 0.03, y0 + 0.01, a0 + 0.02, pos + 0.03 + wid, y0 + 2.04, a0 + 0.065)); add('brass', box(pos + wid - 0.1, y0 + 1.0, a0 + 0.065, pos + wid - 0.02, y0 + 1.025, a0 + 0.11)); }
-      else { add('oak', box(a0 + 0.02, y0 + 0.01, pos + 0.03, a0 + 0.065, y0 + 2.04, pos + 0.03 + wid)); add('brass', box(a0 + 0.065, y0 + 1.0, pos + wid - 0.1, a0 + 0.11, y0 + 1.025, pos + wid - 0.02)); }
+    }
+    // one doorway per wall gap: the scan finds it on each row of the wall's thickness
+    const grp = [];
+    for (const c of cand) { const g = grp.find(q => q.di === c.di && Math.abs(q.L1 - c.L) <= 1 && Math.abs(q.a0 - c.a0) <= 1 && Math.abs(q.a1 - c.a1) <= 1); if (g) { g.L1 = c.L; g.n++; } else grp.push({ ...c, L0: c.L, L1: c.L, n: 1 }); }
+    for (const g of grp) {
+      const pos = (g.di ? gx0 : gz0) + ((g.L0 + g.L1) / 2 + 0.5) * RES;
+      const a0 = (g.di ? gz0 : gx0) + g.a0 * RES, a1 = (g.di ? gz0 : gx0) + (g.a1 + 1) * RES;
+      if (doorsMade.some(d => d.di === g.di && Math.abs(d.pos - pos) < 0.3 && Math.min(d.a1, a1) - Math.max(d.a0, a0) > 0.2)) continue;
+      // a real doorway has a room on both sides: at least 0.8 m of floor straight out from the opening each way. A built-in
+      // wardrobe's alcove is only ~0.6 m deep (Plot 26's bedroom got a door across its wardrobe, 6 Nov)
+      const at2 = (L, a) => g.di ? [L, a] : [a, L], mid = Math.round((g.a0 + g.a1) / 2);
+      const reach = (L, step) => { let n = 0; while (n < 30 && isF(...at2(L + step * n, mid))) n++; return n; };
+      if (reach(g.L0 - 1, -1) < 16 || reach(g.L1 + 1, 1) < 16) continue;
+      doorAt(g.di, pos, a0, a1); globalThis.__planDoors = (globalThis.__planDoors || 0) + 1;
+    }
+  }
+  // bedroom floors: dark herringbone, filled out from the bed to the walls and stopping on a straight line under each door
+  // (the room finder's own boundary wanders through the doorway and left a saw-tooth of planks, 11 Nov)
+  {
+    const stop = new Uint8Array(N);
+    for (const d of doorsMade) {   // the threshold: the one row of cells on the door's plane, across the opening
+      const line = Math.floor(((d.di ? d.pos - gx0 : d.pos - gz0) / RES) - 0.5);
+      for (let t = Math.floor(((d.di ? d.a0 - gz0 : d.a0 - gx0) / RES)) - 2; t <= Math.ceil(((d.di ? d.a1 - gz0 : d.a1 - gx0) / RES)) + 2; t++) {
+        const i = d.di ? line : t, j = d.di ? t : line; if (i >= 0 && j >= 0 && i < nx && j < nz) stop[idx(i, j)] = 1; }
+    }
+    const bathIds = new Set(live.filter(R => R.type === 'bath').map(R => R.id));
+    const inBP = (x, z) => bathPlan && x > bathPlan.x0 - RES && x < bathPlan.x1 + RES && z > bathPlan.z0 - RES && z < bathPlan.z1 + RES;
+    const ok = (k) => free[k] && !stop[k] && !bathIds.has(room[k]) && !inBP(cx(k % nx), cz(Math.floor(k / nx)));
+    const patch = new Uint8Array(N);
+    for (const R of bedrooms) {
+      let sk = -1, best = -1; for (let k = 0; k < N; k++) if (room[k] === R.id && dist[k] > best && ok(k)) { best = dist[k]; sk = k; }
+      if (sk < 0) continue;
+      const m = new Uint8Array(N), st = [sk]; m[sk] = 1; let n = 1;
+      while (st.length) { const k = st.pop(), i = k % nx;
+        for (const kk of [i + 1 < nx ? k + 1 : -1, i > 0 ? k - 1 : -1, k + nx < N ? k + nx : -1, k - nx]) if (kk >= 0 && !m[kk] && ok(kk)) { m[kk] = 1; n++; st.push(kk); } }
+      if (n * RES * RES > R.area * 1.5 + 2) {   // an opening with no door: keep to the room finder's cells rather than flood the flat
+        globalThis.__bedFloorFallback = (globalThis.__bedFloorFallback || 0) + 1;
+        for (let k = 0; k < N; k++) if (room[k] === R.id && ok(k)) patch[k] = 1;
+      } else for (let k = 0; k < N; k++) if (m[k]) patch[k] = 1;
+    }
+    // row runs of patch cells, merged down the rows where they repeat
+    const open = new Map();
+    const flush = (key, zs, ze) => { const [i0, i1] = key.split(',').map(Number); const xa = cx(i0) - RES / 2, xb = cx(i1) + RES / 2;
+      const q = new THREE.PlaneGeometry(xb - xa, ze - zs); q.rotateX(-Math.PI / 2); q.translate((xa + xb) / 2, y0 + 0.006, (zs + ze) / 2);
+      const pq = q.attributes.position, uq = q.attributes.uv; for (let t = 0; t < pq.count; t++) uq.setXY(t, pq.getX(t) / mats.herrSize, pq.getZ(t) / mats.herrSize); add('floorBed', q); };
+    for (let j = 0; j <= nz; j++) {
+      const runsJ = new Set();
+      if (j < nz) { let i = 0; while (i < nx) { if (!patch[idx(i, j)]) { i++; continue; } let e = i; while (e + 1 < nx && patch[idx(e + 1, j)]) e++; runsJ.add(i + ',' + e); i = e + 1; } }
+      for (const [key, zs] of [...open]) if (!runsJ.has(key)) { flush(key, zs, cz(j) - RES / 2); open.delete(key); }
+      for (const key of runsJ) if (!open.has(key)) open.set(key, cz(j) - RES / 2);
     }
   }
   // shower room: walk-in shower with fluted glass screen, wall-hung WC, basin on an oak vanity, backlit mirror
   for (const bathR of [bath || bathPlan, bath2].filter(Boolean)) {
     const R = bathR, wx = R.x1 - R.x0 + RES, wz = R.z1 - R.z0 + RES, x0 = R.x0 - RES / 2, z0 = R.z0 - RES / 2, x1 = x0 + wx, z1 = z0 + wz;
     const alongX = wx >= wz;   // long axis
+    // the lived-in touches (Charlie, 6 Nov: the shower rooms read as bare plans from above): towels over the rail, a bath mat by the
+    // shower, a stack of towels and a plant on the vanity
+    const dress = (a, w, ax, v, vw, sh) => {
+      const B2 = (a0, y_0, b0, a1, y_1, b1, k) => add(k, ax === 'x' ? box(a0, y_0, b0, a1, y_1, b1) : box(b0, y_0, a0, b1, y_1, a1));
+      const io = w < (ax === 'x' ? (z0 + z1) / 2 : (x0 + x1) / 2) ? 1 : -1;   // into the room from the rail's wall
+      B2(a - 0.3, y0 + 0.78, Math.min(w, w + io * 0.07), a - 0.02, y0 + 1.42, Math.max(w, w + io * 0.07), 'towel');
+      B2(a + 0.02, y0 + 0.9, Math.min(w, w + io * 0.07), a + 0.3, y0 + 1.42, Math.max(w, w + io * 0.07), 'towelW');
+      const sc = ax === 'x' ? [(sh[0] + sh[2]) / 2, (sh[1] + sh[3]) / 2] : [(sh[1] + sh[3]) / 2, (sh[0] + sh[2]) / 2];   // shower centre in (along, across)
+      const ma = sc[0] + (a > sc[0] ? 0.75 : -0.75); const mc = ax === 'x' ? (z0 + z1) / 2 : (x0 + x1) / 2;
+      B2(ma - 0.25, y0 + 0.008, mc - 0.35, ma + 0.25, y0 + 0.022, mc + 0.35, 'bathmat');
+      const vo = vw < mc ? 1 : -1;
+      B2(v + 0.12, y0 + 0.9, Math.min(vw + vo * 0.06, vw + vo * 0.3), v + 0.28, y0 + 1.0, Math.max(vw + vo * 0.06, vw + vo * 0.3), 'towelW');
+      const pc = ax === 'x' ? [v - 0.2, vw + vo * 0.2] : [vw + vo * 0.2, v - 0.2];
+      add('ceramic', new THREE.CylinderGeometry(0.06, 0.05, 0.1, 12).translate(pc[0], y0 + 0.95, pc[1]));
+      add('sprig', new THREE.IcosahedronGeometry(0.09, 1).translate(pc[0], y0 + 1.06, pc[1]));
+    };
     // marble floor
     const fl = new THREE.PlaneGeometry(wx, wz); fl.rotateX(-Math.PI / 2); fl.translate((x0 + x1) / 2, y0 + 0.008, (z0 + z1) / 2); add('marble', fl);
     // shower at the far end of the long axis (away from the room's door)
@@ -478,6 +686,7 @@ export function buildApartment(u, ctx) {
       const wcx = along + 0.45; add('ceramic', box(wcx - 0.18, y0 + 0.3, zw + 0.02, wcx + 0.18, y0 + 0.42, zw + 0.55)); add('ceramic', box(wcx - 0.25, y0 + 0.42, zw, wcx + 0.25, y0 + 1.1, zw + 0.14));
       add('chrome', box(wcx - 0.11, y0 + 1.0, zw + 0.141, wcx + 0.11, y0 + 1.06, zw + 0.15));
       for (let k = 0; k < 5; k++) add('brass', box(along - 0.32, y0 + 1.0 + k * 0.1, z1 - 0.07, along + 0.32, y0 + 1.02 + k * 0.1, z1 - 0.05));
+      dress(along, z1 - 0.06, 'x', vx, zw, sh);
     } else {
       const xw = x0, vz = along - 0.25;
       add('oak', box(xw, y0 + 0.45, vz - 0.32, xw + 0.46, y0 + 0.82, vz + 0.32));
@@ -486,8 +695,21 @@ export function buildApartment(u, ctx) {
       add('mirror', box(xw + 0.02, y0 + 1.15, vz - 0.3, xw + 0.04, y0 + 1.95, vz + 0.3)); add('glow', box(xw + 0.015, y0 + 1.12, vz - 0.33, xw + 0.02, y0 + 1.98, vz + 0.33));
       const wcz = along + 0.45; add('ceramic', box(xw + 0.02, y0 + 0.3, wcz - 0.18, xw + 0.55, y0 + 0.42, wcz + 0.18)); add('ceramic', box(xw, y0 + 0.42, wcz - 0.25, xw + 0.14, y0 + 1.1, wcz + 0.25));
       for (let k = 0; k < 5; k++) add('brass', box(x1 - 0.07, y0 + 1.0 + k * 0.1, along - 0.32, x1 - 0.05, y0 + 1.02 + k * 0.1, along + 0.32));
+      dress(along, x1 - 0.06, 'z', vz, xw, sh);
     }
     lights.push({ x: (x0 + x1) / 2, z: (z0 + z1) / 2, I: 2.5, d: 4 });
+  }
+  // the utility cupboard next to the shower room (types A-C, as the plans): washing machine and dryer side by side, so the
+  // cut-away floors show them fitted rather than as plan symbols
+  if (bathPlan && 'ABC'.includes(BPLOT[u.plot])) {
+    const [bx0, , bx1, bz1, dx] = BP[BPLOT[u.plot]], left = Math.abs(dx - bx0) < 0.01, uz0 = bz1 + 0.12, uz1 = bz1 + 0.72;
+    const ux = left ? [bx0 + 0.08, bx0 + 0.72] : [bx1 - 1.36, bx1 - 0.72];
+    for (const a of [ux[0], ux[0] + 0.66]) {
+      add('ceramic', box(a, y0, uz0, a + 0.6, y0 + 0.85, uz1));
+      const d = new THREE.TorusGeometry(0.17, 0.025, 8, 28); d.translate(a + 0.3, y0 + 0.48, uz1 + 0.012); add('chrome', d);
+      const g = new THREE.CircleGeometry(0.15, 24); g.translate(a + 0.3, y0 + 0.48, uz1 + 0.006); add('chrome', g);
+    }
+    add('oak', box(ux[0] - 0.02, y0 + 0.86, uz0, ux[0] + 1.3, y0 + 0.9, uz1 + 0.02));   // oak worktop over them
   }
   // type 2A: the en-suite off the main bedroom is too small for the room finder (it merges into the bedroom), so it is fitted from the plan
   if (u.type === '2A' && !bath2) {

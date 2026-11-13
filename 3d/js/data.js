@@ -18,7 +18,7 @@ export const SITE = {
   whatsapp: '447353164480',
   phone: '07353 164480',
   email: 'charlie@brik-studios.com',
-  updated: '29 Oct 2026',
+  updated: '12 Nov 2026',
 };
 
 export const FLOOR_H = 2.85;                // floor to floor (61.77 / 64.62 / 67.47 / 70.32 AOD)
@@ -37,6 +37,16 @@ export const STATUS = {
   'Sold': { key: 'sold', label: 'Sold', color: '#e3242b' },
 };
 
+// Churchgate pavement level along Charter House, metres relative to the ground floor (61.77 m AOD), x = metres along
+// Churchgate from the Harvey Street corner. From the architect's NE elevation A839_P_300H: the pavement is about 0.6 m below
+// the ground floor at the corner, level with it at the arched entrance and about 1.0 m above it at the far end of the
+// Churchgate wing, so the wing's ground floor sits below the street there (Charlie, 12 Nov).
+export const CG_PAVE = (x) => -0.62 + 0.073 * x;
+// Harvey Street pavement along the building, z = metres from the Churchgate corner towards the SW end (architect's front
+// elevation [Harvey Street], A839_P_300H): about 0.7 m below the ground floor at the corner, falling to about 2.3 m below it
+// at the SW end of the Harvey wing, so that wing's ground-floor windows stand well above the street (as the Harvey St CGI).
+export const HV_PAVE = (z) => -0.72 - 0.075 * z;
+
 // Window ids refer to the façade bays defined in building.js
 //   CG1..CG6 = Churchgate bays from the Harvey St corner; HV1..HV6 = Harvey St bays from the corner
 //   RC1..RC3 = courtyard windows on the Churchgate wing; RH1..RH2 = courtyard windows on the Harvey wing
@@ -53,8 +63,8 @@ export const UNITS = [
   P(5, 'G.05', 0, '1B', 1, 412, 189000, 'Available', 'Facing St Mary’s Gate, rectangle', ['HV5', 'RH1'], [0.34, 13.3, 11.7, 17.2], 'Harvey Street to the front, courtyard to the rear'),
   P(6, 'G.06', 0, '1B', 1, 412, 189000, 'Available', 'Facing St Mary’s Gate, rectangle', ['HV6', 'RH2'], [0.34, 17.2, 11.7, 21.27], 'Harvey Street to the front, courtyard to the rear'),
 
-  P(7, '1.01', 1, '1A', 1, 412, 189000, 'Available', 'Park facing', ['CG6', 'RC1'], [18.55, -0.34, 22.6, 11.0], 'Looks across Churchgate to the trees and new play park'),
-  P(8, '1.02', 1, '1A', 1, 412, 189000, 'Available', 'Park facing', ['CG5', 'RC2'], [14.72, -0.34, 18.55, 11.0], 'Looks across Churchgate to the trees and new play park'),
+  P(7, '1.01', 1, '1A', 1, 412, 189000, 'Sold', 'Park facing', ['CG6', 'RC1'], [18.55, -0.34, 22.6, 11.0], 'Looks across Churchgate to the trees and new play park'),
+  P(8, '1.02', 1, '1A', 1, 412, 189000, 'Sold', 'Park facing', ['CG5', 'RC2'], [14.72, -0.34, 18.55, 11.0], 'Looks across Churchgate to the trees and new play park'),
   P(9, '1.03', 1, '1A', 1, 412, 189000, 'Available', 'Park facing', ['CG4', 'RC3'], [10.9, -0.34, 14.72, 11.0], 'Looks across Churchgate to the trees and new play park'),
   P(10, '1.04', 1, '2A', 2, 658, 300000, 'Available', 'Corner 2 bed, 5 windows', ['CG1', 'CG2', 'HV1', 'HV2'], [0, 0, 10.9, 6.2], 'Corner 2 bed: Churchgate, Harvey Street and towards St Mary’s Church'),
   P(11, '1.05', 1, '1C', 1, 410, 190000, 'Available', 'Facing St Mary’s Gate, square layout', ['HV3', 'HV4'], [0, 6.2, 6.7, 13.3], 'Faces St Mary’s Gate across Harvey Street'),
@@ -69,7 +79,7 @@ export const UNITS = [
   P(19, '2.06', 2, '1B', 1, 412, 193000, 'Available', 'Facing St Mary’s Gate, rectangle', ['HV5', 'RH1'], [0.34, 13.3, 11.7, 17.2], 'Harvey Street to the front, courtyard to the rear'),
   P(20, '2.07', 2, '1B', 1, 412, 193000, 'Sold', 'Facing St Mary’s Gate, rectangle', ['HV6', 'RH2'], [0.34, 17.2, 11.7, 21.27], 'Harvey Street to the front, courtyard to the rear'),
 
-  P(21, '3.01', 3, '1A', 1, 412, 193000, 'Available', 'Park facing, top floor', ['CG6', 'RC1'], [18.55, -0.34, 22.6, 11.0], 'Top floor, looking across Churchgate to the treetops'),
+  P(21, '3.01', 3, '1A', 1, 412, 193000, 'Sold', 'Park facing, top floor', ['CG6', 'RC1'], [18.55, -0.34, 22.6, 11.0], 'Top floor, looking across Churchgate to the treetops'),
   P(22, '3.02', 3, '1A', 1, 412, 193000, 'Available', 'Park facing, top floor', ['CG5', 'RC2'], [14.72, -0.34, 18.55, 11.0], 'Top floor, looking across Churchgate to the treetops'),
   P(23, '3.03', 3, '1A', 1, 412, 193000, 'Sold', 'Park facing, top floor', ['CG4', 'RC3'], [10.9, -0.34, 14.72, 11.0], 'Top floor, looking across Churchgate to the treetops'),
   P(24, '3.04', 3, '2A', 2, 658, 303000, 'Available', 'Top-floor corner 2 bed, 5 windows', ['CG1', 'CG2', 'CG3', 'HV1', 'HV2'], [0, 0, 10.9, 6.2], 'Top-floor corner: views towards the Market Hall and St Mary’s Church'),

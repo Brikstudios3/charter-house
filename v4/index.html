@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Charter House · Investment report (v4 side-scroll draft) | BRIK Studios</title>
+<link rel="preload" href="fonts/besley-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:Besley;src:url(fonts/besley-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:Besley;src:url(fonts/besley-latin-600-normal.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:Besley;src:url(fonts/besley-latin-500-italic.woff2) format('woff2');font-weight:500;font-style:italic;font-display:swap}
+@font-face{font-family:Figtree;src:url(../assets/fonts/figtree-300.woff2) format('woff2');font-weight:300;font-display:swap}
+@font-face{font-family:Figtree;src:url(../assets/fonts/figtree-400.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:Figtree;src:url(../assets/fonts/figtree-500.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:Figtree;src:url(../assets/fonts/figtree-600.woff2) format('woff2');font-weight:600;font-display:swap}
+:root{--green:#183A2C;--green2:#22503D;--cream:#F7F1EC;--beige:#EFE7DC;--beige2:#E6DCCD;--line:#D9CDBC;--ink:#231D1A;--mute:#6E655E;--gold:#B3A184;--gold2:#C8B48E;--brick:#A44C28;
+  --u:min(1vw,1.6vh);            /* one design unit: scales with the smaller of width and height on landscape screens */
+  --pad:calc(var(--u)*4.2)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--green);overscroll-behavior:none}
+body{font-family:Figtree,system-ui,sans-serif;color:var(--ink);font-size:calc(var(--u)*1.08);line-height:1.55;-webkit-font-smoothing:antialiased;overflow:hidden}
+a{color:inherit}
+img{display:block;max-width:100%}
+/* ---------- deck ---------- */
+.deck{position:fixed;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}
+.deck::-webkit-scrollbar{display:none}
+.pg{flex:0 0 100vw;width:100vw;height:100vh;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;position:relative;overflow:hidden;background:var(--cream)}
+.pg.dk{background:var(--green);color:var(--cream)}
+.pg.bg{background:var(--beige)}
+/* ---------- chrome ---------- */
+.top{position:fixed;left:0;right:0;top:0;height:calc(var(--u)*5.2);display:flex;align-items:center;justify-content:space-between;padding:0 var(--pad);z-index:20;pointer-events:none;mix-blend-mode:normal}
+.top>*{pointer-events:auto}
+.wm{font-family:Besley;font-size:calc(var(--u)*1.25);letter-spacing:.02em;text-decoration:none;color:var(--ink);transition:color .3s}
+.wm small{font-family:Figtree;font-size:.62em;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-left:.9em}
+body.ondark .wm{color:var(--cream)}
+body.oncover .wm{opacity:0;pointer-events:none}
+.menu-b{font:500 calc(var(--u)*.78)/1 Figtree;letter-spacing:.26em;text-transform:uppercase;background:none;border:0;color:var(--ink);cursor:pointer;padding:.8em 0}
+body.ondark .menu-b{color:var(--cream)}
+.bot{position:fixed;left:0;right:0;bottom:0;height:calc(var(--u)*5);display:flex;align-items:center;gap:calc(var(--u)*1.6);padding:0 var(--pad);z-index:20;pointer-events:none}
+.bot>*{pointer-events:auto}
+.nav{width:calc(var(--u)*3.4);height:calc(var(--u)*3.4);min-width:38px;min-height:38px;border-radius:50%;border:1px solid rgba(35,29,26,.25);background:rgba(247,241,236,.85);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);transition:opacity .2s, background .2s}
+.nav:hover{background:#fff}
+.nav[disabled]{opacity:.25;cursor:default}
+.nav svg{width:42%;height:42%}
+body.ondark .nav{border-color:rgba(247,241,236,.35);background:rgba(24,58,44,.55);color:var(--cream)}
+.count{font:500 calc(var(--u)*.78)/1 Figtree;letter-spacing:.22em;text-transform:uppercase;color:var(--mute);min-width:9em}
+body.ondark .count{color:rgba(247,241,236,.7)}
+.bar{flex:1;height:1px;background:rgba(35,29,26,.15);position:relative;max-width:46vw;margin-left:auto}
+.bar i{position:absolute;left:0;top:-1px;height:3px;background:var(--gold);width:0;transition:width .35s}
+body.ondark .bar{background:rgba(247,241,236,.25)}
+.hint{position:fixed;left:50%;bottom:calc(var(--u)*6.5);transform:translateX(-50%);z-index:21;font:500 12px/1 Figtree;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);background:rgba(24,58,44,.85);padding:10px 16px;border-radius:30px;transition:opacity .6s;pointer-events:none}
+.hint.off{opacity:0}
+/* contents */
+.toc{position:fixed;inset:0;background:rgba(24,58,44,.97);z-index:40;color:var(--cream);display:none;padding:calc(var(--u)*7) var(--pad) var(--pad);overflow:auto}
+.toc.on{display:block}
+.toc h3{font-family:Besley;font-weight:500;font-size:calc(var(--u)*2.4);margin-bottom:calc(var(--u)*2.4)}
+.toc ol{list-style:none;columns:3;column-gap:calc(var(--u)*4)}
+.toc li{break-inside:avoid;border-top:1px solid rgba(247,241,236,.16)}
+.toc button{all:unset;cursor:pointer;display:flex;gap:1.2em;width:100%;padding:.75em 0;font-size:calc(var(--u)*1.05)}
+.toc button span{color:var(--gold);font-size:.8em;letter-spacing:.2em;min-width:2.4em;padding-top:.15em}
+.toc button:hover{color:#fff}
+.toc .x{position:absolute;right:var(--pad);top:calc(var(--u)*2.2);font:500 calc(var(--u)*.8)/1 Figtree;letter-spacing:.26em;text-transform:uppercase;background:none;border:0;color:var(--cream);cursor:pointer;padding:1em 0}
+/* ---------- type ---------- */
+.lab{font:500 calc(var(--u)*.74)/1.3 Figtree;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.lab.g{color:var(--green2)}
+h1,h2,h3{font-family:Besley,Georgia,serif;font-weight:500;letter-spacing:-.012em}
+h2{font-size:calc(var(--u)*3.1);line-height:1.08;margin:calc(var(--u)*1.1) 0 calc(var(--u)*1.5)}
+h2.s{font-size:calc(var(--u)*2.5)}
+h3{font-size:calc(var(--u)*1.45);line-height:1.2}
+p{margin-bottom:.85em}
+.lead{font-size:calc(var(--u)*1.2);color:#3d3530}
+.dk .lead,.dk p{color:rgba(247,241,236,.86)}
+.small{font-size:calc(var(--u)*.8);color:var(--mute);line-height:1.5}
+.dk .small{color:rgba(247,241,236,.6)}
+.cap{position:absolute;right:calc(var(--u)*1.6);bottom:calc(var(--u)*1.4);font:600 calc(var(--u)*.68)/1.2 Figtree;letter-spacing:.26em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5);text-align:right;z-index:2}
+.cap.l{right:auto;left:calc(var(--u)*1.6)}
+.cgi{position:absolute;right:var(--pad);bottom:calc(var(--u)*5.4);font-size:calc(var(--u)*.68);color:var(--mute);letter-spacing:.04em;text-align:right;max-width:30%}
+.btn{display:inline-flex;align-items:center;gap:.6em;font:600 calc(var(--u)*.82)/1 Figtree;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;padding:1.15em 1.6em;border:1px solid var(--green);color:var(--cream);background:var(--green);margin:0 .6em .6em 0;border-radius:2px}
+.btn.o{background:transparent;color:var(--green)}
+.dk .btn{background:var(--cream);color:var(--green);border-color:var(--cream)}
+.dk .btn.o{background:transparent;color:var(--cream)}
+/* ---------- layouts ---------- */
+.full{position:absolute;inset:0}
+.full>img{width:100%;height:100%;object-fit:cover}
+.sp{position:absolute;inset:0;display:grid;grid-template-columns:64fr 36fr}
+.sp.r{grid-template-columns:36fr 64fr}
+.sp.r .im{order:2}
+.sp.h{grid-template-columns:50fr 50fr}
+.im{position:relative;overflow:hidden;background:#0a0a0a}
+.im img{width:100%;height:100%;object-fit:cover}
+.tx{padding:calc(var(--u)*8.5) calc(var(--u)*4.4) calc(var(--u)*6) calc(var(--u)*3.6);display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.sp.r .tx{padding-left:var(--pad);padding-right:calc(var(--u)*3.6)}
+.wide{position:absolute;inset:0;padding:calc(var(--u)*8) var(--pad) calc(var(--u)*6.5);display:flex;flex-direction:column}
+.wide.c{justify-content:center}
+.wide.c>.legal:last-child{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(var(--u)*5.6);margin:0}
+.facts{border-top:1px solid var(--line);margin-top:calc(var(--u)*.8)}
+.facts>div{display:flex;justify-content:space-between;gap:1em;padding:calc(var(--u)*.95) 0;border-bottom:1px solid var(--line);font-size:calc(var(--u)*1.12)}
+.facts b{font-weight:500;font-size:calc(var(--u)*.72);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);align-self:center}
+.facts span{text-align:right}
+.dk .facts{border-color:rgba(247,241,236,.2)}.dk .facts>div{border-color:rgba(247,241,236,.2)}.dk .facts b{color:rgba(247,241,236,.6)}
+.big{font-family:Besley;font-size:calc(var(--u)*2.6);line-height:1}
+/* cover */
+.cover .mark{position:absolute;left:var(--pad);top:calc(var(--u)*4.4);width:calc(var(--u)*9);height:calc(var(--u)*3.4);background:var(--cream);-webkit-mask:url(../3d/assets/brand_brik.png) left center/contain no-repeat;mask:url(../3d/assets/brand_brik.png) left center/contain no-repeat}
+.cover .ttl{position:absolute;left:var(--pad);top:30%;max-width:60%}
+.cover h1{font-size:calc(var(--u)*7.4);line-height:.98;color:var(--cream);margin:calc(var(--u)*1.6) 0 calc(var(--u)*1.4)}
+.cover .meta{color:rgba(247,241,236,.7);font-size:calc(var(--u)*1.05);letter-spacing:.04em}
+.cover svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:36%}
+.cover .rt{position:absolute;right:var(--pad);top:calc(var(--u)*5);text-align:right}
+/* chapter divider */
+.chap .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.3) 0,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 48%,rgba(0,0,0,.55))}
+.chap .ct{position:absolute;left:var(--pad);bottom:calc(var(--u)*8.5);color:#fff}
+.chap .ct .lab{color:rgba(255,255,255,.85)}
+.chap .ct h2{color:#fff;font-size:calc(var(--u)*5.2);margin-top:calc(var(--u)*.8)}
+.chap .ct .n{font-family:Besley;font-size:calc(var(--u)*1.6);color:var(--gold2)}
+/* number grid */
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line)}
+.nums>div{padding:calc(var(--u)*1.25) 0;border-bottom:1px solid var(--line)}
+.nums>div:nth-child(odd){padding-right:calc(var(--u)*1.4)}
+.nums .big{font-size:calc(var(--u)*2.7)}
+.nums .k{font:500 calc(var(--u)*.7)/1.3 Figtree;letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-bottom:.55em}
+.nums .s{font-size:calc(var(--u)*.86);color:var(--mute);margin-top:.35em}
+.nums .wide1{grid-column:1/-1}
+/* plan pages */
+.plan{position:absolute;inset:0;display:grid;grid-template-rows:minmax(0,1fr);grid-template-columns:30fr 42fr 28fr;gap:calc(var(--u)*3);padding:calc(var(--u)*8.5) var(--pad) calc(var(--u)*6.5)}
+.plan .pl{background:#fff;display:flex;align-items:center;justify-content:center;padding:calc(var(--u)*2);border:1px solid var(--line);min-height:0;overflow:hidden}
+.plan .pl img{height:100%;width:100%;object-fit:contain}
+.plan .side{display:flex;flex-direction:column;gap:calc(var(--u)*1.4);min-height:0}
+.plan .side .thumb{flex:1;background:#fff;border:1px solid var(--line);padding:calc(var(--u)*1);display:flex;align-items:center;justify-content:center;min-height:0;position:relative}
+.plan .side .thumb img{width:100%;height:100%;object-fit:contain}
+.plan .side .thumb.ph{padding:0;overflow:hidden}.plan .side .thumb.ph img{width:100%;height:100%;object-fit:cover;max-height:none}
+/* spec */
+.spec{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*2.6) calc(var(--u)*3.4);margin-top:calc(var(--u)*2.2)}
+.spec h4{font:600 calc(var(--u)*.82)/1.3 Figtree;letter-spacing:.26em;text-transform:uppercase;color:var(--green2);padding-bottom:.8em;border-bottom:1px solid var(--ink)}
+.spec ul{list-style:none}
+.spec li{padding:.7em 0;border-bottom:1px solid var(--line);font-size:calc(var(--u)*1.25)}
+/* people */
+.ppl{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*2.6);flex:1;min-height:0;margin-top:calc(var(--u)*1)}
+.pp{display:flex;flex-direction:column;min-height:0}
+.pp .ph{flex:1;min-height:0;overflow:hidden;background:#ddd}
+.pp .ph img{width:100%;height:100%;object-fit:cover;object-position:50% 18%;filter:grayscale(1) contrast(1.05)}
+.pp h3{margin-top:calc(var(--u)*1.1)}
+.pp .role{font:600 calc(var(--u)*.7)/1.4 Figtree;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin:.4em 0 .5em}
+.pp p{font-size:calc(var(--u)*.95);color:#4a413b;margin:0}
+/* partner */
+.partners{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*4);flex:1;min-height:0;margin-top:calc(var(--u)*.6)}
+.pt{display:flex;flex-direction:column;min-height:0}
+.strip{display:grid;gap:calc(var(--u)*.7);flex:1;min-height:0;margin-bottom:calc(var(--u)*1.4)}
+.strip.two{grid-template-columns:1.4fr 1fr}.strip.three{grid-template-columns:1.2fr 1fr 1fr}
+.strip>div{position:relative;overflow:hidden;background:#ddd}
+.strip img{width:100%;height:100%;object-fit:cover}
+.strip .cap{font-size:calc(var(--u)*.6);right:calc(var(--u)*.9);bottom:calc(var(--u)*.8)}
+.pt ul{list-style:none;margin-top:.4em}
+.pt li{font-size:calc(var(--u)*.95);padding:.45em 0;border-bottom:1px solid var(--line)}
+.aw{display:flex;flex-wrap:wrap;gap:.5em .6em;margin-top:.9em}
+.aw span{font:500 calc(var(--u)*.66)/1.2 Figtree;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);padding:.55em .7em;color:#4a413b}
+/* grids of cards */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*1.6);flex:1;min-height:0;margin-top:calc(var(--u)*1)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*1.6);flex:1;min-height:0;margin-top:calc(var(--u)*1)}
+.card{display:flex;flex-direction:column;min-height:0}
+.card .ci{flex:1;min-height:0;position:relative;overflow:hidden;background:#ddd}
+.card .ci img{width:100%;height:100%;object-fit:cover}
+.card .big{margin-top:calc(var(--u)*1)}
+.card h3{font-size:calc(var(--u)*1.25);margin:.55em 0 .3em}
+.card p{font-size:calc(var(--u)*.92);color:#4a413b;margin:0}
+.card .walk{font:600 calc(var(--u)*.72)/1 Figtree;letter-spacing:.2em;text-transform:uppercase;color:var(--green2);margin-top:.9em}
+.logos{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--u)*1.1);margin-top:calc(var(--u)*1.4)}
+.logos>div{background:#fff;border:1px solid var(--line);padding:calc(var(--u)*1.5) calc(var(--u)*1.4)}
+.logos .lg{height:calc(var(--u)*4.2);display:flex;align-items:center}
+.logos .lg img{max-height:100%;max-width:80%;object-fit:contain}
+.logos .big{font-size:calc(var(--u)*2.3);margin-top:.5em}
+.logos .n2{font-size:calc(var(--u)*.86);font-weight:500}
+.logos .n3{font-size:calc(var(--u)*.78);color:var(--mute)}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:calc(var(--u)*1.08)}
+td,th{padding:.62em 0;border-bottom:1px solid var(--line);text-align:left}
+th{font:500 calc(var(--u)*.68)/1.3 Figtree;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+td.r,th.r{text-align:right}
+tr.t td{font-weight:600;border-bottom:1px solid var(--ink);border-top:1px solid var(--ink)}
+.cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:calc(var(--u)*3.4);flex:1;min-height:0;margin-top:calc(var(--u)*1.2)}
+.cols3b{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:calc(var(--u)*3);margin-top:calc(var(--u)*1.2)}
+.panel{background:#fff;border:1px solid var(--line);padding:calc(var(--u)*1.6) calc(var(--u)*1.8)}
+.bars{display:flex;align-items:flex-end;gap:calc(var(--u)*2.2);height:calc(var(--u)*17);margin-top:calc(var(--u)*2.2);border-bottom:1px solid var(--ink)}
+.bars>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%}
+.bars .b{background:var(--beige2);position:relative}
+.bars .b.hi{background:var(--green2)}
+.bars .b.mid{background:var(--gold)}
+.bars .v{font-family:Besley;font-size:calc(var(--u)*1.7);margin-bottom:.3em}
+.bars .k{font-size:calc(var(--u)*.82);color:var(--mute);margin-top:.6em;min-height:2.6em;position:relative;top:calc(var(--u)*3)}
+/* reviews */
+.revs{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*3);margin-top:calc(var(--u)*2)}
+.rv{border-top:1px solid var(--ink);padding-top:calc(var(--u)*1.2)}
+.rv .st{color:#00b67a;letter-spacing:.15em;font-size:calc(var(--u)*1.1)}
+.rv q{display:block;font-family:Besley;font-size:calc(var(--u)*1.7);line-height:1.38;margin:.7em 0 .9em;quotes:"\201C" "\201D"}
+.rv .who{font:600 calc(var(--u)*.72)/1.3 Figtree;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+/* process */
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:calc(var(--u)*1.2);margin-top:calc(var(--u)*1.4)}
+.stp{border-top:2px solid var(--line);padding-top:calc(var(--u)*1)}
+.stp.on{border-color:var(--gold)}
+.stp .n{font-family:Besley;font-size:calc(var(--u)*1.8);color:var(--gold)}
+.stp h3{font-size:calc(var(--u)*1.25);margin:.3em 0 .35em}
+.stp p{font-size:calc(var(--u)*.98);color:#4a413b;margin:0}
+.pay{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*1.6);margin-top:calc(var(--u)*2.4)}
+.pay .panel h3{font-size:calc(var(--u)*1.2);margin:.35em 0 .1em}
+.pay .amt{font-family:Besley;font-size:calc(var(--u)*2.3);color:var(--green2);margin:.15em 0 .45em}
+.timeline table{font-size:calc(var(--u)*1.0)}
+/* faq */
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:0 calc(var(--u)*4);margin-top:calc(var(--u)*1.4)}
+.faq div{padding:calc(var(--u)*1.5) 0;border-top:1px solid var(--line)}
+.faq h3{font-size:calc(var(--u)*1.35);margin-bottom:.4em}
+.faq p{font-size:calc(var(--u)*1.05);color:#4a413b;margin:0}
+/* close */
+.close .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,28,22,.93) 0,rgba(15,28,22,.86) 42%,rgba(15,28,22,.2) 72%,rgba(15,28,22,0))}
+.close .in{position:absolute;left:var(--pad);top:0;bottom:0;width:min(46%,760px);display:flex;flex-direction:column;justify-content:center;color:var(--cream)}
+.close h2{color:#fff;font-size:calc(var(--u)*4)}
+.close .who{display:flex;gap:calc(var(--u)*1.4);align-items:center;margin:calc(var(--u)*1.4) 0 calc(var(--u)*2)}
+.close .who img{width:calc(var(--u)*6);height:calc(var(--u)*6);border-radius:50%;object-fit:cover;object-position:50% 20%;filter:grayscale(1)}
+.close .who b{display:block;font-family:Besley;font-weight:500;font-size:calc(var(--u)*1.5)}
+.close .who span{font-size:calc(var(--u)*.95);color:rgba(247,241,236,.75)}
+.close .tel{font-family:Besley;font-size:calc(var(--u)*2.1);text-decoration:none;display:block}
+.close .em{font-size:calc(var(--u)*1.15);text-decoration:none;color:rgba(247,241,236,.85);display:block;margin-bottom:calc(var(--u)*2.2)}
+.legal{font-size:calc(var(--u)*.74);line-height:1.55;color:var(--mute)}
+.dk .legal{color:rgba(247,241,236,.58)}
+.refs{columns:3;column-gap:calc(var(--u)*3.4);margin-top:calc(var(--u)*1.2)}
+.refs div{break-inside:avoid;padding:.75em 0;border-bottom:1px solid var(--line);font-size:calc(var(--u)*1.05)}
+.refs span{display:block;color:var(--mute);font-size:.88em}
+.quote{font-family:Besley;font-size:calc(var(--u)*1.9);line-height:1.3;margin:calc(var(--u)*1) 0 calc(var(--u)*1.6)}
+.quote:before{content:"\201C";color:var(--gold);font-size:2.4em;line-height:0;display:block;margin:.35em 0 .1em -.06em}
+.chips{display:flex;flex-wrap:wrap;gap:calc(var(--u)*.6);margin-top:calc(var(--u)*1.2)}
+.chips span{font-size:calc(var(--u)*.86);border:1px solid var(--line);padding:.5em .85em;border-radius:40px;background:#fff}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*1.6);margin-top:calc(var(--u)*1.4)}
+.timeline .panel .big{color:var(--green2)}
+.draft{position:fixed;right:calc(var(--u)*14);top:calc(var(--u)*1.55);z-index:22;font:600 10px/1 Figtree;letter-spacing:.2em;text-transform:uppercase;background:var(--brick);color:#fff;padding:6px 9px;border-radius:2px}
+/* ---------- portrait phones: stack each page, scroll inside it, still swipe across ---------- */
+@media (max-aspect-ratio: 1/1){
+  :root{--u:max(3.3vw,10.5px);--pad:5.5vw}
+  body{font-size:15px}
+  .pg{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  .sp,.sp.r,.sp.h{position:relative;display:flex;flex-direction:column;min-height:100%}
+  .sp .im{flex:0 0 44vh;order:0!important}
+  .tx,.sp.r .tx{padding:6vw var(--pad) 26vw;justify-content:flex-start;overflow:visible}
+  .wide{position:relative;inset:auto;min-height:100%;padding:20vw var(--pad) 26vw}
+  .plan{position:relative;display:flex;flex-direction:column;padding:20vw var(--pad) 26vw;gap:5vw}
+  .plan .pl{height:60vh}.plan .side .thumb{height:34vh;flex:none}
+  .spec,.cols,.cols3b,.faq,.pay,.timeline,.partners{grid-template-columns:1fr}
+  .g4,.g3,.ppl{grid-template-columns:1fr 1fr}
+  .card .ci,.pp .ph{flex:none;height:36vw}
+  .strip{flex:none;height:46vw}
+  .logos{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  .revs{grid-template-columns:1fr}
+  .refs,.toc ol{columns:1}
+  .cover .ttl{max-width:none;right:var(--pad);top:26%}
+  .cover h1{font-size:15vw}
+  .close .in{width:auto;right:var(--pad);justify-content:flex-end;padding-bottom:28vw}
+  .close .shade{background:linear-gradient(0deg,rgba(15,28,22,.95) 0,rgba(15,28,22,.85) 55%,rgba(15,28,22,.15) 85%)}
+  .chap .ct h2{font-size:13vw}
+  .bars{height:44vw}
+  .draft{right:auto;left:50%;transform:translateX(-50%)}
+  .bar{display:none}
+  .spec,.cols,.cols3b,.faq,.pay,.timeline,.partners,.plan{grid-template-columns:1fr!important}
+  .wide.c{justify-content:flex-start}
+  .wide.c>.legal:last-child{position:static;margin-top:5vw}
+  .cgi{position:static;display:block;max-width:none;text-align:left;padding:0 var(--pad) 26vw;margin-top:-20vw}
+  .top{background:rgba(247,241,236,.95);height:13vw}
+  body.ondark .top{background:rgba(24,58,44,.92)}
+  .bot{background:linear-gradient(0deg,rgba(247,241,236,.96) 60%,rgba(247,241,236,0));height:18vw}
+  body.ondark .bot{background:linear-gradient(0deg,rgba(24,58,44,.94) 60%,rgba(24,58,44,0))}
+  .wm small{display:none}
+  .draft{left:auto;right:calc(var(--pad) + 76px);transform:none;top:4.2vw}
+  .ovl{position:relative!important;left:auto!important;top:auto!important;max-width:none!important;margin:0}
+  .sp.h .im{flex:0 0 52vh}
+}
+@media (prefers-reduced-motion: reduce){.deck{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="top"><a class="wm" href="#p1" data-go="0">Charter House<small>Investment report</small></a><button class="menu-b" id="menuB" aria-label="Contents">Contents</button></header>
+<span class="draft">v4 draft</span>
+
+<main class="deck" id="deck">
+
+<!-- 1 · Cover: dark brand colour, the mark and the name, a thin gold line of viaduct arches. No photo, no text block. -->
+<section class="pg dk cover" data-ch="Cover" data-dark>
+  <div class="mark" role="img" aria-label="BRIK Studios"></div>
+  <div class="rt lab">Private pre-launch</div>
+  <div class="ttl">
+    <div class="lab">Investment report · 50–72 Churchgate, Stockport</div>
+    <h1>Charter House</h1>
+    <div class="meta">The last site to be developed in the Underbanks</div>
+  </div>
+  <svg viewBox="0 0 1600 360" preserveAspectRatio="xMidYMax slice" fill="none" stroke="#B3A184" stroke-width="1.1" aria-hidden="true"><g id="arches" opacity=".8"></g><path d="M0 330 C 220 300, 400 350, 640 326 S 1060 292, 1300 322 S 1520 342, 1600 334" opacity=".5"/><path d="M0 346 C 240 320, 420 364, 660 342 S 1080 310, 1320 338 S 1530 356, 1600 350" opacity=".28"/></svg>
+</section>
+
+<!-- 2 · Mood: full-bleed, no text -->
+<section class="pg dk" data-ch="Charter House" data-dark>
+  <div class="full"><img src="../assets/img/rear.webp" alt="Charter House on the corner of Churchgate and Harvey Street"></div>
+  <span class="cap">Charter House, the corner<br><span style="opacity:.75;letter-spacing:.14em">CGI indicative</span></span>
+</section>
+
+<!-- 3 · The opportunity -->
+<section class="pg" data-ch="The opportunity">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/side.webp" alt=""><span class="cap">The gable end concept</span></div>
+    <div class="tx">
+      <div class="lab">The opportunity</div>
+      <h2>A very limited number of buy-to-let apartments in the Underbanks.</h2>
+      <p class="lead">Stockport's historic conservation area, where strict planning means new homes almost never get built.</p>
+      <p>Charter House sits on the corner of Harvey Street and Churchgate. It's launching exclusively through BRIK Studios, and you're seeing it at private pre-launch, before it goes public.</p>
+      <p class="small" style="margin-top:1.4em">Charlie Baxter, Co-founder and Sales Director<br><a href="tel:+447353164480">07353 164480</a> · <a href="mailto:charlie@brik-studios.com">charlie@brik-studios.com</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Key details -->
+<section class="pg" data-ch="Key details">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/front.webp" alt=""><span class="cap">Churchgate elevation concept</span></div>
+    <div class="tx">
+      <div class="lab">Key details</div>
+      <h2 class="s">Charter House, Stockport</h2>
+      <div class="facts">
+        <div><b>Homes</b><span>27 apartments</span></div>
+        <div><b>Storeys</b><span>4</span></div>
+        <div><b>Completion</b><span>Early 2028</span></div>
+        <div><b>Tenure</b><span>999-year lease, nil ground rent</span></div>
+        <div><b>Developer</b><span>Hall &amp; Co</span></div>
+        <div><b>Architect</b><span>Ollier Smurthwaite</span></div>
+      </div>
+      <p class="small" style="margin-top:1.3em">Service charge est. £2.50 per sq ft per year · 10-year build warranty · A secure bike store per apartment · Exchange: 20% within 28 days</p>
+    </div>
+  </div>
+  <span class="cgi">CGI indicative and subject to change.</span>
+</section>
+
+<!-- 5 · Why now -->
+<section class="pg dk" data-ch="Why now" data-dark>
+  <div class="sp r">
+    <div class="im"><a href="../3d/assets/charterhouse_film.mp4" target="_blank" rel="noopener" style="display:block;height:100%"><img src="../3d/assets/charterhouse_film.jpg" alt="Watch the Charter House film" style="object-fit:contain;background:#0a0a0a"><span class="cap">▶&nbsp; Watch the film · 0:42</span></a></div>
+    <div class="tx">
+      <div class="lab">Private pre-launch · Why now</div>
+      <h2>Our Underbanks launches sell out in days, not months.</h2>
+      <div class="facts">
+        <div><b>Underbank Lofts</b><span>Sold out in under 2 weeks</span></div>
+        <div><b>The Print House</b><span>Phases one and two: 5 and 7 days</span></div>
+        <div><b>St Marys Gate</b><span>Sold out off-plan</span></div>
+      </div>
+      <p style="margin-top:1.4em">Charter House is the last site to be developed in the Underbanks: 27 apartments, and it isn't on the open market yet. The best apartments always go first.</p>
+      <div style="margin-top:.6em"><a class="btn" href="https://calendly.com/charlie-brik-studios/charter-house-3d-tour-video-call" target="_blank" rel="noopener">Book a 3D virtual tour</a><a class="btn o" href="https://wa.me/447353164480?text=Hi%20Charlie%2C%20I%27m%20looking%20at%20the%20Charter%20House%20report%20and%20have%20a%20question." target="_blank" rel="noopener">WhatsApp me</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · The numbers -->
+<section class="pg" data-ch="The numbers">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/kitchen.webp" alt=""><span class="cap">Kitchen and living concept</span></div>
+    <div class="tx">
+      <div class="lab">The numbers · Example one bed</div>
+      <h2 class="s">£189,000</h2>
+      <div class="nums">
+        <div><div class="k">Net cash flow</div><div class="big">£614.17</div><div class="s">per month, after costs</div></div>
+        <div><div class="k">Gross yield</div><div class="big">8.3%</div><div class="s">on £1,300 pcm</div></div>
+        <div><div class="k">Past 12 months</div><div class="big">+4.9%</div><div class="s">Stockport price growth</div></div>
+        <div><div class="k">Average annual return</div><div class="big">34%</div><div class="s">on capital deployed, 5-year hold</div></div>
+      </div>
+      <p class="small" style="margin-top:1.2em">Full workings in the Returns chapter.</p>
+    </div>
+  </div>
+  <span class="cgi">CGI indicative. Furniture not included.</span>
+</section>
+
+<!-- 7 · Chapter: The building -->
+<section class="pg dk chap" data-ch="01 The building" data-dark>
+  <div class="full"><img src="../assets/img/garden.webp" alt=""></div><div class="shade"></div>
+  <div class="ct"><div class="n">01</div><h2>The building</h2><div class="lab">Conservation-led design · Period brick detailing</div></div>
+  <span class="cap">The residents' courtyard concept</span>
+</section>
+
+<!-- 8 · The BRIK-down -->
+<section class="pg" data-ch="01 The building">
+  <div class="sp r">
+    <div class="im"><img src="../assets/img/james.webp" alt="James Dempsey" style="filter:grayscale(1);object-position:50% 20%"></div>
+    <div class="tx">
+      <div class="lab">The BRIK-down</div>
+      <p class="quote">With the previous Hall &amp; Co scheme next door, St Marys Gate, selling out and fully tenanting at rents 25 to 40% above forecast, the case for the Underbanks is no longer theoretical. Charter House is the chance to act on it.</p>
+      <p>What we love about this site is how unapologetically it leans into the heritage. Conservation-led design, period brick detailing, the kind of craftsmanship that gets harder to find every year. Charter House is being built to outlast trends, not follow them.</p>
+      <p class="small" style="margin-top:.6em"><b style="color:var(--ink);font-weight:600">James Dempsey</b><br>CEO, BRIK Studios. Previously group sales director in Hong Kong for 12 years</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · Your home: kitchen and living -->
+<section class="pg" data-ch="01 The building">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/kitchen.webp" alt="" style="object-position:30% 50%"><span class="cap">Kitchen and living concept</span></div>
+    <div class="tx">
+      <div class="lab">Your home</div>
+      <h2 class="s">Kitchen and living</h2>
+      <div class="facts">
+        <div><span style="text-align:left">Fully fitted kitchen with integrated dishwasher</span></div>
+        <div><span style="text-align:left">Marble-effect quartz worktop, tiled splashback</span></div>
+        <div><span style="text-align:left">Premium LVT flooring</span></div>
+        <div><span style="text-align:left">Skirting and architraves in dark heritage colours</span></div>
+      </div>
+    </div>
+  </div>
+  <span class="cgi">CGI indicative. Furniture not included.</span>
+</section>
+
+<!-- 10 · Bedroom and bathroom -->
+<section class="pg" data-ch="01 The building">
+  <div class="sp h">
+    <div class="im"><img src="../assets/img/bed.webp" alt=""><span class="cap">Bedroom concept</span></div>
+    <div class="im"><img src="../assets/img/bath.webp" alt=""><span class="cap">Bathroom concept</span></div>
+  </div>
+  <div style="position:absolute;left:var(--pad);top:calc(var(--u)*6.4);background:rgba(247,241,236,.94);padding:calc(var(--u)*1.4) calc(var(--u)*1.8);max-width:min(30%,420px);z-index:3" class="ovl">
+    <div class="lab">Bedroom and bathroom</div>
+    <p class="small" style="color:var(--ink);margin:.7em 0 0">LVT flooring, matt sockets and fixtures, wooden doors. Glass shower screen and matt black fittings, wall-hung toilet and basin, backlit mirrored cabinets.</p>
+  </div>
+</section>
+
+<!-- 11 · Floor plan: one bed -->
+<section class="pg bg" data-ch="Floor plans">
+  <div class="plan">
+    <div style="display:flex;flex-direction:column;justify-content:center">
+      <div class="lab g">Floor plans</div>
+      <h2>One Bedroom<br>Residence</h2>
+      <div class="facts">
+        <div><b>Type</b><span>1A</span></div>
+        <div><b>Size</b><span>412 sq ft</span></div>
+        <div><b>Plots</b><span>7–9, 14–16, 21–23</span></div>
+        <div><b>From</b><span>£189,000</span></div>
+      </div>
+      <p style="margin-top:1.4em"><a class="btn o" href="../3d/#plot-8">See it in 3D</a></p>
+    </div>
+    <div class="pl"><img src="../assets/img/fb14.webp" alt="Type 1A one-bed floor plan, furnished"></div>
+    <div class="side">
+      <div class="thumb"><img src="../assets/img/fa14.webp" alt="Where type 1A sits on the floor"><span class="cap" style="color:var(--mute);text-shadow:none">Plot 14 on the second floor</span></div>
+      <div class="thumb ph"><img src="../assets/img/p21_pos.webp" alt=""><span class="cap">Where plot 21 sits</span></div>
+    </div>
+  </div>
+  <span class="cgi">Plans are indicative and not to scale. Areas are approximate.</span>
+</section>
+
+<!-- 12 · Floor plan: two bed -->
+<section class="pg bg" data-ch="Floor plans">
+  <div class="plan" style="grid-template-columns:30fr 70fr">
+    <div style="display:flex;flex-direction:column;justify-content:center">
+      <div class="lab g">Floor plans</div>
+      <h2>Two Bedroom<br>Residence</h2>
+      <div class="facts">
+        <div><b>Type</b><span>2A</span></div>
+        <div><b>Size</b><span>658 sq ft</span></div>
+        <div><b>Plots</b><span>10, 17, 24</span></div>
+        <div><b>From</b><span>£300,000</span></div>
+      </div>
+      <p style="margin-top:1.4em"><a class="btn o" href="../3d/#plot-24">See it in 3D</a></p>
+    </div>
+    <div class="pl"><img src="../assets/img/p24_fb.webp" alt="Type 2A two-bed floor plan"></div>
+  </div>
+  <span class="cgi">Plans are indicative and not to scale. Areas are approximate.</span>
+</section>
+
+<!-- 13 · Specification -->
+<section class="pg bg" data-ch="Specification">
+  <div class="wide c">
+    <div class="lab g">The specification</div>
+    <h2 class="s">Finished to a heritage standard</h2>
+    <div class="spec">
+      <div><h4>Kitchen</h4><ul><li>Fully fitted, with integrated dishwasher</li><li>Marble-effect quartz worktop</li><li>Tiled splashback</li></ul></div>
+      <div><h4>Interiors &amp; finishes</h4><ul><li>Premium LVT flooring</li><li>Wooden doors</li><li>Skirting and architraves in dark heritage colours</li><li>Matt sockets and fixtures</li></ul></div>
+      <div><h4>Bathroom</h4><ul><li>Glass shower screen</li><li>Matt black fittings</li><li>Wall-hung toilet and basin</li><li>Backlit mirrored cabinets</li></ul></div>
+      <div><h4>The building</h4><ul><li>Planted residents' courtyard</li><li>Front doors on gallery walkways overlooking it</li><li>Conservation-led design, period brick detailing</li></ul></div>
+      <div><h4>Security &amp; storage</h4><ul><li>A secure bike store for every apartment</li></ul></div>
+      <div><h4>Peace of mind</h4><ul><li>10-year build warranty</li><li>999-year lease, nil ground rent</li><li>Service charge est. £2.50 per sq ft per year</li></ul></div>
+    </div>
+  </div>
+  <span class="cgi">Specification may change during the build; equivalent or better alternatives may be used.</span>
+</section>
+
+<!-- 14 · The people behind it -->
+<section class="pg" data-ch="The people">
+  <div class="wide">
+    <div class="lab">The people behind it</div>
+    <h2 class="s">Real people, a real track record</h2>
+    <div class="ppl">
+      <div class="pp"><div class="ph"><img src="../assets/img/james.webp" alt="James Dempsey"></div><h3>James Dempsey</h3><div class="role">CEO, BRIK Studios</div><p>Group sales director in Hong Kong for 12 years, bringing investors from Hong Kong, China and Singapore into the UK.</p></div>
+      <div class="pp"><div class="ph"><img src="../assets/img/charlie.webp" alt="Charlie Baxter"></div><h3>Charlie Baxter</h3><div class="role">Co-founder and Sales Director</div><p>10 years in property. Owns an apartment at Albion House, Hall &amp; Co's previous Underbanks building.</p></div>
+      <div class="pp"><div class="ph"><img src="../assets/img/jawaad.webp" alt="Jawaad Alam"></div><h3>Jawaad Alam</h3><div class="role">Aftersales Manager</div><p>With you from reservation, through the solicitor and broker, to completion.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 · Developer and architect, with their work -->
+<section class="pg" data-ch="The people">
+  <div class="wide">
+    <div class="lab">Brought to you by an award-winning team</div>
+    <div class="partners" style="margin-top:calc(var(--u)*1.6)">
+      <div class="pt">
+        <div class="strip two"><div><img src="../assets/img/stmarys.webp" alt=""><span class="cap">St Marys Gate, next door, 2025</span></div><div><img src="../assets/img/hall_done.webp" alt=""></div></div>
+        <div class="lab g">Developer</div><h3 style="margin:.35em 0 .2em">Hall &amp; Co</h3>
+        <ul><li>25+ years and 13 completed residential schemes across the North West, Cheshire and North Wales</li><li>St Marys Gate next door: 50 apartments, completed 2025, sold out off-plan and fully let</li></ul>
+      </div>
+      <div class="pt">
+        <div class="strip three"><div><img src="../assets/img/arch1.webp" alt=""></div><div><img src="../assets/img/arch2.webp" alt=""></div><div><img src="../assets/img/arch3.webp" alt=""><span class="cap">Ollier Smurthwaite schemes</span></div></div>
+        <div class="lab g">Architect</div><h3 style="margin:.35em 0 .2em">Ollier Smurthwaite</h3>
+        <ul><li>Appointed by Stockport Council to bring its vision for the Underbanks to life</li><li>18 years in business, 24 awards and £200m+ of mixed-use projects</li></ul>
+      </div>
+    </div>
+    <div class="aw" style="margin-top:calc(var(--u)*1.4)"><span>Grade II-listed restoration · Bank Chambers</span><span>Manchester Society of Architects · The George, Stockport</span><span>Housing Design Awards · Climate Innovation District</span><span>House Builder Awards · Roof Gardens</span><span>Manchester Society of Architects · City Gardens</span><span>RIBA Regional Awards · Devonshire Road</span></div>
+  </div>
+</section>
+
+<!-- 16 · Chapter: Why Stockport -->
+<section class="pg dk chap" data-ch="02 Why Stockport" data-dark>
+  <div class="full"><img src="../assets/img/skviaduct.webp" alt=""></div><div class="shade"></div>
+  <div class="ct"><div class="n">02</div><h2>Why Stockport</h2><div class="lab">The commuter hub of choice</div></div>
+  <span class="cap">Stockport viaduct</span>
+</section>
+
+<!-- 17 · Stockport has it all / commuter hub -->
+<section class="pg" data-ch="02 Why Stockport">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/t_station.webp" alt=""><span class="cap">Stockport station</span></div>
+    <div class="tx">
+      <div class="lab">Stockport has it all</div>
+      <h2 class="s">The North West's new commuter hub.</h2>
+      <p>A historic market town with real character, on the West Coast Main Line. Heritage streets full of independents, parks, well-regarded schools, and a town centre you can walk end to end.</p>
+      <div class="nums">
+        <div><div class="k">Manchester</div><div class="big">8 min</div><div class="s">11 trains an hour</div></div>
+        <div><div class="k">London Euston</div><div class="big">1 hr 58</div><div class="s">3 trains an hour</div></div>
+        <div><div class="k">Station</div><div class="big">£550m</div><div class="s">redevelopment</div></div>
+        <div><div class="k">Metrolink</div><div class="big">£2.5bn</div><div class="s">extension announced June 2025</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 18 · Regeneration -->
+<section class="pg" data-ch="02 Why Stockport">
+  <div class="wide">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:4vw">
+      <div><div class="lab">The UK's largest town-centre regeneration</div><h2 class="s" style="margin-bottom:0">£1bn today. £2bn by 2040.</h2></div>
+      <p class="small" style="max-width:40%;margin:0">The first town-centre Mayoral Development Corporation in the UK, now covering the whole town centre. Source: Stockport MDC and Stockport Council, 2025.</p>
+    </div>
+    <div class="g4">
+      <div class="card"><div class="ci"><img src="../assets/img/r_sk8.webp" alt=""></div><div class="big">£250m</div><h3>Stockport 8</h3><p>Pension-fund-led: 1,300 homes, with commercial space, green space and a park.</p></div>
+      <div class="card"><div class="ci"><img src="../assets/img/r_exch.webp" alt=""></div><div class="big">£145m</div><h3>Stockport Exchange</h3><p>375,000 sq ft of Grade A offices and a 115-bed hotel, next to the station.</p></div>
+      <div class="card"><div class="ci"><img src="../assets/img/t_inter.webp" alt=""></div><div class="big">£160m</div><h3>Transport interchange</h3><p>Completed March 2024: 164 departures an hour. Project of the Year, National Transport Awards 2024.</p></div>
+      <div class="card"><div class="ci"><img src="../assets/img/r_county.webp" alt=""></div><div class="big">League One</div><h3>Stockport County</h3><p>Back-to-back promotions and sold-out season tickets.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · Employers -->
+<section class="pg" data-ch="02 Why Stockport">
+  <div class="wide c">
+    <div class="lab">Tenants on the doorstep</div>
+    <h2 class="s">Big employers, here in Stockport.</h2>
+    <p style="max-width:62%">Not jobs at the end of a commute into Manchester: most are within a few miles of the town centre. In 2026 Vitality moved more than 1,000 staff into 3 Stockport Exchange, next to the station.</p>
+    <div class="logos">
+      <div><div class="lg"><img src="../assets/img/e_council.webp" alt="Stockport Council"></div><div class="big">6,000+</div><div class="n2">Stockport Council</div><div class="n3">Council services</div></div>
+      <div><div class="lg"><img src="../assets/img/e_nhs.webp" alt="Stockport NHS"></div><div class="big">2,790+</div><div class="n2">Stockport NHS Foundation Trust</div><div class="n3">Healthcare</div></div>
+      <div><div class="lg"><img src="../assets/img/e_vitality.webp" alt="Vitality"></div><div class="big">1,000+</div><div class="n2">Vitality Health</div><div class="n3">3 Stockport Exchange, 2026</div></div>
+      <div><div class="lg"><img src="../assets/img/e_lex.webp" alt="Lex Autolease"></div><div class="big">850</div><div class="n2">Lex Autolease</div><div class="n3">Cheadle Heath</div></div>
+      <div><div class="lg"><img src="../assets/img/e_robinsons.webp" alt="Robinsons Brewery"></div><div class="big">830</div><div class="n2">Robinsons Brewery</div><div class="n3">Stockport's own brewery</div></div>
+      <div><div class="lg"><img src="../assets/img/e_together.webp" alt="Together Trust"></div><div class="big">800</div><div class="n2">Together Trust</div><div class="n3">Social care, Cheadle</div></div>
+      <div><div class="lg"><img src="../assets/img/e_nexperia.webp" alt="Nexperia"></div><div class="big">780</div><div class="n2">Nexperia</div><div class="n3">Electronics, Hazel Grove</div></div>
+      <div><div class="lg"><img src="../assets/img/e_totally.webp" alt="Totally Local Company"></div><div class="big">750</div><div class="n2">Totally Local Company</div><div class="n3">Cheadle Heath</div></div>
+      <div><div class="lg"><img src="../assets/img/e_homes.webp" alt="Stockport Homes"></div><div class="big">720</div><div class="n2">Stockport Homes</div><div class="n3">Housing association</div></div>
+      <div><div class="lg"><img src="../assets/img/e_aa.webp" alt="The AA"></div><div class="big">650</div><div class="n2">The AA</div><div class="n3">Cheadle</div></div>
+    </div>
+    <p class="legal" style="margin-top:auto">Stockport Council, August 2026.</p>
+  </div>
+</section>
+
+<!-- 20 · In the press -->
+<section class="pg dk" data-ch="02 Why Stockport" data-dark>
+  <div class="sp r">
+    <div class="im"><img src="../assets/img/skmarket.webp" alt=""><span class="cap">Stockport Market Hall</span></div>
+    <div class="tx">
+      <div class="lab">In the press</div>
+      <h2><span style="color:var(--gold2)">No. 4</span><br>UK's coolest neighbourhood</h2>
+      <p class="small" style="margin-top:-.4em">Underbanks and Central Stockport, Time Out 2026</p>
+      <div class="facts">
+        <div><span style="text-align:left">Stockport named best place to live in the North West of England</span><b>2024</b></div>
+        <div><span style="text-align:left">Stockport offers Britain's towns a blueprint for revival</span><b>Press</b></div>
+        <div><span style="text-align:left">This is Stockport's Northern Quarter: people are moving here from Manchester</span><b>Press</b></div>
+        <div><span style="text-align:left">Stockport Interchange wins a prestigious national transport award</span><b>2024</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 21 · Chapter: The Underbanks -->
+<section class="pg dk chap" data-ch="03 The Underbanks" data-dark>
+  <div class="full"><img src="../assets/img/skunderbanks.webp" alt=""></div><div class="shade"></div>
+  <div class="ct"><div class="n">03</div><h2>The Underbanks</h2><div class="lab">A minute from Charter House</div></div>
+  <span class="cap">The Underbanks, Stockport</span>
+</section>
+
+<!-- 22 · The Underbanks: demand and supply -->
+<section class="pg" data-ch="03 The Underbanks">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/tenant.webp" alt="" style="object-position:50% 60%"><span class="cap">The Underbanks</span></div>
+    <div class="tx">
+      <div class="lab">Where Stockport comes alive</div>
+      <h2 class="s">Huge demand, tiny supply.</h2>
+      <p>Cobbled lanes of independents, bars, restaurants and events, and the youngest average age in Stockport. It's where young professionals want to live.</p>
+      <p>Listed buildings and strict planning mean nothing over four storeys can be built in the conservation area, so future supply has a hard cap.</p>
+      <div class="nums">
+        <div><div class="k">Average age</div><div class="big">36.8</div><div class="s">the youngest in Stockport</div></div>
+        <div><div class="k">Conservation area</div><div class="big">1974</div><div class="s">£1.8m National Lottery heritage grant</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 23 · Amenities on the doorstep -->
+<section class="pg" data-ch="03 The Underbanks">
+  <div class="wide">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:4vw">
+      <div><div class="lab">Your amenities</div><h2 class="s" style="margin-bottom:0">Everything on the doorstep.</h2></div>
+      <p class="small" style="max-width:36%;margin:0">Walking times from Charter House.</p>
+    </div>
+    <div class="g3" style="grid-template-rows:1fr 1fr">
+      <div class="card"><div class="ci"><img src="../assets/img/under.webp" alt=""></div><h3>The Underbanks</h3><div class="walk">Under 1 min</div></div>
+      <div class="card"><div class="ci"><img src="../assets/img/market.webp" alt=""></div><h3>The Market Hall</h3><div class="walk">Next door</div></div>
+      <div class="card"><div class="ci"><img src="../assets/img/resto.webp" alt=""></div><h3>Bars and restaurants</h3><div class="walk">In the Underbanks</div></div>
+      <div class="card"><div class="ci"><img src="../assets/img/r_merse.webp" alt=""></div><h3>Merseyway Shopping Centre</h3><div class="walk">3 min</div></div>
+      <div class="card"><div class="ci"><img src="../assets/img/t_inter.webp" alt=""></div><h3>Bus interchange and park</h3><div class="walk">10 min</div></div>
+      <div class="card"><div class="ci"><img src="../assets/img/t_station.webp" alt=""></div><h3>Stockport station</h3><div class="walk">10 min · Manchester in 8</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 24 · Our involvement -->
+<section class="pg" data-ch="03 The Underbanks">
+  <div class="wide">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:4vw">
+      <div><div class="lab">Rooted in the Underbanks</div><h2 class="s" style="margin-bottom:0">We've built our own businesses on these streets.</h2></div>
+    </div>
+    <div class="g4">
+      <div class="card"><div class="ci"><img src="../assets/img/b_incu.webp" alt=""></div><h3>INCU</h3><p>Short for incubator: our commercial lettings arm, giving independent brands space to test concepts in store.</p></div>
+      <div class="card"><div class="ci"><img src="../assets/img/b_miru.webp" alt=""></div><h3>Miru Mill</h3><p>A creative space in the town centre for workshops, studio space, event hire and dinner parties.</p></div>
+      <div class="card"><div class="ci"><img src="../assets/img/b_convene.webp" alt=""></div><h3>Convene</h3><p>A neighbourhood café focused on seasonal cooking.</p></div>
+      <div class="card"><div class="ci"><img src="../assets/img/b_dilly.webp" alt=""></div><h3>Dilly Deli</h3><p>Your neighbourhood favourite on Little Underbank.</p></div>
+    </div>
+    <div class="nums" style="grid-template-columns:repeat(4,1fr);margin-top:calc(var(--u)*1.6)">
+      <div><div class="k">Transacted for clients</div><div class="big">£1.3bn</div></div>
+      <div><div class="k">Capital deployed</div><div class="big">£425m</div></div>
+      <div><div class="k">UK developments delivered</div><div class="big">17</div></div>
+      <div><div class="k">Combined experience</div><div class="big">55 years</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 25 · The data -->
+<section class="pg" data-ch="04 The data">
+  <div class="sp r">
+    <div class="im"><img src="../assets/img/skroofs.webp" alt=""><span class="cap">Stockport town centre</span></div>
+    <div class="tx">
+      <div class="lab">The data</div>
+      <h2 class="s">A hard cap on supply.</h2>
+      <div class="nums">
+        <div><div class="k">Time to sell</div><div class="big">22 days</div><div class="s">2nd fastest in the country</div></div>
+        <div><div class="k">SK1 average</div><div class="big">Under £200k</div><div class="s">2.5x lower than SK9</div></div>
+        <div><div class="k">Town-centre sales</div><div class="big">48</div><div class="s">a fraction of nearby postcodes</div></div>
+        <div><div class="k">New-build sales</div><div class="big">Near zero</div><div class="s">little to no new development</div></div>
+        <div><div class="k">12 months to Apr 2026</div><div class="big">+4.9%</div><div class="s">average prices</div></div>
+        <div><div class="k">Last five years</div><div class="big">+17%</div><div class="s">average prices</div></div>
+      </div>
+      <p class="legal" style="margin-top:1em">Sources: The Telegraph (2025 data); HM Land Registry UK House Price Index; ONS.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 26 · Chapter: Returns -->
+<section class="pg dk chap" data-ch="05 Returns" data-dark>
+  <div class="full"><img src="../assets/img/hero.webp" alt=""></div><div class="shade"></div>
+  <div class="ct"><div class="n">05</div><h2>Returns</h2><div class="lab">Worked example · One bed at £189,000</div></div>
+  <span class="cap">Charter House concept · CGI indicative</span>
+</section>
+
+<!-- 27 · Cash flow and cash needed -->
+<section class="pg bg" data-ch="05 Returns">
+  <div class="wide c">
+    <div class="lab g">Returns forecast · Example one bed</div>
+    <h2 class="s">£614 a month, after costs.</h2>
+    <div class="cols3b">
+      <div class="panel">
+        <div class="nums" style="border:0">
+          <div><div class="k">Rent forecast</div><div class="big">£1,300</div><div class="s">pcm</div></div>
+          <div><div class="k">Gross yield</div><div class="big">8.3%</div></div>
+          <div><div class="k">Net monthly</div><div class="big">£614</div></div>
+          <div><div class="k">Net per year</div><div class="big">£7,370</div></div>
+        </div>
+      </div>
+      <div class="panel"><div class="lab g" style="margin-bottom:.8em">Monthly cash flow</div>
+        <table><tr><td>Rent</td><td class="r">£1,300</td></tr><tr><td>Mortgage, 75% at 4% interest only (5-year fix)</td><td class="r">−£472.50</td></tr><tr><td>Service charge, est.</td><td class="r">−£83</td></tr><tr><td>Ground rent</td><td class="r">£0</td></tr><tr><td>Letting management, 10%</td><td class="r">−£130</td></tr><tr class="t"><td>Net monthly cash flow</td><td class="r">£614.17</td></tr></table></div>
+      <div class="panel"><div class="lab g" style="margin-bottom:.8em">Cash needed</div>
+        <table><tr><td>20% deposit</td><td class="r">£37,800</td></tr><tr><td>Admin fee</td><td class="r">£500</td></tr><tr><td>Stamp duty*</td><td class="r">£10,730</td></tr><tr><td>Legal fees</td><td class="r">£1,900</td></tr><tr><td>5% top-up for a 75% mortgage</td><td class="r">£9,450</td></tr><tr class="t"><td>Total cash deployed</td><td class="r">£60,380</td></tr></table></div>
+    </div>
+    <p class="legal" style="margin-top:auto">*Stamp duty at the higher rate for an additional property; lower if this will be your only home. Legal fees are from our panel solicitor. Please take your own tax and legal advice.</p>
+  </div>
+</section>
+
+<!-- 28 · Proven rents next door -->
+<section class="pg" data-ch="05 Returns">
+  <div class="sp r">
+    <div class="im"><img src="../assets/img/stmarys.webp" alt=""><span class="cap">St Marys Gate, next door. Completed 2025</span></div>
+    <div class="tx">
+      <div class="lab">Proven rents next door</div>
+      <h2 class="s">St Marys Gate beat its forecast.</h2>
+      <p>Hall &amp; Co's St Marys Gate sold in Q1 2023 with a 1-bed rent forecast of £900 pcm. By May 2025, 1 beds were letting for £1,100 to £1,250 pcm: 22–39% above forecast.</p>
+      <div class="bars">
+        <div><div class="v">£900</div><div class="b" style="height:58%"></div><div class="k">St Marys Gate, forecast 2023</div></div>
+        <div><div class="v">£1,100–1,250</div><div class="b mid" style="height:80%"></div><div class="k">St Marys Gate, achieved 2025</div></div>
+        <div><div class="v">£1,300</div><div class="b hi" style="height:84%"></div><div class="k">Charter House, forecast</div></div>
+      </div>
+      <p class="small" style="margin-top:calc(var(--u)*4.4)">1-bed rent, per calendar month.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 29 · Long-term view -->
+<section class="pg bg" data-ch="05 Returns">
+  <div class="wide c">
+    <div class="lab g">The long-term view</div>
+    <h2 class="s">The North West is forecast to lead the UK.</h2>
+    <div class="cols3b" style="grid-template-columns:1.25fr 1fr 1fr">
+      <div class="panel"><div class="lab g" style="margin-bottom:.6em">Price growth forecast</div>
+        <table><tr><th></th><th class="r">2027</th><th class="r">2028</th><th class="r">2029</th><th class="r">2030</th><th class="r">5 yrs</th></tr>
+        <tr><td><b>North West</b></td><td class="r">3.5%</td><td class="r">6.5%</td><td class="r">6.5%</td><td class="r">6.5%</td><td class="r"><b>25.0%</b></td></tr>
+        <tr><td>UK</td><td class="r">2.5%</td><td class="r">5.0%</td><td class="r">6.0%</td><td class="r">6.0%</td><td class="r">18.5%</td></tr>
+        <tr><td>London</td><td class="r">1.0%</td><td class="r">3.5%</td><td class="r">5.0%</td><td class="r">5.0%</td><td class="r">10.6%</td></tr></table>
+        <p class="legal" style="margin-top:.8em">Sources: Savills, five-year forecast revised June 2026; Upstix.</p></div>
+      <div class="panel"><div class="lab g" style="margin-bottom:.6em">Rental growth at 4% a year</div>
+        <table><tr><th>Year</th><th class="r">Rent pcm</th><th class="r">Gross yield</th></tr><tr><td>1</td><td class="r">£1,300</td><td class="r">8.3%</td></tr><tr><td>2</td><td class="r">£1,352</td><td class="r">8.6%</td></tr><tr><td>3</td><td class="r">£1,406</td><td class="r">8.9%</td></tr><tr><td>4</td><td class="r">£1,462</td><td class="r">9.3%</td></tr><tr><td>5</td><td class="r">£1,521</td><td class="r">9.7%</td></tr></table></div>
+      <div class="panel"><div class="lab g" style="margin-bottom:.6em">Over 20 years</div>
+        <div class="nums" style="border:0">
+          <div class="wide1"><div class="k">Value by year 20</div><div class="big">£517,393</div><div class="s">from £189,000</div></div>
+          <div><div class="k">Capital gain</div><div class="big" style="font-size:calc(var(--u)*1.9)">£328,393</div></div>
+          <div><div class="k">Net rental income</div><div class="big" style="font-size:calc(var(--u)*1.9)">£284,685</div></div>
+          <div><div class="k">Total return on £60,380</div><div class="big" style="font-size:calc(var(--u)*1.9)">1015%</div></div>
+          <div><div class="k">Average a year</div><div class="big" style="font-size:calc(var(--u)*1.9)">51%</div></div>
+        </div></div>
+    </div>
+    <p class="legal" style="margin-top:auto">Capital growth assumes the apartment is worth £195,000 on completion and then rises 5% a year. Rental income assumes 4% rent growth, 10% management, a 75% interest-only mortgage at 4% and the service charge. Average annual return is the total return divided by the years held; it is not compounded. Forecasts are not guaranteed.</p>
+  </div>
+</section>
+
+<!-- 30 · Reviews -->
+<section class="pg" data-ch="Our clients">
+  <div class="wide" style="justify-content:center">
+    <div class="lab">What our clients say</div>
+    <h2 class="s">Rated Excellent on Trustpilot. <span style="color:var(--mute);font-size:.6em">4.8 out of 5 from 63 reviews</span></h2>
+    <div class="revs">
+      <div class="rv"><div class="st">★★★★★</div><q>Charlie is the person you want in your corner if you are looking to invest in property. Professional, likeable and honest.</q><div class="who">Di Ainsworth</div></div>
+      <div class="rv"><div class="st">★★★★★</div><q>Brik were responsive and supportive both before and after we completed the apartment purchase. Can't wait to watch the build progress.</q><div class="who">Clare R</div></div>
+      <div class="rv"><div class="st">★★★★★</div><q>He's taken the time to explain everything properly, answer all of my questions, and make sure I actually understand what I'm investing in.</q><div class="who">Namra Anwar, on Jawaad</div></div>
+    </div>
+    <p style="margin-top:calc(var(--u)*2.4)"><a class="btn o" href="https://uk.trustpilot.com/review/brik-studios.com" target="_blank" rel="noopener">Read all reviews on Trustpilot</a></p>
+  </div>
+</section>
+
+<!-- 31 · Process and payments -->
+<section class="pg bg" data-ch="Next steps">
+  <div class="wide c">
+    <div class="lab g">The process</div>
+    <h2 class="s">Six steps, from today to your keys.</h2>
+    <div class="steps">
+      <div class="stp"><div class="n">1</div><h3>Appraise</h3><p>Review the development and the numbers.</p></div>
+      <div class="stp on"><div class="n">2</div><h3>Choose your apartment</h3><p>A 30-minute 3D video tour with Charlie.</p></div>
+      <div class="stp"><div class="n">3</div><h3>Reserve</h3><p>£3,000 takes it off the market.</p></div>
+      <div class="stp"><div class="n">4</div><h3>Legal process</h3><p>AML checks, our panel solicitor and, if needed, our broker.</p></div>
+      <div class="stp"><div class="n">5</div><h3>Exchange</h3><p>20% deposit, within 28 days.</p></div>
+      <div class="stp"><div class="n">6</div><h3>Completion</h3><p>Early 2028. Pay the balance, collect your keys.</p></div>
+    </div>
+    <div class="timeline">
+      <div class="panel"><div class="lab g">Today, to reserve</div><div class="big" style="margin:.35em 0 .5em">£3,000</div><table><tr><td>Reservation deposit, counts towards your 20%</td><td class="r">£2,500</td></tr><tr><td>Admin fee to BRIK Studios</td><td class="r">£500</td></tr></table></div>
+      <div class="panel"><div class="lab g">Within 28 days, on exchange</div><div class="big" style="margin:.35em 0 .5em">£36,500</div><table><tr><td>Rest of your 20% deposit</td><td class="r">£35,300</td></tr><tr><td>Legal fees</td><td class="r">£1,200</td></tr></table></div>
+      <div class="panel"><div class="lab g">Early 2028, on completion</div><div class="big" style="margin:.35em 0 .5em">£20,880</div><table><tr><td>5% top-up, with a 75% mortgage</td><td class="r">£9,450</td></tr><tr><td>Stamp duty*</td><td class="r">£10,730</td></tr><tr><td>Legal fees</td><td class="r">£700</td></tr></table></div>
+    </div>
+    <p class="legal" style="margin-top:auto">Example one bed at £189,000. Total cash needed with a 75% buy-to-let mortgage: £60,380. *Stamp duty at the higher rate for an additional property. Please take your own tax and legal advice.</p>
+  </div>
+</section>
+
+<!-- 32 · After you reserve -->
+<section class="pg" data-ch="Next steps">
+  <div class="sp r">
+    <div class="im"><img src="../assets/img/jawaad.webp" alt="Jawaad Alam" style="filter:grayscale(1);object-position:50% 20%"></div>
+    <div class="tx">
+      <div class="lab">After you reserve</div>
+      <p class="quote" style="font-size:calc(var(--u)*1.7)">It's my job to make the process as seamless as possible, and I'll be on hand to assist with every step.</p>
+      <p class="small" style="margin-top:-.6em"><b style="color:var(--ink);font-weight:600">Jawaad Alam</b>, Aftersales Manager</p>
+      <div class="facts">
+        <div><b>1</b><span>A call to walk you through exactly what happens next</span></div>
+        <div><b>2</b><span>Our panel solicitor and, if you need one, our mortgage broker</span></div>
+        <div><b>3</b><span>With you through exchange and completion</span></div>
+      </div>
+      <p style="margin-top:1.3em"><b style="font-weight:600">After completion, we take care of it all.</b> Tenant find, referencing, rent collection and day-to-day management, for 10% of the rent. We're two minutes away at The Print House.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 33 · FAQs -->
+<section class="pg" data-ch="Next steps">
+  <div class="wide c">
+    <div class="lab">Before you reserve</div>
+    <h2 class="s">Frequently asked questions</h2>
+    <div class="faq">
+      <div><h3>How do I reserve?</h3><p>Book a 3D virtual tour and choose your apartment with us. £3,000 then takes it off the market: £2,500 counts towards your 20% deposit and £500 is BRIK Studios' admin fee.</p></div>
+      <div><h3>Can I buy with a mortgage?</h3><p>Yes. Most buyers use a 75% buy-to-let mortgage, arranged in the months before completion. We can introduce you to our mortgage broker.</p></div>
+      <div><h3>What do I pay, and when?</h3><p>£3,000 to reserve. The rest of your 20% deposit within 28 days, on exchange. The balance on completion, expected early 2028.</p></div>
+      <div><h3>What are the lease and ground rent?</h3><p>A 999-year lease with nil ground rent, and a 10-year build warranty.</p></div>
+      <div><h3>What are the running costs?</h3><p>Service charge est. £2.50 per sq ft per year, about £86 a month for an average 1 bed. Letting management is 10% of the rent. Both are in every number here.</p></div>
+      <div><h3>Who finds the tenant and manages it?</h3><p>We do, for 10% of the rent. You don't need to live nearby.</p></div>
+      <div><h3>Can I see it before I buy?</h3><p>It's under construction, so we take you round our 3D model of the finished building on a video call. St Marys Gate next door is a finished Hall &amp; Co scheme you can see for yourself.</p></div>
+      <div><h3>When is completion?</h3><p>Early 2028. You'll get notice to complete well ahead of the date.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 34 · Heritage -->
+<section class="pg" data-ch="Heritage">
+  <div class="sp">
+    <div class="im"><img src="../assets/img/h_shop.webp" alt="" style="filter:sepia(.25)"><span class="cap">W. Harvey, prize medal saddler, archive</span></div>
+    <div class="tx">
+      <div class="lab">The building's heritage</div>
+      <h2 class="s">Named for its neighbour.</h2>
+      <p>Charter House is named for Stockport's Market Hall, right next door. Harvey Street is named after William Harvey, a prize-medal saddler and leather goods merchant whose shop also kitted out Stockport's Boy Scouts.</p>
+      <p>The building borrows its identity from his adverts: the scout on the keyring comes straight from them.</p>
+      <div class="strip two" style="flex:none;height:calc(var(--u)*13);margin-top:.6em"><div><img src="../assets/img/idboard.webp" alt=""></div><div><img src="../assets/img/keyring.webp" alt="" style="object-position:50% 30%"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 35 · Strong close -->
+<section class="pg dk close" data-ch="Contact" data-dark>
+  <div class="full"><img src="../assets/img/rear.webp" alt=""></div><div class="shade"></div>
+  <div class="in">
+    <div class="lab">See it in 3D, then choose yours</div>
+    <h2>Secure yours before it launches.</h2>
+    <div class="who"><img src="../assets/img/charlie.webp" alt=""><div><b>Charlie Baxter</b><span>Co-founder and Sales Director, BRIK Studios</span></div></div>
+    <a class="tel" href="tel:+447353164480">07353 164480</a>
+    <a class="em" href="mailto:charlie@brik-studios.com">charlie@brik-studios.com</a>
+    <div><a class="btn" href="https://calendly.com/charlie-brik-studios/charter-house-3d-tour-video-call" target="_blank" rel="noopener">Book a 3D virtual tour</a><a class="btn o" href="https://wa.me/447353164480?text=Hi%20Charlie%2C%20I%27m%20looking%20at%20the%20Charter%20House%20report%20and%20have%20a%20question." target="_blank" rel="noopener">WhatsApp me</a></div>
+    <p class="legal" style="margin-top:calc(var(--u)*1.6)">30 minutes on Microsoft Teams, at a time that suits you. No obligation.</p>
+  </div>
+  <span class="cap">Charter House, the corner · CGI indicative</span>
+</section>
+
+<!-- 36 · References and legal small print -->
+<section class="pg bg" data-ch="Sources">
+  <div class="wide">
+    <div class="lab g">Further reading</div>
+    <h2 class="s">References and sources</h2>
+    <div class="refs">
+      <div>Stockport 8 Consultation<span>Stockport MDC and European Cities Fund, 2024</span></div>
+      <div>Stockport Business Framework 2023–2028<span>Stockport MDC, 2023</span></div>
+      <div>Central Stockport Infrastructure Delivery Plan<span>Stockport Council, 2020</span></div>
+      <div>Stockport Station Growth Prospectus<span>Stockport Council and Stockport MDC, 2023</span></div>
+      <div>Stockport Strategic Business Plan 2024–2029<span>Stockport MDC, 2024</span></div>
+      <div>Stockport Strategic Regeneration Framework<span>Stockport Council, 2019</span></div>
+      <div>Stockport Town Centre Living: Development Framework<span>CBRE, 2018</span></div>
+      <div>The Value of a Tram Station on Local House Prices<span>City University of Birmingham, 2019</span></div>
+      <div>Unstoppable Stockport<span>Stockport MDC, spring 2025</span></div>
+      <div>Stockport Exchange: Commercial District Brochure<span>Muse and CBRE, 2020</span></div>
+      <div>Stockport, Change Here<span>Stockport Council, 2023</span></div>
+      <div>UK House Price Index<span>HM Land Registry</span></div>
+    </div>
+    <div class="panel" style="margin-top:auto">
+      <div class="lab g" style="margin-bottom:.6em">Important information</div>
+      <p class="legal" style="margin:0">These particulars are for guidance only and do not form part of any offer or contract. Computer-generated images, floor plans and specifications are indicative and may change; furniture is not included. Areas and dimensions are approximate. Service charges are estimates. Rental and capital growth figures are forecasts based on the stated assumptions and are not guaranteed; the value of property can go down as well as up. Please take your own independent tax, legal and financial advice before investing.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="bot">
+  <button class="nav" id="prev" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="nav" id="next" aria-label="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 5l7 7-7 7"/></svg></button>
+  <span class="count" id="count">01 / 36</span>
+  <div class="bar"><i id="barI"></i></div>
+</footer>
+<div class="hint" id="hint">Swipe or use the arrows</div>
+
+<nav class="toc" id="toc" aria-label="Contents"><button class="x" id="tocX">Close</button><h3>Contents</h3><ol id="tocL"></ol></nav>
+
+<script>
+(() => {
+  const deck = document.getElementById('deck'), pages = [...deck.querySelectorAll('.pg')], N = pages.length;
+  const prev = document.getElementById('prev'), next = document.getElementById('next'), count = document.getElementById('count'), barI = document.getElementById('barI');
+  let cur = 0;
+  // cover arches (the Stockport viaduct as a line motif)
+  const g = document.getElementById('arches'); let s = '';
+  for (let x = -40, w = 112; x < 1660; x += w) { const r = w / 2 - 11, cx = x + w / 2; s += `<path d="M${cx - r} 360 V180 A${r} ${r} 0 0 1 ${cx + r} 180 V360"/>`; }
+  g.innerHTML = s + '<path d="M0 110 H1600"/><path d="M0 120 H1600" opacity=".4"/>';
+  const pad = n => String(n).padStart(2, '0');
+  function setCur(i) {
+    cur = Math.max(0, Math.min(N - 1, i));
+    const p = pages[cur];
+    count.textContent = `${pad(cur + 1)} / ${N}${p.dataset.ch ? ' · ' + p.dataset.ch : ''}`;
+    barI.style.width = ((cur + 1) / N * 100) + '%';
+    prev.disabled = cur === 0; next.disabled = cur === N - 1;
+    document.body.classList.toggle('ondark', p.hasAttribute('data-dark')); document.body.classList.toggle('oncover', cur === 0);
+    if (location.hash !== '#p' + (cur + 1)) history.replaceState(null, '', '#p' + (cur + 1));
+  }
+  const go = (i, smooth = true) => { i = Math.max(0, Math.min(N - 1, i)); deck.scrollTo({ left: i * deck.clientWidth, behavior: smooth ? 'smooth' : 'auto' }); setCur(i); };
+  prev.onclick = () => go(cur - 1); next.onclick = () => go(cur + 1);
+  let t; deck.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(() => setCur(Math.round(deck.scrollLeft / deck.clientWidth)), 60); }, { passive: true });
+  addEventListener('keydown', e => {
+    if (document.getElementById('toc').classList.contains('on')) { if (e.key === 'Escape') closeToc(); return; }
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') go(0); else if (e.key === 'End') go(N - 1);
+  });
+  // vertical mouse wheel steps the deck sideways on landscape screens
+  let wl = 0; deck.addEventListener('wheel', e => {
+    if (matchMedia('(max-aspect-ratio: 1/1)').matches) return;
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    e.preventDefault(); const now = Date.now(); if (now - wl < 650) return; wl = now; go(cur + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+  addEventListener('resize', () => go(cur, false));
+  // contents: one entry per chapter
+  const toc = document.getElementById('toc'), tl = document.getElementById('tocL'); const seen = new Set();
+  pages.forEach((p, i) => { const c = p.dataset.ch; if (!c || seen.has(c)) return; seen.add(c); const li = document.createElement('li'); li.innerHTML = `<button><span>${pad(i + 1)}</span>${c}</button>`; li.firstChild.onclick = () => { closeToc(); go(i, false); }; tl.appendChild(li); });
+  const closeToc = () => toc.classList.remove('on');
+  document.getElementById('menuB').onclick = () => toc.classList.add('on');
+  document.getElementById('tocX').onclick = closeToc;
+  document.querySelector('[data-go]').onclick = e => { e.preventDefault(); go(0); };
+  const m = location.hash.match(/^#p(\d+)$/); go(m ? +m[1] - 1 : 0, false);
+  setTimeout(() => document.getElementById('hint').classList.add('off'), 3800);
+})();
+</script>
+</body>
+</html>

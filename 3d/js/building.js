@@ -1,8 +1,8 @@
 // Charter House: procedural model built from the Ollier Smurthwaite plans and elevations.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { UNITS, FLOOR_H } from './data.js?v=1793905393';
-import { roomMaterial, CUT_PLANES } from './materials.js?v=1793905393';
+import { UNITS, FLOOR_H, CG_PAVE } from './data.js?v=1794535000';
+import { roomMaterial, CUT_PLANES } from './materials.js?v=1794535000';
 
 const FH = FLOOR_H;
 const T = 0.4;              // external wall thickness
@@ -69,6 +69,10 @@ export function boxGeom(x0, y0, z0, x1, y1, z1) {
   return g;
 }
 
+// the Churchgate entrance floor: level with the pavement there, which on the climbing street is about level with the
+// ground floor (architect's NE elevation; was -0.41 on the old flat street)
+const ENT_V = Math.max(-0.41, CG_PAVE(8.9));
+
 // ---------------------------------------------------------------- façade definitions
 // window spec: { id, c (u centre), v0, v1, w, type: 'win2'|'win1'|'blind'|'door'|'arch', floor }
 function fl(f) { return f * FH; }
@@ -111,13 +115,17 @@ export function buildCharterHouse(M, base) {
     hvCB.forEach((z, i) => open.cbH.push({ id: 'HV' + (i + 1), c: 9.2 - z, v0: y + CBs, v1: y + CBh, w: CBW, type: 'win2', floor: f }));
     cgW.forEach((x, i) => {
       const id = 'CG' + (i + 4), c = x - 10.9;
-      if (f === 0) open.cwC.push({ id, c, v0: y + Gs, v1: y + Gh, w: GW, type: 'blind', floor: f });
-      else if (f === 3) open.cwC.push({ id, c, v0: 8.8, v1: 10.72, w: 0.95, type: 'win1', floor: f });
+      // the wing's ground floor is below the climbing Churchgate pavement (bins and plant behind, no windows): a recessed brick
+      // panel runs from the pavement up under each first-floor window, and those windows come down close to the pavement
+      // in clear glass (architect's NE elevation A839_P_300H and the developer's CGIs, 12 Nov)
+      if (f === 0) open.cwC.push({ id, c, v0: CG_PAVE(x) + 0.04, v1: 1.52, w: GW, type: 'blind', floor: f });
+      else if (f === 1) open.cwC.push({ id, c, v0: 2.03, v1: y + Gh, w: GW, type: 'win2', floor: f, panelTo: y + 0.06, rows: 3 });
+      else if (f === 3) open.cwC.push({ id, c, v0: 8.8, v1: 10.72, w: 0.95 * 1.03, type: 'win1', floor: f });   // gable windows 3% wider (Charlie, 12 Nov)
       else open.cwC.push({ id, c, v0: y + Gs, v1: y + Gh, w: GW, type: 'win2', floor: f });
     });
     hvW.forEach((z, i) => {
       const id = 'HV' + (i + 4), c = 21.27 - z;
-      if (f === 3) open.hwH.push({ id, c, v0: 8.8, v1: 10.72, w: 0.95, type: 'win1', floor: f });
+      if (f === 3) open.hwH.push({ id, c, v0: 8.8, v1: 10.72, w: 0.95 * 1.03, type: 'win1', floor: f });   // gable windows 3% wider (Charlie, 12 Nov)
       else open.hwH.push({ id, c, v0: y + Gs, v1: y + Gh, w: GW, type: 'win2', floor: f });
     });
     // courtyard faces
@@ -166,9 +174,9 @@ export function buildCharterHouse(M, base) {
     const h = new THREE.Path();
     if (o.type === 'arch') {
       const x0 = o.c - 1.3, x1 = o.c + 1.3, spring = 3.3;
-      h.moveTo(x0, 0); h.lineTo(x1, 0); h.lineTo(x1, spring);
+      h.moveTo(x0, ENT_V); h.lineTo(x1, ENT_V); h.lineTo(x1, spring);
       h.absarc(o.c, spring, 1.3, 0, Math.PI, false);
-      h.lineTo(x0, 0);
+      h.lineTo(x0, ENT_V);
     } else {
       const x0 = o.c - o.w / 2, x1 = o.c + o.w / 2;
       h.moveTo(x0, o.v0); h.lineTo(x1, o.v0); h.lineTo(x1, o.v1); h.lineTo(x0, o.v1); h.lineTo(x0, o.v0);
@@ -203,13 +211,14 @@ export function buildCharterHouse(M, base) {
     band(F[k], -0.06, len, 12.05, 0.24, 0.07);            // frieze
     band(F[k], -0.08, len, 12.42, 0.1, 0.1);              // corbel
     band(F[k], -0.1, len, PARAPET - 0.1, 0.12, 0.12, 'stone'); // coping
-    seg(-1.5, (a, b) => band(F[k], a, b, -1.5, 1.95, 0.03));   // plinth (engineering brick)
+    seg(-1.5, (a, b) => band(F[k], a, b, -2.4, 2.85, 0.03));   // plinth (engineering brick), down past the falling Harvey St pavement
   }
   for (const k of ['cbIx', 'cbIz']) band(F[k], -0.05, k === 'cbIx' ? 9.2 : 10.9, PARAPET - 0.1, 0.12, 0.1, 'stone');
   const wingBands = [2.58, 5.43, 8.28];
   for (const [k, len] of [['cwC', 11.71], ['hwH', 12.07], ['cwE', 11.37], ['hwS', 11.36]]) {
-    wingBands.forEach(v => band(F[k], 0, len, v, 0.15, 0.04));
-    band(F[k], 0, len, -1.5, 1.7, 0.03);
+    // on Churchgate the first-floor windows now come down through the 2.58 m course, so it is left off there
+    wingBands.forEach(v => { if (!(k === 'cwC' && v < 3)) band(F[k], 0, len, v, 0.15, 0.04); });
+    band(F[k], 0, len, k === 'hwH' || k === 'hwS' ? -3.0 : -1.5, k === 'hwH' || k === 'hwS' ? 3.2 : 1.7, 0.03);   // Harvey St falls ~2.3 m by the SW end
     if (k === 'cwE' || k === 'hwS') band(F[k], 0, len, EAVES - 0.22, 0.22, 0.06);
   }
   // courtyard plinth
@@ -265,6 +274,11 @@ export function buildCharterHouse(M, base) {
     add(x0, o.v0, x1, o.v0 + fw); add(x0, o.v1 - fw, x1, o.v1);
     add(x0, o.v0, x0 + fw, o.v1); add(x1 - fw, o.v0, x1, o.v1);
     if (cols === 2) add(o.c - 0.035, o.v0, o.c + 0.035, o.v1);
+    // the tall Churchgate wing first-floor windows are six panes: two columns, three equal rows, no extra glazing bars
+    // (as the developer's Churchgate CGI; Charlie, 12 Nov)
+    if (o.rows === 3) {
+      for (const t of [1 / 3, 2 / 3]) { const tv3 = o.v0 + (o.v1 - o.v0) * t; add(x0, tv3 - 0.035, x1, tv3 + 0.035); }
+    } else {
     const tv = o.v0 + (o.v1 - o.v0) * rowsSplit;
     add(x0, tv - 0.035, x1, tv + 0.035);
     // slim glazing bars in the upper lights
@@ -273,6 +287,7 @@ export function buildCharterHouse(M, base) {
       for (const cx of [(x0 + o.c) / 2, (o.c + x1) / 2]) gb(cx - 0.012, tv, cx + 0.012, o.v1 - fw);
     } else {
       gb(o.c - 0.012, tv, o.c + 0.012, o.v1 - fw);
+    }
     }
     // glass
     const gl = new THREE.PlaneGeometry(o.w - 0.06, o.v1 - o.v0 - 0.06);
@@ -295,19 +310,27 @@ export function buildCharterHouse(M, base) {
         const gl = new THREE.PlaneGeometry(0.22, 1.4); gl.rotateY(Math.PI); gl.translate(o.c, o.v0 + 1.2, 0.135); fa.place(gl); B.add('glass', gl);
       } else {
         frameSet(fa, o, o.type === 'win1' ? 1 : 2, 0.56);
+        // windows that run down past the floor (Churchgate wing, first floor): clear glass all the way down, no panel (Charlie,
+        // 12 Nov: no privacy-glass look); the lit room behind runs down to the sill so the lower panes don't read as blanked
         // room behind
         const unit = unitFor(o.floor, o.id);
         if (unit || key === 'cwR' || key === 'hwR') {
           const fy = fl(o.floor);
-          const ry0 = fy + 0.02, ry1 = fy + (o.floor === 3 && o.type === 'win1' ? 2.75 : 2.62);
+          const ry0 = o.panelTo ? o.v0 - 0.02 : fy + 0.02, ry1 = fy + (o.floor === 3 && o.type === 'win1' ? 2.75 : 2.62);
           const L = FACADE_LEN[key] || 99;
           const rx0 = Math.max(0.45, o.c - o.w / 2 - 0.95), rx1 = Math.min(L - 0.45, o.c + o.w / 2 + 0.95), depth = 3.4;
-          const g = roomBox(rx0, ry0, 0.2, rx1, Math.max(ry1, o.v1 + 0.05), depth, roomPanel(unit, o.id), Math.random());
+          // top floor under the sloping roof (rear and end walls): the room box stops at the eaves, or its top showed through the
+          // slates as a row of brown patches (Charlie, 6 Nov: "fix roof")
+          const underSlope = o.floor === 3 && ['cwR', 'hwR', 'cwE', 'hwS'].includes(key);
+          const top = underSlope ? Math.min(Math.max(ry1, o.v1 + 0.05), EAVES + 0.02) : Math.max(ry1, o.v1 + 0.05);
+          const g = roomBox(rx0, ry0, 0.2, rx1, top, depth, roomPanel(unit, o.id), Math.random());
           fa.place(g);
           rooms.push({ plot: unit ? unit.plot : 'common', geom: g });
         }
-        const centre = fa.point(o.c, (o.v0 + o.v1) / 2, 0.15);
-        windows.push({ id: o.id, floor: o.floor, facade: key, plot: unit ? unit.plot : null, pos: centre, normal: fa.n.clone(), w: o.w, h: o.v1 - o.v0 });
+        // rooms only see the glazed part above a floor-zone panel
+        const gv0 = o.panelTo || o.v0;
+        const centre = fa.point(o.c, (gv0 + o.v1) / 2, 0.15);
+        windows.push({ id: o.id, floor: o.floor, facade: key, plot: unit ? unit.plot : null, pos: centre, normal: fa.n.clone(), w: o.w, h: o.v1 - gv0, yb: fa.point(o.c, o.v0, 0.15).y });   // yb: foot of the glass (the floor glow reaches down to it)
       }
       // sills and heads
       if (o.type !== 'door') {
@@ -336,19 +359,21 @@ export function buildCharterHouse(M, base) {
       g.translate(c, spring, T / 2 - 0.05);
       fa.place(g); boxUV(g); B.add(i === 11 ? 'stone' : 'brick2', g);
     }
-    // jambs
+    // jambs (down to the pavement: the entrance is level with Churchgate, Charlie 6 Nov)
     for (const s of [-1, 1]) {
-      const g = boxGeom(c + s * r - (s < 0 ? 0.3 : 0), 0, -0.05, c + s * r + (s > 0 ? 0.3 : 0), spring, 0.05);
+      const g = boxGeom(c + s * r - (s < 0 ? 0.3 : 0), ENT_V, -0.05, c + s * r + (s > 0 ? 0.3 : 0), spring, 0.05);
       fa.place(g); boxUV(g); B.add('brick2', g);
     }
     // recessed screen: doors, sign transom, fanlight
     const dz = 0.32;
     const screen = (a, b, c2, d, key = 'frame') => { const g = boxGeom(a, b, dz, c2, d, dz + 0.1); fa.place(g); B.add(key, g); };
-    screen(c - r, 0, c - r + 0.08, spring); screen(c + r - 0.08, 0, c + r, spring);
-    screen(c - 0.04, 0, c + 0.04, 2.5);                     // meeting stile
+    screen(c - r, ENT_V, c - r + 0.08, spring); screen(c + r - 0.08, ENT_V, c + r, spring);
+    screen(c - 0.04, ENT_V, c + 0.04, 2.5);                     // meeting stile
     screen(c - r, 2.45, c + r, 2.55); screen(c - r, 3.18, c + r, 3.3);
-    for (const dx of [-0.65, 0.65]) screen(c + dx - 0.03, 0, c + dx + 0.03, 2.45);
-    screen(c - r, 0, c + r, 0.12, 'door');
+    for (const dx of [-0.65, 0.65]) screen(c + dx - 0.03, ENT_V, c + dx + 0.03, 2.45);
+    screen(c - r, ENT_V, c + r, ENT_V + 0.12, 'door');
+    // stone threshold flush with the paving, from the pavement edge in under the doors
+    { const g = boxGeom(c - r - 0.3, ENT_V - 0.2, -0.8, c + r + 0.3, ENT_V - 0.02, dz + 0.14); fa.place(g); boxUV(g, 1.2); B.add('stone', g); }
     // fanlight radial bars
     for (let i = 1; i < 6; i++) {
       const a = Math.PI * i / 6;
@@ -357,7 +382,7 @@ export function buildCharterHouse(M, base) {
     }
     const tor = new THREE.TorusGeometry(0.45, 0.025, 6, 24, Math.PI); tor.translate(c, spring, dz + 0.05); fa.place(tor); B.add('frame', tor);
     // glass (doors + fanlight)
-    const gd = new THREE.PlaneGeometry(2.5, 3.2); gd.rotateY(Math.PI); gd.translate(c, 1.65, dz + 0.04); fa.place(gd); B.add('glass', gd);
+    const gd = new THREE.PlaneGeometry(2.5, 3.25 - ENT_V); gd.rotateY(Math.PI); gd.translate(c, (3.25 + ENT_V) / 2, dz + 0.04); fa.place(gd); B.add('glass', gd);
     const fan = new THREE.CircleGeometry(r - 0.05, 32, 0, Math.PI); fan.rotateY(Math.PI); fan.translate(c, spring, dz + 0.04); fa.place(fan); B.add('glass', fan);
     // sign transom panel (brand wordmark)
     const signTex = new THREE.TextureLoader().load(base + 'brand_charterhouse.png'); signTex.colorSpace = THREE.SRGBColorSpace; signTex.anisotropy = 8;
@@ -365,8 +390,9 @@ export function buildCharterHouse(M, base) {
     const sp = new THREE.PlaneGeometry(1.55, 0.67); sp.rotateY(Math.PI); sp.translate(c, 2.86, dz - 0.012); fa.place(sp);
     const sign = new THREE.Mesh(sp, signMat); group.add(sign);
     const panel = boxGeom(c - 1.0, 2.55, dz - 0.01, c + 1.0, 3.18, dz + 0.05); fa.place(panel); B.add('door', panel);
-    // gilded Charter House wordmark in individual letters on the brickwork above the arch
-    {
+    // gilded Charter House wordmark in individual letters on the brickwork above the arch: taken off (Charlie, 9 Nov: it cut
+    // through the window above in the park view, and the name is already in the glass over the door)
+    if (false) {
       const gold = new THREE.MeshStandardMaterial({ map: signTex, alphaMap: signTex, alphaTest: 0.5, color: '#f0cf8a', emissive: '#3a2a10', roughness: 0.28, metalness: 1, envMapIntensity: 1.6, clippingPlanes: CUT_PLANES });
       // the PNG is black ink on transparent: use its alpha, colour it gold
       gold.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.rgb = diffuse;').replace('#include <alphamap_fragment>', 'diffuseColor.a *= texture2D( alphaMap, vAlphaMapUv ).a;'); };
@@ -379,7 +405,7 @@ export function buildCharterHouse(M, base) {
       const sh2 = new THREE.Mesh(sg2, shadowM); sh2.renderOrder = 2; group.add(sh2);
     }
     // lobby behind
-    const lg = roomBox(c - 1.4, 0, dz + 0.12, c + 1.4, 4.7, 4.5, 3, 0.4); fa.place(lg);
+    const lg = roomBox(c - 1.4, ENT_V, dz + 0.12, c + 1.4, 4.7, 4.5, 3, 0.4); fa.place(lg);
     rooms.push({ plot: 'lobby', geom: lg });
     windows.push({ id: 'ARCH', floor: 0, facade: 'cbC', plot: null, pos: fa.point(c, 1.8, 0.3), normal: fa.n.clone(), w: 2.6, h: 4.6 });
   }
@@ -402,6 +428,7 @@ export function buildCharterHouse(M, base) {
 
   // ---- rear access galleries (red steel), canopy and courtyard
   galleries(B);
+  frontDoors(B);
 
   // ---- build merged meshes
   const meshes = B.build(M, group);
@@ -514,18 +541,22 @@ function roofs(B) {
     ridge(B, [xr, yr, z0], [xr, yr, z1 - hipIn]);
   }
   // ---- cross gables (45 deg) facing the streets
-  const crossX = (a, b, zFront, zBack) => {          // Churchgate wing, gable faces -z
-    const m = (a + b) / 2, ye = EAVES - 0.02, yr = APEX + 0.02;
-    addRoof(B, slopeQuad([a - 0.06, ye, zBack], [m, yr, zBack], [m, yr, zFront], [a - 0.06, ye, zFront]));
-    addRoof(B, slopeQuad([m, yr, zBack], [b + 0.06, ye, zBack], [b + 0.06, ye, zFront], [m, yr, zFront]));
-    ridge(B, [m, yr, zFront + 0.25], [m, yr, zBack]);
+  const crossX = (a, b, zFront, zBack) => {          // Churchgate wing, gable faces -z; hipped back end (see above)
+    const m = (a + b) / 2, ye = EAVES - 0.02, yr = APEX + 0.02, zh = zBack - (b - a) / 2;
+    addRoof(B, slopeQuad([a - 0.06, ye, zBack], [m, yr, zh], [m, yr, zFront], [a - 0.06, ye, zFront]));
+    addRoof(B, slopeQuad([m, yr, zh], [b + 0.06, ye, zBack], [b + 0.06, ye, zFront], [m, yr, zFront]));
+    addRoof(B, tri([a - 0.06, ye, zBack], [b + 0.06, ye, zBack], [m, yr, zh]));
+    ridge(B, [m, yr, zFront + 0.25], [m, yr, zh]);
+    hipRidge(B, [m, yr, zh], [a - 0.06, ye, zBack]); hipRidge(B, [m, yr, zh], [b + 0.06, ye, zBack]);
   };
   [[10.9, 14.72], [14.72, 18.55], [18.55, 22.61]].forEach(([a, b]) => crossX(a, b, -0.2, 5.35));
-  const crossZ = (a, b, xFront, xBack) => {          // Harvey wing, gable faces -x
-    const m = (a + b) / 2, ye = EAVES - 0.02, yr = APEX + 0.02;
-    addRoof(B, slopeQuad([xFront, ye, a - 0.06], [xFront, yr, m], [xBack, yr, m], [xBack, ye, a - 0.06]));
-    addRoof(B, slopeQuad([xFront, yr, m], [xFront, ye, b + 0.06], [xBack, ye, b + 0.06], [xBack, yr, m]));
-    ridge(B, [xFront + 0.25, yr, m], [xBack, yr, m]);
+  const crossZ = (a, b, xFront, xBack) => {          // Harvey wing, gable faces -x; hipped back end
+    const m = (a + b) / 2, ye = EAVES - 0.02, yr = APEX + 0.02, xh = xBack - (b - a) / 2;
+    addRoof(B, slopeQuad([xFront, ye, a - 0.06], [xFront, yr, m], [xh, yr, m], [xBack, ye, a - 0.06]));
+    addRoof(B, slopeQuad([xFront, yr, m], [xFront, ye, b + 0.06], [xBack, ye, b + 0.06], [xh, yr, m]));
+    addRoof(B, tri([xBack, ye, b + 0.06], [xBack, ye, a - 0.06], [xh, yr, m]));
+    ridge(B, [xFront + 0.25, yr, m], [xh, yr, m]);
+    hipRidge(B, [xh, yr, m], [xBack, ye, a - 0.06]); hipRidge(B, [xh, yr, m], [xBack, ye, b + 0.06]);
   };
   [[9.2, 13.4], [13.4, 17.2], [17.2, 21.27]].forEach(([a, b]) => crossZ(a, b, 0.48, 6.02));
   // ---- corner block: flat roof behind parapet with a low mansard and lift overrun
@@ -550,6 +581,13 @@ function gutter(B, a, b) {
   if (Math.abs(b[2] - a[2]) > Math.abs(b[0] - a[0])) g.rotateY(Math.PI / 2);
   g.translate((a[0] + b[0]) / 2, a[1] - 0.04, (a[2] + b[2]) / 2);
   B.add('metal', g);
+}
+function hipRidge(B, a, b) {
+  const d = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]), len = d.length();
+  const g = new THREE.CylinderGeometry(0.075, 0.075, len, 8, 1);
+  g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()));
+  g.translate((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 0.03, (a[2] + b[2]) / 2);
+  B.add('slate', g);
 }
 function ridge(B, a, b) {
   const len = Math.hypot(b[0] - a[0], b[2] - a[2]);
@@ -604,6 +642,85 @@ function galleries(B) {
   const cy = 3 * FH + 2.55;
   B.add('steel', boxGeom(dx0, cy, dz0, XE + 0.15, cy + 0.14, dz1 + 0.12));
   B.add('steel', boxGeom(dx0, cy, dz1, dx1 + 0.12, cy + 0.14, 18.55));
+}
+
+// ------------------------------------------------------------------------------------------------ front doors on the walkways
+// a little homely dressing outside every flat (Charlie, 6 Nov): a coir mat, pots with clipped box balls and flowering plants,
+// a lantern by the door, a bench with cushions where the walkway has room, and planters with trailing flowers on the rail
+function frontDoors(B) {
+  let sd = 4242; const R = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+  const FL = ['flowerA', 'flowerB', 'flowerC', 'flowerD', 'flowerE'];
+  const ball = (x, y, z, r, key) => { const g = new THREE.IcosahedronGeometry(r, 2); const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) { const k = 1 + (Math.sin(p.getX(i) * 41 + p.getY(i) * 37) * Math.sin(p.getZ(i) * 43)) * 0.08; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); }
+    g.computeVertexNormals(); g.translate(x, y, z); B.add(key, g); };
+  const blooms = (x, y, z, r, n) => { for (let i = 0; i < n; i++) { const a = R() * Math.PI * 2, rr = Math.sqrt(R()) * r; const g = new THREE.IcosahedronGeometry(0.03 + R() * 0.02, 0); g.translate(x + Math.cos(a) * rr, y + R() * 0.12, z + Math.sin(a) * rr); B.add(FL[Math.floor(R() * FL.length)], g); } };
+  const cyl = (x, y, z, r0, r1, h, key) => B.add(key, new THREE.CylinderGeometry(r1, r0, h, 16).translate(x, y + h / 2, z));
+  const topiary = (x, y, z) => { cyl(x, y, z, 0.15, 0.2, 0.46, 'potCharcoal'); ball(x, y + 0.46 + 0.24, z, 0.25, 'leafDark'); };
+  const flowerPot = (x, y, z) => { cyl(x, y, z, 0.12, 0.17, 0.3, 'potClay'); ball(x, y + 0.31, z, 0.17, 'leafLight'); blooms(x, y + 0.36, z, 0.15, 14); };
+  const mat = (x0, z0, x1, z1, y) => { B.add('coirEdge', boxGeom(x0, y + 0.002, z0, x1, y + 0.014, z1)); B.add('coir', boxGeom(x0 + 0.04, y + 0.004, z0 + 0.04, x1 - 0.04, y + 0.017, z1 - 0.04)); };
+  const lantern = (x, y, z, nx, nz) => { const ox = x + nx * 0.09, oz = z + nz * 0.09;
+    B.add('steel', boxGeom(ox - 0.08, y + 1.72, oz - 0.08, ox + 0.08, y + 2.02, oz + 0.08)); B.add('lanternGlow', boxGeom(ox - 0.065, y + 1.75, oz - 0.065, ox + 0.065, y + 1.99, oz + 0.065)); B.add('steel', boxGeom(ox - 0.1, y + 2.02, oz - 0.1, ox + 0.1, y + 2.05, oz + 0.1)); };
+  const bench = (x0, z0, x1, z1, y, along) => {   // slim timber bench against the wall with a seat cushion and two scatter cushions
+    B.add('timber', boxGeom(x0, y + 0.42, z0, x1, y + 0.46, z1));
+    for (const t of [0.1, 0.9]) { const x = x0 + (x1 - x0) * (along === 'x' ? t : 0.5), z = z0 + (z1 - z0) * (along === 'z' ? t : 0.5); B.add('steel', boxGeom(x - 0.03, y, z - 0.03, x + 0.03, y + 0.42, z + 0.03)); }
+    B.add('cushion', boxGeom(x0 + 0.03, y + 0.46, z0 + 0.03, x1 - 0.03, y + 0.52, z1 - 0.03));
+    const L = along === 'x' ? x1 - x0 : z1 - z0;
+    // two or three scatter cushions in a mix of the three fabrics, each at its own slouch
+    const CK = ['cushionA', 'cushionB', 'cushion'], nC = R() < 0.35 ? 3 : 2, ts = nC === 3 ? [0.18, 0.5, 0.82] : [0.2 + R() * 0.06, 0.74 + R() * 0.06];
+    ts.map(t => [t, CK[Math.floor(R() * 3)], 0.3 + R() * 0.1]).forEach(([t, k, sz]) => { const g = new THREE.BoxGeometry(along === 'x' ? sz : 0.1, sz - 0.02, along === 'x' ? 0.1 : sz); g.rotateX(along === 'x' ? -0.12 - R() * 0.2 : 0); g.rotateZ(along === 'z' ? 0.12 + R() * 0.2 : 0); g.rotateY((R() - 0.5) * 0.3);
+      const cx = along === 'x' ? x0 + L * t : (x0 + 0.06), cz = along === 'z' ? z0 + L * t : (z0 + 0.06); g.translate(cx, y + 0.68, cz); B.add(k, g); });
+  };
+  const trough = (x0, z0, x1, z1, y) => { B.add('potCharcoal', boxGeom(x0, y + 0.82, z0, x1, y + 1.02, z1));
+    const n = Math.max(2, Math.round(Math.max(x1 - x0, z1 - z0) / 0.25));
+    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t; ball(x, y + 1.04, z, 0.13, i % 2 ? 'leafLight' : 'leafDark'); blooms(x, y + 1.08, z, 0.12, 6);
+      if (i % 2 === 0) { const g = new THREE.IcosahedronGeometry(0.07, 1); g.scale(1, 2.2, 1); g.translate(x, y + 0.82, z); B.add('leafLight', g); } } };   // trailing over the front
+  // a bit more planting to choose from, so no two front doors are dressed alike (Charlie, 6 Nov: "not exact copy paste each time")
+  const grass = (x, y, z, sc) => { cyl(x, y, z, 0.12 * sc, 0.15 * sc, 0.4 * sc, 'potStone');
+    for (let i = 0; i < 11; i++) { const g = new THREE.ConeGeometry(0.022 * sc, 0.6 * sc * (0.75 + R() * 0.5), 4); g.translate(0, 0.3 * sc, 0); g.rotateZ((R() - 0.5) * 0.8); g.rotateX((R() - 0.5) * 0.8); g.translate(x + (R() - 0.5) * 0.1 * sc, y + 0.4 * sc, z + (R() - 0.5) * 0.1 * sc); B.add(R() < 0.5 ? 'leafLight' : 'leafDark', g); } };
+  const olive = (x, y, z, sc) => { cyl(x, y, z, 0.15 * sc, 0.19 * sc, 0.38 * sc, R() < 0.5 ? 'potClay' : 'potStone'); cyl(x, y + 0.38 * sc, z, 0.02, 0.026, 0.62 * sc, 'timber');
+    ball(x, y + sc + 0.16 * sc, z, 0.22 * sc, 'leafLight'); ball(x + 0.09 * sc, y + 0.92 * sc, z + 0.05 * sc, 0.15 * sc, 'leafDark'); ball(x - 0.08 * sc, y + 1.12 * sc, z - 0.04 * sc, 0.13 * sc, 'leafLight'); };
+  const potScaled = (x, y, z, sc, kind) => { const k = kind ?? Math.floor(R() * 5);
+    if (k === 0) { cyl(x, y, z, 0.15 * sc, 0.2 * sc, 0.46 * sc, R() < 0.6 ? 'potCharcoal' : 'potStone'); ball(x, y + 0.7 * sc, z, 0.25 * sc, 'leafDark'); }
+    else if (k === 1) { cyl(x, y, z, 0.12 * sc, 0.17 * sc, 0.3 * sc, R() < 0.7 ? 'potClay' : 'potCharcoal'); ball(x, y + 0.31 * sc, z, 0.17 * sc, 'leafLight'); blooms(x, y + 0.36 * sc, z, 0.15 * sc, 10 + Math.floor(R() * 10)); }
+    else if (k === 2) grass(x, y, z, sc);
+    else if (k === 3) olive(x, y, z, sc);
+    else { const s2 = sc * 0.75; potScaled(x, y, z, sc, 1); potScaled(x + 0.24 * sc, y, z + 0.12 * sc, s2, R() < 0.5 ? 0 : 2); } };
+  // one front door: a mat (size, colour and angle vary), a lantern to one side, planting at one or both flanks where there is room.
+  // axis 'x': the wall runs along x at z = w0 and the deck is +z; axis 'z': along z at x = w0, deck +x
+  const dressDoor = (axis, u, w0, y, keepOut) => {
+    const W = (a, o) => axis === 'x' ? [a, w0 + o] : [w0 + o, a];
+    const mw = 0.86 + R() * 0.12, md = 0.5 + R() * 0.1, ang = (R() - 0.5) * 0.1, [mx, mz] = W(u + (R() - 0.5) * 0.05, md / 2 + 0.05);
+    const grey = R() < 0.3;
+    for (const [inset, key, t0, t1] of [[0, grey ? 'potCharcoal' : 'coirEdge', 0.002, 0.014], [0.04, grey ? 'potStone' : 'coir', 0.004, 0.017]]) {
+      const g = new THREE.BoxGeometry(axis === 'x' ? mw - 2 * inset : md - 2 * inset, t1 - t0, axis === 'x' ? md - 2 * inset : mw - 2 * inset); g.rotateY(ang); g.translate(mx, y + (t0 + t1) / 2, mz); B.add(key, g);
+    }
+    const side = R() < 0.5 ? -1 : 1, free = (a) => !keepOut.some(([p, q]) => a > p - 0.3 && a < q + 0.3);
+    { const la = u + side * 0.66; if (free(la)) { const [lx, lz] = W(la, 0); lantern(lx, y, lz, axis === 'x' ? 0 : 1, axis === 'x' ? 1 : 0); } }
+    for (const sd of [side, -side]) {
+      if (sd === side && R() < 0.55) continue;   // usually planting on the side away from the lantern; sometimes both
+      const a = u + sd * (0.66 + R() * 0.12); if (!free(a)) continue;
+      const [px, pz] = W(a, 0.22 + R() * 0.06); potScaled(px, y, pz, 0.8 + R() * 0.45);
+    }
+  };
+  for (let f = 1; f <= 3; f++) {
+    const y = f * FH;
+    // Churchgate-wing walkway: doors in the wall at z = 11.03, deck to z = 12.45; the bench moves along floor by floor
+    const dz = 11.03, doorsC = [19.32, 17.83, 13.98];
+    const bx = [14.85, 15.05, 15.0][f - 1], bl = [1.2, 1.0, 1.1][f - 1], benchC = [bx, bx + bl];
+    for (const x of doorsC) dressDoor('x', x, dz, y, [benchC, ...doorsC.filter(o => o !== x).map(o => [o - 0.5, o + 0.5])]);
+    if (f !== 2 || R() < 0.5) bench(benchC[0], dz + 0.02, benchC[1], dz + 0.4, y, 'x'); else { potScaled(15.2, y, dz + 0.26, 1.15, 3); potScaled(15.85, y, dz + 0.24, 0.9); }
+    // Harvey-wing walkway: doors in the wall at x = 11.7, deck to x = 13.15
+    const dx = 11.7, doorsH = [16.5, 17.9];
+    const benchH = f === 3 ? [14.1, 15.0] : [14.0, 15.2];
+    for (const z of doorsH) dressDoor('z', z, dx, y, [benchH, ...doorsH.filter(o => o !== z).map(o => [o - 0.5, o + 0.5])]);
+    bench(dx + 0.02, benchH[0], dx + 0.4, benchH[1], y, 'z'); potScaled(dx + 0.24, y, 13.7, 0.85 + R() * 0.35);
+    // planters hooked over the inside of the rail, trailing flowers (a different run on each floor)
+    const tr = [[[14.2, 15.3], [16.4, 17.5], [18.5, 19.5]], [[13.9, 14.8], [16.0, 17.3], [18.7, 19.6]], [[14.5, 15.7], [17.0, 18.0]]][f - 1];
+    for (const [a, b] of tr) trough(a, 12.45 - 0.24, b, 12.45 - 0.06, y);
+    for (const [a, b] of [[[14.4, 15.4], [16.6, 17.6]], [[14.0, 15.1], [16.9, 17.6]], [[15.0, 16.2]]][f - 1]) trough(13.15 - 0.24, a, 13.15 - 0.06, b, y);
+  }
+  // ground-floor flats open onto the courtyard
+  for (const x of [13.6, 19.8]) { mat(x - 0.5, 11.07, x + 0.5, 11.7, -0.05); lantern(x - 0.7, -0.05, 11.03, 0, 1); topiary(x + 0.75, -0.05, 11.3); flowerPot(x - 0.75, -0.05, 11.28); }
 }
 
 // ------------------------------------------------------------------------------------------------ curtains

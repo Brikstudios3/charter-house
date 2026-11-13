@@ -1,0 +1,132 @@
+{
+ "name": "Charter House",
+ "title": "Charter House Investment Report | BRIK Studios",
+ "description": "Private Pre-Launch | Boutique Heritage Apartments in Stockport's Underbanks",
+ "url": "https://charliebrikstudios.github.io/charter-house/",
+ "og_source": "hero",
+ "dev_hero": [
+  "stmarys",
+  "St Marys Gate, next door, by Hall &amp; Co",
+  "St Marys Gate, next door. Hall &amp; Co, completed 2025"
+ ],
+ "arch_hero": [
+  "arch1",
+  "Ollier Smurthwaite project",
+  "An Ollier Smurthwaite scheme"
+ ],
+ "brik_exclusive": "Charter House is launching exclusively through BRIK Studios: our relationship with Hall &amp; Co goes back several years.",
+ "early_html": "<div class=\"earlynote\"><span class=\"pl\"><i></i>Private pre-launch</span><p><b>You're early.</b> Charter House isn't on the open market yet.</p></div>",
+ "awards": [
+  [
+   "Hall &amp; Co",
+   "Award-winning restoration",
+   "Grade II-listed",
+   "Bank Chambers, now ProFolk",
+   ""
+  ],
+  [
+   "Manchester Society of Architects",
+   "Winner",
+   "",
+   "The George, Stockport",
+   "2023"
+  ],
+  [
+   "Housing Design Awards",
+   "Project Winner",
+   "",
+   "Climate Innovation District",
+   "2017"
+  ],
+  [
+   "House Builder Awards",
+   "Winner",
+   "",
+   "Roof Gardens",
+   "2016"
+  ],
+  [
+   "Manchester Society of Architects",
+   "Winner",
+   "",
+   "City Gardens",
+   "2016"
+  ],
+  [
+   "RIBA Regional Awards",
+   "Small Project Award",
+   "",
+   "Devonshire Road",
+   "2012"
+  ]
+ ],
+ "film": {
+  "id": "78I9H4xnRO8EPkD1JZ9rs1M9RWsSKr009u01fMpF9qMfs",
+  "dur": "0:42",
+  "poster": "film"
+ },
+ "faq": [
+  [
+   "How do I reserve?",
+   "Book a 3D virtual tour and choose your apartment with us. £3,000 then takes it off the market: £2,500 is your reservation deposit and counts towards your 20% deposit, and £500 is BRIK Studios' admin fee."
+  ],
+  [
+   "What do I pay, and when?",
+   "£3,000 to reserve. The rest of your 20% deposit within 28 days, when contracts are exchanged. The balance on completion, expected early 2028, usually with a 75% buy-to-let mortgage plus a 5% top-up."
+  ],
+  [
+   "Can I buy with a mortgage?",
+   "Yes. Most buyers use a 75% buy-to-let mortgage, arranged in the months before completion. We can introduce you to our mortgage broker."
+  ],
+  [
+   "What are the lease and ground rent?",
+   "A 999-year lease with nil ground rent, and a 10-year build warranty."
+  ],
+  [
+   "What are the running costs?",
+   "The service charge is estimated at £2.50 per sq ft per year, about £86 a month for an average 1 bed. If we manage the letting, that's 10% of the rent. Both are already in every number in this report."
+  ],
+  [
+   "Who finds the tenant and manages it?",
+   "We do: tenant find, referencing, rent collection and day-to-day management, for 10% of the rent. You don't need to live nearby."
+  ],
+  [
+   "Can I see it before I buy?",
+   "Charter House is under construction, so we take you round our 3D model of the finished building on a video call. You're welcome to walk the site and the Underbanks with us, and St Marys Gate next door is a finished Hall & Co scheme you can see for yourself."
+  ],
+  [
+   "When is completion?",
+   "Early 2028. We'll keep you updated as the build progresses, and you'll get notice to complete well ahead of the date."
+  ]
+ ],
+ "awards_bg": "arch1",
+ "awards_h": "An award-winning team.",
+ "urgency": {
+  "cap": "Private pre-launch · Why now",
+  "h": "Our Underbanks launches sell out in days, not months.",
+  "stats": [
+   [
+    "Under 2 weeks",
+    "Underbank Lofts, our last launch, sold out"
+   ],
+   [
+    "5 and 7 days",
+    "The Print House, phases one and two"
+   ],
+   [
+    "Sold out",
+    "St Marys Gate next door, off-plan"
+   ]
+  ],
+  "p": "Charter House is the last site to be developed in the Underbanks: 27 apartments, and it isn't on the open market yet. The best apartments always go first, so book your 3D tour and choose yours before it launches."
+ },
+ "awards_cap": "Brought to you by",
+ "howread": {
+  "cap": "How to read this report",
+  "h": "Just keep scrolling.",
+  "p": [
+   "It's broken down into easy steps, in the order you need them. There's a lot of information here, and anyone considering a property investment in the North West of England should take the time to read it. It boils down decades of UK property investment experience, several years of buying, selling and investing in Stockport ourselves, and many hours of research by our team and founders, pulling together market reports, government documents and property data.",
+   "So take your time. By the end you'll fully understand not only Charter House, but the wider case for Stockport, and why we're convinced it's the best place in the UK to invest."
+  ]
+ }
+}

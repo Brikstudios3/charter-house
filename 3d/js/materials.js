@@ -125,7 +125,13 @@ export function makeMaterials(base) {
 
   // --- context
   const ctx = (name, o) => decorate(pbr(name, o), { macro: o?.macro ?? 0.1 });
-  M.cBrickSmg = ctx('brick_smg', { orm: true, color: '#f0dfd6', ns: 1.0, macro: 0.07 });
+  // St Mary's Gate in the same crisp, high-resolution brick as Charter House, a touch warmer (Charlie, 6 Nov: smarter brickwork)
+  // 6 Nov (Charlie's walk-round video): the corner block is an even orange-red brick, the Churchgate range a multi red / plum / blue-black
+  M.cBrickSmg = ctx('brick_smgA', { orm: true, color: '#ffffff', ns: 1.0, macro: 0.04 });
+  M.cBrickSmgB = ctx('brick_smgB', { orm: true, color: '#ffffff', ns: 1.0, macro: 0.05 });
+  M.smgArch = ctx('brick_smgB', { orm: true, color: '#9a8f92', ns: 1.0, macro: 0.02 });   // the darker brick arches over the sashes
+  M.smgDoor = new THREE.MeshStandardMaterial({ color: '#eceae4', roughness: 0.45 });
+  M.smgPlinth = ctx('brick', { orm: true, color: '#5a5a62', ns: 1.2, macro: 0.04 });
   M.cBrickOld = ctx('brick_old', { orm: true, color: '#e8d7cf', ns: 1.0, macro: 0.12 });
   M.cBrick = ctx('brick', { orm: true, color: '#d8c4bb', ns: 1.0, macro: 0.12 });
   M.cSlate = ctx('slate', { orm: true, color: '#b4bac0' }); M.cSlate.roughness = 1.0; M.cSlate.envMapIntensity = 0.55;
@@ -157,6 +163,14 @@ export function makeMaterials(base) {
   M.brassCtx = new THREE.MeshStandardMaterial({ color: '#c9a24f', metalness: 1, roughness: 0.32 });
   M.lampGlow = new THREE.MeshStandardMaterial({ color: '#4a4237', emissive: '#ffcf86', emissiveIntensity: 0, roughness: 0.15, metalness: 0.2 });
   M.bulb = new THREE.MeshBasicMaterial({ color: '#ffdca0' });
+  // front-door dressing on the access walkways (Charlie, 6 Nov): coir mats, pots and planting, a bench with cushions, lanterns
+  const dress = (o) => new THREE.MeshStandardMaterial({ roughness: 0.9, ...o, clippingPlanes: CUT_PLANES });
+  M.coir = dress({ color: '#a8875a', roughness: 1 }); M.coirEdge = dress({ color: '#3b3129', roughness: 1 });
+  M.potCharcoal = dress({ color: '#3a3b3d', roughness: 0.55 }); M.potClay = dress({ color: '#b46a45', roughness: 0.85 }); M.potStone = dress({ color: '#d2cbbf', roughness: 0.9 });
+  M.leafDark = dress({ color: '#3d5a2c', roughness: 0.85 }); M.leafLight = dress({ color: '#6d8a45', roughness: 0.85 });
+  M.flowerA = dress({ color: '#f2a7bd', roughness: 0.7 }); M.flowerB = dress({ color: '#ffffff', roughness: 0.7 }); M.flowerC = dress({ color: '#b9a3e3', roughness: 0.7 }); M.flowerD = dress({ color: '#f7d35c', roughness: 0.7 }); M.flowerE = dress({ color: '#e8606a', roughness: 0.7 });
+  M.cushion = dress({ color: '#d9cdb8', roughness: 1 }); M.cushionA = dress({ color: '#9aa98c', roughness: 1 }); M.cushionB = dress({ color: '#c99a3b', roughness: 1 });
+  M.lanternGlow = dress({ color: '#4a4237', emissive: '#ffcf86', emissiveIntensity: 0.8, roughness: 0.3 });
   return M;
 }
 

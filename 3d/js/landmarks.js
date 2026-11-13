@@ -5,7 +5,7 @@
 // Built in each landmark's own frame (x = geographic east, z = geographic south) then rotated into site coordinates.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { boxUV } from './building.js?v=1793905393';
+import { boxUV } from './building.js?v=1794535000';
 
 const box = (x0, y0, z0, x1, y1, z1) => { const g = new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0); g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); return g; };
 
@@ -75,21 +75,27 @@ export function landmarkMaterials(tex, base) {
   const T = (n, o) => tex(base + 'tex/' + n, o);
   const sandMap = T('sandstone_w.jpg'), sandN = T('sandstone_normal.jpg', { srgb: false });
   sandMap.anisotropy = sandN.anisotropy = 16;
-  const mhRoof = T('mh_roof.jpg'); const mhSide = T('mh_side.png', { wrap: false }); const mhGable = T('mh_gable.png', { wrap: false });
+  // 6 Nov: roof and side screens drawn from the drone footage (slate, glazed ridges, red valley boards)
+  const mhRoof = T('mh_roof2.jpg'); const mhSide = T('mh_side2.jpg', { wrap: false }); const mhGable = T('mh_gable.png', { wrap: false });
   return {
     // St Mary's is deep red Cheshire sandstone, darkened with age; dressings a shade lighter
-    sand: new THREE.MeshStandardMaterial({ map: sandMap, normalMap: sandN, normalScale: new THREE.Vector2(1.4, 1.4), roughness: 0.9, color: new THREE.Color(0.86, 0.5, 0.42) }),
-    stone: new THREE.MeshStandardMaterial({ map: sandMap, normalMap: sandN, normalScale: new THREE.Vector2(1.2, 1.2), roughness: 0.82, color: new THREE.Color(1.0, 0.66, 0.56) }),
+    sand: new THREE.MeshStandardMaterial({ map: sandMap, normalMap: sandN, normalScale: new THREE.Vector2(1.4, 1.4), roughness: 0.92, color: new THREE.Color(0.52, 0.56, 0.68) }),   // 6 Nov: weathered grey-brown (Charlie's photos, Street View), not the bright red it was
+    stone: new THREE.MeshStandardMaterial({ map: sandMap, normalMap: sandN, normalScale: new THREE.Vector2(1.2, 1.2), roughness: 0.85, color: new THREE.Color(0.74, 0.8, 0.94) }),
     glass: new THREE.MeshStandardMaterial({ color: '#1b2026', roughness: 0.08, metalness: 0.55, envMapIntensity: 1.6 }),
     lead: new THREE.MeshStandardMaterial({ color: '#4b5051', roughness: 0.72, metalness: 0.1 }),
     slate: new THREE.MeshStandardMaterial({ color: '#4c5157', roughness: 0.62 }),
-    clock: new THREE.MeshStandardMaterial({ color: '#f1ece0', roughness: 0.4, emissive: new THREE.Color('#fff2d0'), emissiveIntensity: 0.06 }),
+    clock: new THREE.MeshStandardMaterial({ color: '#f7f6f2', roughness: 0.4, emissive: new THREE.Color('#ffffff'), emissiveIntensity: 0.05 }),
+    clockBlack: new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.5, metalness: 0.3 }),
     gold: new THREE.MeshStandardMaterial({ color: '#c9a24f', metalness: 1, roughness: 0.3 }),
     iron: new THREE.MeshStandardMaterial({ color: '#ecebe5', roughness: 0.45, metalness: 0.15 }),
     mhRoof: new THREE.MeshStandardMaterial({ map: mhRoof, roughness: 0.3, metalness: 0.1, envMapIntensity: 0.9 }),
     mhSide: new THREE.MeshStandardMaterial({ map: mhSide, roughness: 0.25, metalness: 0.2, side: THREE.DoubleSide }),
     mhGable: new THREE.MeshStandardMaterial({ map: mhGable, alphaTest: 0.5, roughness: 0.3, side: THREE.DoubleSide }),
     plinth: new THREE.MeshStandardMaterial({ color: '#a19d95', roughness: 0.92 }),
+    // the Market Hall's paintwork, sampled from the drone footage: ochre column shafts, deep green upper posts and bargeboards, red finials
+    mhYellow: new THREE.MeshStandardMaterial({ color: '#d29a34', roughness: 0.5 }),
+    mhGreen: new THREE.MeshStandardMaterial({ color: '#1d3a3c', roughness: 0.45 }),
+    mhRed: new THREE.MeshStandardMaterial({ color: '#b2342f', roughness: 0.5, metalness: 0.2 }),
     // St Joseph's (1861-62, M. E. Hadfield): hammer-dressed Yorkshire gritstone with Hollington stone dressings
     grit: new THREE.MeshStandardMaterial({ map: sandMap, normalMap: sandN, normalScale: new THREE.Vector2(1.6, 1.6), roughness: 0.93, color: new THREE.Color(0.74, 0.68, 0.58) }),
     dress: new THREE.MeshStandardMaterial({ map: sandMap, normalMap: sandN, normalScale: new THREE.Vector2(1.0, 1.0), roughness: 0.8, color: new THREE.Color(1.0, 0.82, 0.7) }),
@@ -98,13 +104,42 @@ export function landmarkMaterials(tex, base) {
 }
 
 // ---------------------------------------------------------------- St Mary's Church
-export function buildStMarys(L, grassMat, { x = -75, z = -23, y = 4.2, rot = Math.PI / 4 } = {}) {
+export function buildStMarys(L, grassMat, { x = -75, z = -23, y = 4.2, rot = Math.PI / 4, clip = null, front = null } = {}) {
   const K = new Kit();
   const H0 = 0;  // church floor level in its frame
-  // raised churchyard: grass plinth with sandstone retaining wall
-  const yard = box(-36, -7, -22, 30, H0 - 0.05, 12); K.add('wall', yard);
-  for (const [x0, z0, x1, z1] of [[-36, 12, 30, 12.7], [-36, -22.7, 30, -22], [-36.7, -22.7, -36, 12.7], [30, -22.7, 30.7, 12.7]]) K.add('sand', box(x0, -7, z0, x1, H0 + 0.9, z1));
-  for (const [x0, z0, x1, z1] of [[-36.1, 12, 30.1, 12.8], [-36.1, -22.8, 30.1, -22]]) K.add('stone', box(x0, H0 + 0.9, z0, x1, H0 + 1.05, z1));
+  // raised churchyard: grass plinth with a low sandstone retaining wall and coping. On the Churchgate side the wall follows the back
+  // of the pavement (clip: world x, z -> clear of the road), as Street View shows it; it used to run straight out into the road
+  // (Charlie, 6 Nov)
+  const cs = Math.cos(rot), sn = Math.sin(rot), W = (a, b) => [x + a * cs + b * sn, z - a * sn + b * cs];
+  // With `front` (world polyline of the boundary wall's outer face: the back of the pavement, then the east end by the car park)
+  // the yard runs right out to it and one straight wall follows it; without, the old rectangle with its own south wall.
+  const bMax = (a) => { let b = front ? 60 : 12; if (clip) while (b > -10 && !clip(...W(a, b + 0.7))) b -= 0.25; return b; };
+  const STEP = front ? 0.5 : 1.0, A0 = -36, A1 = 30;
+  for (let a = A0; a < A1 - 1e-6; a += STEP) {
+    const a1 = Math.min(A1, a + STEP), bm = Math.min(bMax(a), bMax(a1));
+    if (front) { K.add('wall', box(a, -7, -22, a1, H0 - 0.05, bm + 0.7)); continue; }
+    K.add('wall', box(a, -7, -22, a1, H0 - 0.05, bm));
+    K.add('sand', box(a, -7, bm, a1, H0 + 0.9, bm + 0.7)); K.add('stone', box(a - 0.02, H0 + 0.9, bm - 0.05, a1 + 0.02, H0 + 1.05, bm + 0.78));
+  }
+  if (front) {
+    const toL = (wx, wz) => { const dx = wx - x, dz = wz - z; return [dx * cs - dz * sn, dx * sn + dz * cs]; };
+    for (let i = 0; i + 1 < front.length; i++) {
+      const [x0, z0] = front[i], [x1, z1] = front[i + 1], len = Math.hypot(x1 - x0, z1 - z0); if (len < 0.05) continue;
+      const dxw = (x1 - x0) / len, dzw = (z1 - z0) / len, nx = dzw, nz = -dxw;     // inward: away from the street
+      const [ac, bc] = toL((x0 + x1) / 2 + nx * 0.35, (z0 + z1) / 2 + nz * 0.35);
+      const da = dxw * cs - dzw * sn, db = dxw * sn + dzw * cs, phi = Math.atan2(-db, da), east = Math.abs(dxw) < 0.3;
+      const seg = (h0, h1, d, k, extra = 0) => { const g = new THREE.BoxGeometry(len + extra, h1 - h0, d); g.rotateY(phi); g.translate(ac, (h0 + h1) / 2, bc); K.add(k, g); };
+      seg(-7, H0 + 0.9, 0.7, 'sand', 0.7); seg(H0 + 0.9, H0 + 1.05, 0.8, 'stone', 0.8);
+      if (east) {   // black railings on the wall along the car park end
+        const n = Math.round(len / 0.13);
+        for (let k = 0; k <= n; k++) { const f = k / n, [pa, pb] = toL(x0 + (x1 - x0) * f + nx * 0.35, z0 + (z1 - z0) * f + nz * 0.35); K.add('clockBlack', box(pa - 0.012, H0 + 1.05, pb - 0.012, pa + 0.012, H0 + 2.15, pb + 0.012)); }
+        for (const hh of [H0 + 1.12, H0 + 2.08]) seg(hh, hh + 0.04, 0.05, 'clockBlack');
+      }
+    }
+  }
+  const bEast = bMax(A1), bWest = bMax(A0);
+  for (const [x0, z0, x1, z1] of [[-36, -22.7, 30, -22], [-36.7, -22.7, -36, bWest + 0.7], [30, -22.7, 30.7, bEast + 0.7]]) K.add('sand', box(x0, -7, z0, x1, H0 + 0.9, z1));
+  K.add('stone', box(-36.1, H0 + 0.9, -22.8, 30.1, H0 + 1.05, -22));
   // ---- west tower 7.6 m square, parapet at 26.5 m
   const tw = 3.8, tx0 = -30.2, tx1 = tx0 + 2 * tw, TH = 26.5;
   K.add('sand', box(tx0, H0, -tw, tx1, TH, tw));
@@ -122,12 +157,18 @@ export function buildStMarys(L, grassMat, { x = -75, z = -23, y = 4.2, rot = Mat
     K.win(ax, sg, wp, ax === 'x' ? tx0 + tw : 0, 17.4, 1.9, 2.4, { lights: 2, transom: false, k: 0.8 });
   }
   K.win('z', 1, tx1, 0, 17.4, 1.9, 2.4, { lights: 2, transom: false, k: 0.8 });
+  // louvre boards across the belfry openings, just proud of the dark glazing
+  for (let y = 17.55; y < 19.6; y += 0.2) {
+    for (const sg of [-1, 1]) K.add('lead', box(tx0 + tw - 0.88, y, sg * (tw + 0.07) - 0.025, tx0 + tw + 0.88, y + 0.07, sg * (tw + 0.07) + 0.025));
+    for (const xw of [tx0 - 0.07, tx1 + 0.07]) K.add('lead', box(xw - 0.025, y, -0.88, xw + 0.025, y + 0.07, 0.88));
+  }
   K.win('z', -1, tx0, 0, 5.2, 3.0, 4.6, { lights: 3, k: 0.8 });                // west window
   K.win('z', -1, tx0, 0, 0.0, 1.9, 2.4, { lights: 1, transom: false, k: 0.75 }); // west door
   for (const [ax, sg, wp, c] of [['x', 1, tw + 0.03, tx0 + tw], ['x', -1, -tw - 0.03, tx0 + tw], ['z', -1, tx0 - 0.03, 0]]) {
     const face = new THREE.CircleGeometry(1.05, 40); const ring = new THREE.RingGeometry(1.05, 1.2, 40);
     const hands = box(-0.04, -0.05, 0, 0.04, 0.75, 0.02), hands2 = box(-0.035, -0.05, 0, 0.035, 0.55, 0.02); hands2.rotateZ(-2.1);
-    for (const [g, m, off] of [[face, 'clock', 0], [ring, 'gold', 0.01], [hands, 'gold', 0.03], [hands2, 'gold', 0.03]]) {
+    const marks = []; for (let h = 0; h < 12; h++) { const g = box(-0.035, 0.82, 0, 0.035, h % 3 ? 0.95 : 1.0, 0.012); g.rotateZ(h * Math.PI / 6); marks.push(g); }
+    for (const [g, m, off] of [[face, 'clock', 0], [ring, 'clockBlack', 0.01], [hands, 'clockBlack', 0.03], [hands2, 'clockBlack', 0.03], ...marks.map(g => [g, 'clockBlack', 0.015])]) {
       if (ax === 'x') { if (sg < 0) g.rotateY(Math.PI); g.translate(c, 12.6, wp + sg * off); }
       else { g.rotateY(-Math.PI / 2); g.translate(wp - off, 12.6, c); }
       K.add(m, g);
@@ -154,8 +195,9 @@ export function buildStMarys(L, grassMat, { x = -75, z = -23, y = 4.2, rot = Mat
   // low-pitched nave roof behind the parapet
   { const g = new THREE.CylinderGeometry(nw, nw, 32, 4, 1); g.rotateZ(Math.PI / 2); g.scale(1, 0.34, 1); g.translate(nx0 + 16, NH + 0.4, 0); K.add('lead', g); }
   // south porch
-  K.add('sand', box(nx0 + 6, H0, nw, nx0 + 11, 6.4, nw + 4.5)); battlements(K, nx0 + 6, nw + 4.5, nx0 + 11, nw + 4.5, 6.4);
-  K.win('x', 1, nw + 4.5, nx0 + 8.5, 0, 2.0, 2.2, { lights: 1, transom: false, k: 0.7 });
+  const pd = Math.max(2.5, Math.min(4.5, Math.min(bMax(nx0 + 6), bMax(nx0 + 11)) - nw - 0.6));
+  K.add('sand', box(nx0 + 6, H0, nw, nx0 + 11, 6.4, nw + pd)); battlements(K, nx0 + 6, nw + pd, nx0 + 11, nw + pd, 6.4);
+  K.win('x', 1, nw + pd, nx0 + 8.5, 0, 2.0, 2.2, { lights: 1, transom: false, k: 0.7 });
   // ---- chancel (14th c.): 14 m x 11.5 m, walls 9 m, steeper slate roof, great east window
   const cx0 = nx1, cx1 = cx0 + 14, cw = 5.75, CH = 9;
   K.add('sand', box(cx0, H0, -cw, cx1, CH, cw));
@@ -169,9 +211,9 @@ export function buildStMarys(L, grassMat, { x = -75, z = -23, y = 4.2, rot = Mat
   // churchyard gateway (Wyatt, three pointed arches) on the Churchgate side
   for (const gx of [-4, 0, 4]) {
     const g = new THREE.ExtrudeGeometry((() => { const s = new THREE.Shape(); s.moveTo(-1.9, 0); s.lineTo(1.9, 0); s.lineTo(1.9, 4.6); s.lineTo(-1.9, 4.6); s.lineTo(-1.9, 0); s.holes.push(archShape(gx === 0 ? 2.6 : 1.8, gx === 0 ? 2.4 : 1.8, 0.8)); return s; })(), { depth: 0.8, bevelEnabled: false });
-    g.translate(nx0 + 14 + gx, H0 - 0.3, 12.0); K.add('sand', g);
+    g.translate(nx0 + 14 + gx, H0 - 0.3, Math.min(12.0, bMax(nx0 + 14 + gx))); K.add('sand', g);
   }
-  pinnacle(K, nx0 + 14, H0 + 4.3, 12.4, 0.5, 2.2);
+  pinnacle(K, nx0 + 14, H0 + 4.3, Math.min(12.4, bMax(nx0 + 14) + 0.4), 0.5, 2.2);
 
   // merge & build
   const grp = new THREE.Group(); grp.name = 'stmarys';
@@ -253,7 +295,8 @@ export function buildMarketHallOSM(L, tex, base, poly, groundAt) {
     if (xs.length < 2) return null;
     return [Math.min(...xs), Math.max(...xs)];
   };
-  const bw = 6.2, EAVE = 6.0, APEX = 10.6;
+  // 6 Nov, from the drone footage rectified: 3.65 m timber ground storey, glazing to 8.2 m, gables rising ~3.1 m (straight pitched, not vaulted)
+  const bw = 6.2, EAVE = 8.2, APEX = 11.3, GROUND = 3.65;
   const zN = Math.min(...zsAll) + 0.5, strips = [];
   for (let k = 0; k < 8; k++) {
     const z0 = zN + k * bw, z1 = z0 + bw; if (z1 > Math.max(...zsAll) - 0.2) break;
@@ -264,37 +307,34 @@ export function buildMarketHallOSM(L, tex, base, poly, groundAt) {
   }
   let y0 = -1e9; for (const s of strips) for (const x of [s.xW, s.xE]) for (const z of [s.z0, s.z1]) y0 = Math.max(y0, groundAt(x, z));
   y0 += 0.15;
-  // pointed-arch profile across one strip (u 0..bw, v EAVE..APEX)
-  const S = bw / 2, Hh = APEX - EAVE, R = (S * S + Hh * Hh) / (2 * S), N = 10;
-  const prof = [];
-  { const a1 = Math.atan2(Hh, S - R); for (let k = 0; k <= N; k++) { const a = Math.PI + (a1 - Math.PI) * k / N; prof.push([R + R * Math.cos(a), EAVE + R * Math.sin(a)]); }
-    const a0 = Math.atan2(Hh, S - (bw - R)); for (let k = 1; k <= N; k++) { const a = a0 - a0 * k / N; prof.push([(bw - R) + R * Math.cos(a), EAVE + R * Math.sin(a)]); } }
+  // straight pitched profile across one strip (u 0..bw, v EAVE..APEX): slate low down, glazing either side of the ridge (in the texture)
+  const S = bw / 2;
+  const prof = [[0, EAVE], [S, APEX], [bw, EAVE]];
   const roofPos = [], roofUv = [];
   const quad = (P, U) => { for (const i of [0, 1, 2, 0, 2, 3]) { roofPos.push(...P[i]); roofUv.push(...U[i]); } };
-  const endMat = new THREE.MeshStandardMaterial({ map: tex(base + 'tex/mh_end.png', { wrap: false }), alphaTest: 0.5, roughness: 0.22, metalness: 0.25, side: THREE.DoubleSide, envMapIntensity: 1.2 });
-  const ends = [];
+  // gable ends: the real bays, rectified from the drone footage (a: the entrance with its red doors and lettering, b: a plain bay)
+  const endMat = (n) => new THREE.MeshStandardMaterial({ map: tex(base + `tex/mh_end_${n}.webp`, { wrap: false }), alphaTest: 0.5, roughness: 0.3, metalness: 0.1, side: THREE.DoubleSide, envMapIntensity: 0.8 });
+  const ends = { a: [], b: [] };
+  const xEmax = Math.max(...strips.map(s => s.xE)), entrance = new Set(strips.map((s, k) => [k, s.xE]).sort((p, q) => q[1] - p[1]).slice(0, 2).map(p => p[0]));
   strips.forEach((s, k) => {
-    // vault
-    let acc = 0;
+    // the two slopes: texture v runs valley (0) to ridge (1), u along the ridge every 4 m
     for (let i = 0; i < prof.length - 1; i++) {
-      const [u0, v0] = prof[i], [u1, v1] = prof[i + 1], seg = Math.hypot(u1 - u0, v1 - v0);
-      const za = s.z0 + u0, zb = s.z0 + u1;
-      quad([[s.xW, y0 + v0, za], [s.xE, y0 + v0, za], [s.xE, y0 + v1, zb], [s.xW, y0 + v1, zb]].map((p, j) => p),
-        [[acc / 2.4, s.xW / 2.4], [acc / 2.4, s.xE / 2.4], [(acc + seg) / 2.4, s.xE / 2.4], [(acc + seg) / 2.4, s.xW / 2.4]]);
-      acc += seg;
+      const [u0, v0] = prof[i], [u1, v1] = prof[i + 1];
+      const za = s.z0 + u0, zb = s.z0 + u1, ta = (v0 - EAVE) / (APEX - EAVE), tb = (v1 - EAVE) / (APEX - EAVE);
+      quad([[s.xW, y0 + v0, za], [s.xE, y0 + v0, za], [s.xE, y0 + v1, zb], [s.xW, y0 + v1, zb]],
+        [[s.xW / 4, ta], [s.xE / 4, ta], [s.xE / 4, tb], [s.xW / 4, tb]]);
     }
-    // ribs every 3.5 m and at both ends
-    for (let x = s.xW; x <= s.xE + 0.01; x += (s.xE - s.xW) / Math.max(1, Math.round((s.xE - s.xW) / 3.5))) {
-      for (let i = 0; i < prof.length - 1; i++) {
-        const [u0, v0] = prof[i], [u1, v1] = prof[i + 1], len = Math.hypot(u1 - u0, v1 - v0);
-        const g = new THREE.BoxGeometry(0.09, len + 0.04, 0.12); g.rotateX(Math.atan2(u1 - u0, v1 - v0)); g.translate(x, y0 + (v0 + v1) / 2 + 0.03, s.z0 + (u0 + u1) / 2); K.add('iron', g);
-      }
-    }
-    // gable ends (east faces Churchgate)
+    K.add('lead', box(s.xW, y0 + APEX - 0.02, (s.z0 + s.z1) / 2 - 0.12, s.xE, y0 + APEX + 0.12, (s.z0 + s.z1) / 2 + 0.12));   // ridge cap
+    // gable ends (east faces Churchgate): the photographed bay, dark green bargeboards up the rakes, a red cast-iron finial
+    const rake = Math.hypot(S, APEX - EAVE), pitch = Math.atan2(APEX - EAVE, S);
     for (const [x, sg] of [[s.xE, 1], [s.xW, -1]]) {
-      const g = new THREE.PlaneGeometry(bw, APEX); g.rotateY(sg * Math.PI / 2); g.translate(x + sg * 0.02, y0 + APEX / 2, (s.z0 + s.z1) / 2); ends.push(g);
-      const f = new THREE.ConeGeometry(0.16, 1.2, 8); f.translate(x, y0 + APEX + 0.6, (s.z0 + s.z1) / 2); K.add('iron', f);
-      const bl = new THREE.SphereGeometry(0.2, 10, 8); bl.translate(x, y0 + APEX + 0.05, (s.z0 + s.z1) / 2); K.add('iron', bl);
+      const zc = (s.z0 + s.z1) / 2;
+      const g = new THREE.PlaneGeometry(bw, APEX); g.rotateY(sg * Math.PI / 2); g.translate(x + sg * 0.02, y0 + APEX / 2, zc); ends[sg > 0 && entrance.has(k) ? 'a' : 'b'].push(g);
+      for (const side of [-1, 1]) {
+        const b = new THREE.BoxGeometry(0.1, 0.3, rake + 0.3); b.rotateX(side * pitch); b.translate(x + sg * 0.07, y0 + (EAVE + APEX) / 2 + 0.12, zc + side * S / 2); K.add('mhGreen', b);
+      }
+      const f = new THREE.ConeGeometry(0.13, 1.0, 8); f.translate(x, y0 + APEX + 0.6, zc); K.add('mhRed', f);
+      const bl = new THREE.SphereGeometry(0.17, 10, 8); bl.translate(x, y0 + APEX + 0.12, zc); K.add('mhRed', bl);
     }
     // side screens where a strip's side is exposed
     const side = (z, xa, xb, sg) => {
@@ -307,19 +347,24 @@ export function buildMarketHallOSM(L, tex, base, poly, groundAt) {
     const nx = strips[k + 1];
     if (!nx) side(s.z1, s.xW, s.xE, 1);
     else { side(s.z1, nx.xE, s.xE, 1); side(s.z1, s.xW, nx.xW, 1); K.add('iron', box(Math.max(s.xW, nx.xW), y0 + EAVE - 0.05, s.z1 - 0.18, Math.min(s.xE, nx.xE), y0 + EAVE + 0.25, s.z1 + 0.18)); }
-    // cast-iron columns at the strip corners
-    for (const [x, z] of [[s.xW, s.z0], [s.xE, s.z0], [s.xW, s.z1], [s.xE, s.z1]]) { const c = new THREE.CylinderGeometry(0.13, 0.16, EAVE, 10); c.translate(x, y0 + EAVE / 2, z); K.add('iron', c); }
+    // the posts between the bays: ochre shafts on a red ball through the timber storey, deep green above with a capital
+    for (const [x, z] of [[s.xW, s.z0], [s.xE, s.z0], [s.xW, s.z1], [s.xE, s.z1]]) {
+      K.add('mhYellow', box(x - 0.17, y0, z - 0.17, x + 0.17, y0 + GROUND, z + 0.17));
+      K.add('mhGreen', box(x - 0.2, y0 + GROUND, z - 0.2, x + 0.2, y0 + EAVE, z + 0.2));
+      K.add('mhGreen', box(x - 0.3, y0 + EAVE - 0.05, z - 0.3, x + 0.3, y0 + EAVE + 0.22, z + 0.3));
+      const ball = new THREE.SphereGeometry(0.24, 12, 8); ball.translate(x, y0 + 0.2, z); K.add('mhRed', ball);
+    }
   });
   // stone plinth on the footprint
   {
     const shp = new THREE.Shape(poly.map(([x, z]) => new THREE.Vector2(x, -z)));
     const g = new THREE.ExtrudeGeometry(shp, { depth: 2.4, bevelEnabled: false }); g.rotateX(-Math.PI / 2); g.translate(0, y0 - 2.25, 0); K.add('plinth', g);
   }
-  L.mhRoof.side = THREE.DoubleSide;
+  L.mhRoof.side = THREE.DoubleSide; if (L.mhRoof.map) { L.mhRoof.map.wrapT = THREE.ClampToEdgeWrapping; L.mhRoof.map.needsUpdate = true; }   // v runs valley to ridge once
   const grp = new THREE.Group(); grp.name = 'markethall';
   const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(roofPos, 3)); rg.setAttribute('uv', new THREE.Float32BufferAttribute(roofUv, 2)); rg.computeVertexNormals();
   const roof = new THREE.Mesh(rg, L.mhRoof); roof.castShadow = true; roof.receiveShadow = true; grp.add(roof);
-  const em = new THREE.Mesh(mergeGeometries(ends, false), endMat); em.castShadow = true; grp.add(em);
+  for (const n of ['a', 'b']) if (ends[n].length) { const em = new THREE.Mesh(mergeGeometries(ends[n], false), endMat(n)); em.castShadow = true; grp.add(em); }
   for (const [k, geos] of Object.entries(K.b)) {
     const g = mergeGeometries(geos, false); if (k === 'stone' || k === 'plinth') boxUV(g, 4.0);
     const m = new THREE.Mesh(g, L[k]); m.castShadow = true; m.receiveShadow = true; grp.add(m);

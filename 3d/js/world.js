@@ -3,6 +3,7 @@
 // Terrain heights are estimates relative to Charter House's ground floor (61.77 m AOD).
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { CG_PAVE, HV_PAVE } from './data.js?v=1794535000';
 
 // ------------------------------------------------------------------ terrain
 let TER = null, TH = null;
@@ -15,6 +16,30 @@ export function setTerrain(t, raw = false) {
     const x = t.x0 + i * t.cell, z = t.z0 + j * t.cell;
     const w = sm((10 - x) / 40) * (1 - sm((-260 - x) / 100)) * (1 - sm((Math.abs(z + 10) - 110) / 90));
     if (w > 0) TH[j * t.nx + i] -= w * 0.08 * Math.min(110, Math.max(0, 10 - x));
+  }
+  // St Mary's Gate stretch (Charlie, 6 Nov): Churchgate falls at an even, gentle 3% from Charter House towards St Mary's and
+  // the Market Place instead of rolling up and down, and St Mary's Gate stands on that even slope
+  for (let j = 0; j < t.nz; j++) for (let i = 0; i < t.nx; i++) {
+    const x = t.x0 + i * t.cell, z = t.z0 + j * t.cell;
+    const w3 = sm((6 - x) / 8) * (1 - sm((-150 - x) / 40)) * (1 - sm((Math.abs(z - 3) - 18) / 12));
+    if (w3 > 0) { const T = -0.03 - 0.03 * Math.max(0, 4 - x); TH[j * t.nx + i] = TH[j * t.nx + i] * (1 - w3) + T * w3; }
+  }
+  // Churchgate climbs past Charter House (architect's NE elevation, Charlie 12 Nov): the road follows the pavement line in
+  // data.js (CG_PAVE, less the 0.14 kerb) from the Harvey Street corner to just past the far end of the building, then eases
+  // back into the street levels beyond. Street side only (z < 0.5); the park and the far pavement follow.
+  for (let j = 0; j < t.nz; j++) for (let i = 0; i < t.nx; i++) {
+    const x = t.x0 + i * t.cell, z = t.z0 + j * t.cell;
+    const w4 = sm((x + 4) / 4) * (1 - sm((x - 30) / 25)) * sm((z + 20) / 5) * (1 - sm((z - 0.5) / 2.5));
+    if (w4 > 0) { const T = CG_PAVE(Math.min(x, 30)) - 0.14 - G0; TH[j * t.nx + i] = TH[j * t.nx + i] * (1 - w4) + T * w4; }
+  }
+  // Harvey Street falls past Charter House (architect's front elevation, Charlie 12 Nov): the road follows HV_PAVE (less the
+  // kerb) from the Churchgate corner to the SW end of the building, the garden frontage beyond the SW end follows it, and
+  // it eases back into the street levels beyond by the Apsley Street bend. The far side stops short of St Mary's Gate.
+  for (let j = 0; j < t.nz; j++) for (let i = 0; i < t.nx; i++) {
+    const x = t.x0 + i * t.cell, z = t.z0 + j * t.cell;
+    const xe = 0.5 + 11.5 * sm((z - 20.6) / 1.4);
+    const w5 = sm((x + 13.5) / 2) * (1 - sm((x - xe) / 2.5)) * sm((z + 3) / 2.5) * (1 - sm((z - 24) / 12));
+    if (w5 > 0) { const T = HV_PAVE(Math.max(0, Math.min(z, 21.3))) - 0.14 - G0; TH[j * t.nx + i] = TH[j * t.nx + i] * (1 - w5) + T * w5; }
   }
   // the play park sits level with Churchgate (no grass bank between the pavement and its railings)
   const jr = Math.round((-6.6 - t.z0) / t.cell);
@@ -341,7 +366,23 @@ export function letteringTexture(text, { w = 4096, h = 256, font = '700 170px "A
 function buildBrewery(M, poly, Wl, roofsFlat, chim, group, bulkPolys = null) {
   // the brewery ranges behind and beside the detailed street front, from a footprint worked out offline (the OSM outline
   // less the front's blocks and its yard), flat felt roofs
-  if (bulkPolys && bulkPolys.length) { bulkPolys.forEach((p, i) => addBuilding(Wl, roofsFlat, [], chim, { p, h: 10.6, r: 'flat', s: 'works', id: 4242 + i * 7 }, 0)); return; }
+  if (bulkPolys && bulkPolys.length) {
+    bulkPolys.forEach((p, i) => addBuilding(Wl, roofsFlat, [], chim, { p, h: 10.6, r: 'flat', s: 'works', id: 4242 + i * 7 }, 0));
+    // slate ridge roofs in rows over the ranges (8 Nov: the flat grey roofs read as more open paving from above)
+    const d = [0.879, 0.477], n = [-0.477, 0.879], ang = Math.atan2(-d[1], d[0]), ridgeG = [];
+    const inP = (pp, x, z) => { let c = false; for (let i = 0, j = pp.length - 1; i < pp.length; j = i++) { const [xi, zi] = pp[i], [xj, zj] = pp[j]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; } return c; };
+    for (const pp of bulkPolys) {
+      let slo = 1e9, shi = -1e9, tlo = 1e9, thi = -1e9;
+      for (const [x, z] of pp) { const s2 = x * d[0] + z * d[1], t2 = x * n[0] + z * n[1]; slo = Math.min(slo, s2); shi = Math.max(shi, s2); tlo = Math.min(tlo, t2); thi = Math.max(thi, t2); }
+      for (let t = tlo + 4.8; t < thi - 3; t += 9.6) for (let s2 = slo + 3; s2 < shi - 2.5; s2 += 5.9) {
+        const x = d[0] * s2 + n[0] * t, z = d[1] * s2 + n[1] * t, ok = (a, b) => inP(pp, d[0] * a + n[0] * b, d[1] * a + n[1] * b);
+        if (!ok(s2, t) || !ok(s2 + 3, t) || !ok(s2 - 3, t) || !ok(s2, t + 4.6) || !ok(s2, t - 4.6)) continue;
+        const g = new THREE.BoxGeometry(6.05, 6.6, 6.6); g.rotateX(Math.PI / 4); g.rotateY(ang); g.translate(x, groundAt(x, z) + 10.6, z); ridgeG.push(g);
+      }
+    }
+    if (ridgeG.length) { const rm = new THREE.Mesh(mergeGeometries(ridgeG, false), M.cSlate); rm.castShadow = rm.receiveShadow = true; rm.name = 'brewery_roofs'; group.add(rm); }
+    return;
+  }
   // The Apsley Street front (Frederic Robinson Ltd offices, the Unicorn Brewery range, the striped turret and the
   // brewhouse tower) is modelled in detail by context.js buildBreweryFront(); here: the brewery yards and ranges
   // behind it on the OSM footprint, cut back so they don't fight the detailed front.
