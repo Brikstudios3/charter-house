@@ -12,9 +12,24 @@
     9,
     21
    ]
+  },
+  "akira": {
+   "name": "Akira",
+   "date": "November 2026",
+   "units": [
+    "p21",
+    "p8",
+    "p9"
+   ],
+   "picks": [
+    21,
+    8,
+    9
+   ]
   }
  },
  "extra_units": {
-  "p9": "{id:\"p9\",name:\"Plot 9\",floor:\"1st floor, by the entrance\",bld:\"Charter House\",type:\"1 bed\",area:412,price:189000,rent:1275,\n  img:\"var(--front)\",pos:\"var(--front)\",fa:\"url(../3d/assets/plans/floor1.jpg)\",fb:\"url(../3d/assets/plans/plot9.png)\",stand:\"Park facing, right beside the main entrance, for £4,000 less\",\n  line:\"A first floor one bed on the park side, right beside the arched main entrance on Churchgate.\",\n  keys:[\"1st floor, right beside the arched main entrance on Churchgate\",\"1 bed, 412 sq ft\",\"Kitchen and living looks across Churchgate to the trees and the new play park\",\"Short walk from the front door and the lift\",\"£189,000, £4,000 less than the top floor\"],\n  quoteShort:\"The value option. Same park facing layout as the top floor, right beside the front door, for £4,000 less.\",\n  quote:\"If value matters most, this is the one. Plot 9 has the same park facing layout as Plots 21 and 22, looking across Churchgate to the trees, and it sits right beside the arched main entrance so it's a short walk from the front door and the lift. You give up the top floor and save £4,000, which nudges the yield up a touch.\"}"
+  "p9": "{id:\"p9\",name:\"Plot 9\",floor:\"1st floor, by the entrance\",bld:\"Charter House\",type:\"1 bed\",area:412,price:189000,rent:1275,\n  img:\"var(--front)\",pos:\"var(--front)\",fa:\"url(../3d/assets/plans/floor1.jpg)\",fb:\"url(../3d/assets/plans/plot9.png)\",stand:\"Park facing, right beside the main entrance, for £4,000 less\",\n  line:\"A first floor one bed on the park side, right beside the arched main entrance on Churchgate.\",\n  keys:[\"1st floor, right beside the arched main entrance on Churchgate\",\"1 bed, 412 sq ft\",\"Kitchen and living looks across Churchgate to the trees and the new play park\",\"Short walk from the front door and the lift\",\"£189,000, £4,000 less than the top floor\"],\n  quoteShort:\"The value option. Same park facing layout as the top floor, right beside the front door, for £4,000 less.\",\n  quote:\"If value matters most, this is the one. Plot 9 has the same park facing layout as Plots 21 and 22, looking across Churchgate to the trees, and it sits right beside the arched main entrance so it's a short walk from the front door and the lift. You give up the top floor and save £4,000, which nudges the yield up a touch.\"}",
+  "p8": "{id:\"p8\",name:\"Plot 8\",floor:\"1st floor\",bld:\"Charter House\",type:\"1 bed\",area:412,price:189000,rent:1275,\n  img:\"var(--front)\",hero:\"var(--front)\",heroCap:\"Plot 8, first floor, park side, directly below Plot 22\",fa:\"url(../3d/assets/plans/floor1.jpg)\",faCap:\"First floor. Plot 8 sits directly below Plot 22\",fb:\"url(../3d/assets/plans/plot8.png)\",stand:\"Same park facing layout as Plot 22, for £4,000 less\",\n  line:\"A first floor one bed on the park side, directly below Plot 22, for slightly better value.\",\n  keys:[\"1st floor, park side, directly below Plot 22\",\"1 bed, 412 sq ft\",\"Kitchen and living looks across Churchgate to the trees and the new play park\",\"Bedroom and front door at the back, over the residents' courtyard, so it sleeps quiet\",\"£189,000, £4,000 less than the top floor\"],\n  quoteShort:\"The value option. The same park facing layout as Plots 21 and 22, two floors down, for £4,000 less.\",\n  quote:\"If value matters most, this is the one. Plot 8 sits directly below Plot 22 with exactly the same layout and the same outlook across Churchgate to the trees and the new play park. You give up the top floor and save £4,000, which nudges the yield up a touch.\"}"
  }
 }
