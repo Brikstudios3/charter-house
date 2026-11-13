@@ -1,0 +1,20 @@
+{
+ "_note": "Client pages for Charter House. Each page is rebuilt from james/index.html every time Charlie's changes are synced, so it always matches the latest James Dempsey version. 'units' lists plot ids in display order; any plot not in James's page is taken from 'extra_units'.",
+ "clients": {
+  "jonathan": {
+   "name": "Jonathan",
+   "date": "November 2026",
+   "units": [
+    "p9",
+    "p21"
+   ],
+   "picks": [
+    9,
+    21
+   ]
+  }
+ },
+ "extra_units": {
+  "p9": "{id:\"p9\",name:\"Plot 9\",floor:\"1st floor, by the entrance\",bld:\"Charter House\",type:\"1 bed\",area:412,price:189000,rent:1275,\n  img:\"var(--front)\",pos:\"var(--front)\",fa:\"url(../3d/assets/plans/floor1.jpg)\",fb:\"url(../3d/assets/plans/plot9.png)\",stand:\"Park facing, right beside the main entrance, for £4,000 less\",\n  line:\"A first floor one bed on the park side, right beside the arched main entrance on Churchgate.\",\n  keys:[\"1st floor, right beside the arched main entrance on Churchgate\",\"1 bed, 412 sq ft\",\"Kitchen and living looks across Churchgate to the trees and the new play park\",\"Short walk from the front door and the lift\",\"£189,000, £4,000 less than the top floor\"],\n  quoteShort:\"The value option. Same park facing layout as the top floor, right beside the front door, for £4,000 less.\",\n  quote:\"If value matters most, this is the one. Plot 9 has the same park facing layout as Plots 21 and 22, looking across Churchgate to the trees, and it sits right beside the arched main entrance so it's a short walk from the front door and the lift. You give up the top floor and save £4,000, which nudges the yield up a touch.\"}"
+ }
+}
