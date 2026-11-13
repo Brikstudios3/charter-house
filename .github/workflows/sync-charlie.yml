@@ -1,0 +1,43 @@
+name: Sync with Charlie
+
+# Every morning, pull in Charlie's latest changes from the repo this one was forked from,
+# rebuild any client pages (tools/build_clients.py), then republish the site.
+# If Charlie's changes clash with ours, the run stops without changing anything and GitHub emails the owner.
+
+on:
+  schedule:
+    - cron: "37 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Merge Charlie's changes
+        run: gh api -X POST "repos/${{ github.repository }}/merge-upstream" -f branch=main
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Rebuild client pages
+        run: |
+          if [ -f tools/build_clients.py ]; then
+            python3 tools/build_clients.py
+            if [ -n "$(git status --porcelain)" ]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add -A
+              git commit -m "Rebuild client pages from the latest James version"
+              git push
+            fi
+          fi
+
+      - name: Republish the site
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
